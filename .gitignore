@@ -5,6 +5,8 @@
 package-lock.json
 yarn.lock
 
+/postgres
+
 # compiled output
 /dist
 /node_modules
