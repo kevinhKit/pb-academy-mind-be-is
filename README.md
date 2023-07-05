@@ -26,10 +26,40 @@
 
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
 
-## Installation
 
+## System Requirements
+Before you begin, make sure you meet the following system requirements:
+
+- [Node.js](https://nodejs.org) - Install version > 18.16.1 of Node.js.
+- [Docker](https://www.docker.com) - Make sure you have Docker installed on your system to build the database container
+
+
+## Installation of dependencies
+To install the project dependencies, run the following command
 ```bash
 $ yarn install
+```
+
+## Container pre-use configuration
+
+Before pulling up the database container, it is necessary to configure the `.env` file with the correct connection data. Follow the steps below:
+
+1. In the root of the project, copy the `.env.template` file and paste it in the same location.
+
+2. Rename the copied file from `.env.template` to `.env`.
+
+3. If you want to change the default values you can open the `.env` file with a text editor and fill in the necessary configuration values.
+
+Once you have done this pre-configuration, you can proceed to start up the database container by following the instructions below.
+
+
+
+## Lift database container
+1. have open `docker desktop` 
+2. Run the following command:
+```bash
+# all
+$ docker-compose up -d
 ```
 
 ## Running the app
@@ -57,6 +87,28 @@ $ yarn run test:e2e
 # test coverage
 $ yarn run test:cov
 ```
+
+## Stopping the app
+to stop the application using yarn the following command is executed
+```bash
+# keyboard
+ctrl + c
+```
+
+## Stopping the Docker container
+To stop the Docker container running the application, follow these steps:
+
+1. Open a terminal or command line.
+
+2. Navigate to the root directory of the project.
+
+3. Run the following command to stop the container:
+
+```bash
+$ docker-compose down
+```
+
+
 
 ## Support
 
