@@ -13,11 +13,7 @@ export class Teacher {
     institutionalEmail: String;
     
     @Column('text')
-    video: String;
-    
-    @Column('text')
-    idrole: String;
-    
+    video: String;    
     
     @OneToOne(
         () => User,
@@ -32,7 +28,9 @@ export class Teacher {
         () => Role,
         role => role.teacher
     )
-    @JoinColumn()
+    @JoinColumn({
+        name: "idRole"
+    })
     role: String;
     
     

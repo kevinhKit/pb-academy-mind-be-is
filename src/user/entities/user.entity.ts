@@ -53,7 +53,7 @@ export class User {
         () => Student,
         student => student.dni
     )
-    stundent: string; 
+    student: string; 
     
     @OneToOne(
         () => Teacher,

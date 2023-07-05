@@ -19,9 +19,11 @@ export class Student {
 
     @OneToOne(
         () => User,
-        user => user.stundent
+        user => user.student
     )
-    @JoinColumn()
+    @JoinColumn({
+        name: "idUser"
+    })
     dni: string;
 
 
