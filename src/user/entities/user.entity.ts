@@ -1,4 +1,5 @@
-import { Column, Entity, Index, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
+import { Student } from "src/student/entities/student.entity";
+import { Column, Entity, Index, JoinColumn, OneToOne, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity('User')
 // @Index('idx_unique_key',['dni','firstName'], {unique:true})
@@ -7,7 +8,7 @@ export class User {
     @PrimaryColumn('text')
     dni: String;
 
-    @PrimaryColumn('text')
+    @Column('text')
     firstName: string;
 
     @Column('text')
@@ -46,5 +47,11 @@ export class User {
 
     @Column('text')
     photoThree: String;
+
+    @OneToOne(
+        () => Student,
+        student => student.dni
+    )
+    stundent: string; 
 
 }
