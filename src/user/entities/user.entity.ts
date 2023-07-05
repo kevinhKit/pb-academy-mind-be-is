@@ -1,4 +1,5 @@
 import { Student } from "src/student/entities/student.entity";
+import { Teacher } from "src/teacher/entities/teacher.entity";
 import { Column, Entity, Index, JoinColumn, OneToOne, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity('User')
@@ -53,5 +54,11 @@ export class User {
         student => student.dni
     )
     stundent: string; 
+    
+    @OneToOne(
+        () => Teacher,
+        teacher => teacher.dni
+    )
+    teacher: string; 
 
 }
