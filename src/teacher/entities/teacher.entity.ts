@@ -1,3 +1,4 @@
+import { Role } from "src/role/entities/role.entity";
 import { User } from "src/user/entities/user.entity";
 import { Column, Entity, JoinColumn, OneToOne, PrimaryColumn } from "typeorm";
 
@@ -26,6 +27,13 @@ export class Teacher {
         name:"idUser"
     })
     dni: String;
+
+    @OneToOne(
+        () => Role,
+        role => role.teacher
+    )
+    @JoinColumn()
+    role: String;
     
     
 
