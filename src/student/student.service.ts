@@ -91,7 +91,8 @@ export class StudentService {
   }
 
   findAll() {
-    return `Está acción devuelve todos los Estudiantes`;
+    const allStudents = this.studentRepository.find({ relations: ['user'] });
+    return allStudents;
   }
 
   findOne(id: number) {
