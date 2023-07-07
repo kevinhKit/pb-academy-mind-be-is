@@ -24,6 +24,9 @@ export class Teacher {
   @Column({ type: 'boolean', name: 'isCoordinator', nullable: true })
   isCoordinator: boolean;
 
+  @Column({ type: 'boolean', name: 'isAdmin', nullable: true })
+  isAdmin: boolean;
+
   @OneToOne(() => User, (user) => user.teacher)
   @JoinColumn({
     name: 'idUser',

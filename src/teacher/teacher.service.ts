@@ -28,6 +28,7 @@ export class TeacherService {
       isBoss,
       isCoordinator,
       isTeacher,
+      isAdmin,
       video,
     } = createTeacherDto;
 
@@ -87,6 +88,7 @@ export class TeacherService {
     newTeacher.isBoss = isBoss;
     newTeacher.isCoordinator = isCoordinator;
     newTeacher.isTeacher = isTeacher;
+    newTeacher.isAdmin = isAdmin;
 
     newTeacher.user = user;
 
@@ -99,7 +101,7 @@ export class TeacherService {
         to: user.email as string, // list of receivers
         subject: '¡Bienvenido a registro UNAH!', // Subject line
         text: `Nombre: ${user.firstName} ${user.secondName} ${user.firstLastName} ${user.secondLastName}
-            \Número de cuenta: ${newTeacher.employeeNumber}\nContraseña ${newPassword}\nCorreo institucional: ${newTeacher.institutionalEmail}`, // plain text body
+            \Número de empleado: ${newTeacher.employeeNumber}\nContraseña ${newPassword}\nCorreo institucional: ${newTeacher.institutionalEmail}`, // plain text body
       });
     }
 

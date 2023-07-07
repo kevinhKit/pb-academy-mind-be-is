@@ -8,6 +8,7 @@ import { transporter } from 'src/utils/mailer';
 import { Teacher } from 'src/teacher/entities/teacher.entity';
 
 import { CreateAuthDto } from './dto/create-auth.dto';
+import { HttpException, HttpStatus } from '@nestjs/common';
 
 @Injectable()
 export class AuthService {
@@ -20,6 +21,7 @@ export class AuthService {
   async create(createAuthDto: CreateAuthDto) {
     const { accountNumber, password, employeeNumber } = createAuthDto;
     let authenticated;
+    let user;
     if (accountNumber) {
       const student = await this.studentRepository.findOne({
         where: { accountNumber: accountNumber },
@@ -28,7 +30,9 @@ export class AuthService {
       if (student) {
         authenticated = await bcrypt.compare(password, student.user.password);
         console.log(authenticated);
-        return authenticated;
+        if (authenticated) {
+          user = student;
+        }
       }
     }
     if (employeeNumber) {
@@ -39,9 +43,17 @@ export class AuthService {
       if (teacher) {
         authenticated = await bcrypt.compare(password, teacher.user.password);
         console.log(authenticated);
-        return authenticated;
+        if (authenticated) {
+          user = teacher;
+        }
       }
     }
-    return { authenticated };
+    if (!authenticated) {
+      throw new HttpException(
+        'Credenciales incorrectas.',
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
+    return { authenticated, user };
   }
 }
