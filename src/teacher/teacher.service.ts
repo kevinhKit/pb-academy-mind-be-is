@@ -98,7 +98,8 @@ export class TeacherService {
   }
 
   findAll() {
-    return `This action returns all teacher`;
+    const allTeachers = this.teacherRepository.find({ relations: ['user'] });
+    return allTeachers;
   }
 
   findOne(id: number) {
