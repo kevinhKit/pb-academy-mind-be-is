@@ -88,7 +88,7 @@ export class TeacherService {
         to: user.email as string, // list of receivers
         subject: '¡Bienvenido a registro UNAH!', // Subject line
         text: `Nombre: ${user.firstName} ${user.secondName} ${user.firstLastName} ${user.secondLastName}
-            \Número de cuenta: ${user.dni}\nContraseña ${newPassword}\nCorreo institucional: ${user.email}`, // plain text body
+            \Número de cuenta: ${user.dni}\nContraseña ${newPassword}\nCorreo institucional: ${newTeacher.institutionalEmail}`, // plain text body
       });
     }
 

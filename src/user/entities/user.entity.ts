@@ -35,12 +35,12 @@ export class User {
   password: string;
 
   @Column('text', {
-    nullable: false,
+    nullable: true,
   })
   address: string;
 
   @Column('text', {
-    nullable: false,
+    nullable: true,
   })
   phone: string;
 
@@ -67,7 +67,7 @@ export class User {
   @Column({ nullable: true })
   isAdmin: boolean;
 
-  @OneToOne(() => Student, (student) => student.dni)
+  @OneToOne(() => Student, (student) => student.user)
   student: string;
 
   @OneToOne(() => Teacher, (teacher) => teacher.user)
