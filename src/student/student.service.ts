@@ -7,6 +7,7 @@ import { User } from 'src/user/entities/user.entity';
 import { Student } from './entities/student.entity';
 import * as bcrypt from 'bcrypt';
 import { transporter } from 'src/utils/mailer';
+import { HttpException, HttpStatus } from '@nestjs/common';
 
 @Injectable()
 export class StudentService {
@@ -26,6 +27,18 @@ export class StudentService {
       address,
       career,
     } = createStudentDto;
+
+    const existingEmail = await this.userRepository.findOne({
+      where: { email: email },
+    });
+
+    if (existingEmail) {
+      throw new HttpException(
+        'Correo ya existente.',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+
     const newPassword = Math.random().toString(36).substring(7);
     const salt = await bcrypt.genSalt(10);
     const password = await bcrypt.hash(newPassword, salt);
@@ -81,7 +94,7 @@ export class StudentService {
         to: user.email as string, // list of receivers
         subject: '¡Bienvenido a registro UNAH!', // Subject line
         text: `Nombre: ${user.firstName} ${user.secondName} ${user.firstLastName} ${user.secondLastName}
-            \Número de cuenta: ${user.dni}\nContraseña ${newPassword}\nCorreo institucional: ${newStudent.institutionalEmail}`, // plain text body
+            \Número de cuenta: ${newStudent.accountNumber}\nContraseña ${newPassword}\nCorreo institucional: ${newStudent.institutionalEmail}`, // plain text body
       });
     }
 

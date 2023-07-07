@@ -7,6 +7,7 @@ import { UserModule } from './user/user.module';
 import { StudentModule } from './student/student.module';
 import { TeacherModule } from './teacher/teacher.module';
 import { RoleModule } from './role/role.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -21,22 +22,22 @@ import { RoleModule } from './role/role.module';
       autoLoadEntities: true,
       synchronize: true,
       // -----------------------
-      "extra": {
-        "precision": {
-          "integer": 32,
-          "decimal": 10
-        }
-      }
+      extra: {
+        precision: {
+          integer: 32,
+          decimal: 10,
+        },
+      },
     }),
     UserModule,
     StudentModule,
     TeacherModule,
-    RoleModule
+    RoleModule,
+    AuthModule,
   ],
 
   controllers: [AppController],
 
   providers: [AppService],
-
 })
 export class AppModule {}

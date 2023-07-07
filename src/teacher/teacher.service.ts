@@ -31,6 +31,17 @@ export class TeacherService {
       video,
     } = createTeacherDto;
 
+    const existingEmail = await this.userRepository.findOne({
+      where: { email: email },
+    });
+
+    if (existingEmail) {
+      throw new HttpException(
+        'Correo ya existente.',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+
     const newPassword = Math.random().toString(36).substring(7);
     const salt = await bcrypt.genSalt(10);
     const password = await bcrypt.hash(newPassword, salt);
@@ -88,7 +99,7 @@ export class TeacherService {
         to: user.email as string, // list of receivers
         subject: '¡Bienvenido a registro UNAH!', // Subject line
         text: `Nombre: ${user.firstName} ${user.secondName} ${user.firstLastName} ${user.secondLastName}
-            \Número de cuenta: ${user.dni}\nContraseña ${newPassword}\nCorreo institucional: ${newTeacher.institutionalEmail}`, // plain text body
+            \Número de cuenta: ${newTeacher.employeeNumber}\nContraseña ${newPassword}\nCorreo institucional: ${newTeacher.institutionalEmail}`, // plain text body
       });
     }
 
