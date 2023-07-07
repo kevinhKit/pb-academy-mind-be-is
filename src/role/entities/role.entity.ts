@@ -1,26 +1,14 @@
-import { Teacher } from "src/teacher/entities/teacher.entity";
-import { Column, Entity, JoinColumn, OneToOne, PrimaryColumn } from "typeorm";
-
+import { Teacher } from 'src/teacher/entities/teacher.entity';
+import { Column, Entity, JoinColumn, OneToOne, PrimaryColumn } from 'typeorm';
 
 @Entity('Role')
 export class Role {
+  @PrimaryColumn('text')
+  idRole: String;
 
-    @PrimaryColumn('text')
-    idRole: String;
+  @Column('text')
+  name: String;
 
-    @Column('text')
-    name: String;
-
-    @Column('text')
-    description: String;
-
-    @OneToOne(
-        () => Teacher,
-        teacher => teacher.role
-    )
-    teacher: String;
-
-
-
-
+  @Column('text')
+  description: String;
 }
