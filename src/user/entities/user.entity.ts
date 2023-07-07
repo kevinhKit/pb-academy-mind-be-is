@@ -1,64 +1,75 @@
-import { Student } from "src/student/entities/student.entity";
-import { Teacher } from "src/teacher/entities/teacher.entity";
-import { Column, Entity, Index, JoinColumn, OneToOne, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
+import { Student } from 'src/student/entities/student.entity';
+import { Teacher } from 'src/teacher/entities/teacher.entity';
+import {
+  Column,
+  Entity,
+  Index,
+  JoinColumn,
+  OneToOne,
+  PrimaryColumn,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 @Entity('User')
 // @Index('idx_unique_key',['dni','firstName'], {unique:true})
 export class User {
+  @PrimaryColumn('text')
+  dni: string;
 
-    @PrimaryColumn('text')
-    dni: String;
+  @Column('text')
+  firstName: string;
 
-    @Column('text')
-    firstName: string;
+  @Column('text')
+  secondName: string;
 
-    @Column('text')
-    secondName: String;
+  @Column('text')
+  firstLastName: string;
 
-    @Column('text')
-    firstLastName: String;
+  @Column('text')
+  secondLastName: string;
 
-    @Column('text')
-    secondLastName: String;
+  @Column('text')
+  email: string;
 
-    @Column('text')
-    email: String;
+  @Column('text')
+  password: string;
 
-    @Column('text')
-    password: String;
+  @Column('text', {
+    nullable: false,
+  })
+  address: string;
 
-    @Column('text',{
-        nullable: false
-    })
-    address: String;
+  @Column('text', {
+    nullable: false,
+  })
+  phone: string;
 
-    @Column('text',{
-        nullable: false
-    })
-    phone: String;
+  @Column('text', {
+    nullable: true,
+  })
+  description: string;
 
-    @Column('text')
-    description: String;
+  @Column('text', {
+    nullable: true,
+  })
+  photoOne: string;
 
-    @Column('text')
-    photoOne: String;
+  @Column('text', {
+    nullable: true,
+  })
+  photoTwo: string;
 
-    @Column('text')
-    photoTwo: String;
+  @Column('text', {
+    nullable: true,
+  })
+  photoThree: string;
 
-    @Column('text')
-    photoThree: String;
+  @Column({ nullable: true })
+  isAdmin: boolean;
 
-    @OneToOne(
-        () => Student,
-        student => student.dni
-    )
-    student: string; 
-    
-    @OneToOne(
-        () => Teacher,
-        teacher => teacher.dni
-    )
-    teacher: string; 
+  @OneToOne(() => Student, (student) => student.dni)
+  student: string;
 
+  @OneToOne(() => Teacher, (teacher) => teacher.user)
+  teacher: string;
 }
