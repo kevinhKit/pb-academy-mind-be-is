@@ -16,90 +16,94 @@ export class StudentService {
     @InjectRepository(Student) private studentRepository: Repository<Student>,
   ) {}
 
-  async create(createStudentDto: CreateStudentDto) {
-    const {
-      dni,
-      firstLastName,
-      firstName,
-      secondLastName,
-      secondName,
-      email,
-      address,
-      career,
-    } = createStudentDto;
+  async create(createStudentDto: CreateStudentDto[]) {
+    const newStudents = [];
+    for (const createStudent of createStudentDto) {
+      const {
+        dni,
+        firstLastName,
+        firstName,
+        secondLastName,
+        secondName,
+        email,
+        address,
+        career,
+      } = createStudent;
 
-    const existingEmail = await this.userRepository.findOne({
-      where: { email: email },
-    });
+      const existingEmail = await this.userRepository.findOne({
+        where: { email: email },
+      });
 
-    if (existingEmail) {
-      throw new HttpException(
-        'Correo ya existente.',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
+      if (existingEmail) {
+        throw new HttpException(
+          'Correo ya existente.',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
 
-    const newPassword = Math.random().toString(36).substring(7);
-    const salt = await bcrypt.genSalt(10);
-    const password = await bcrypt.hash(newPassword, salt);
+      const newPassword = Math.random().toString(36).substring(7);
+      const salt = await bcrypt.genSalt(10);
+      const password = await bcrypt.hash(newPassword, salt);
 
-    const user = this.userRepository.create({
-      dni: dni,
-      firstName: firstName,
-      secondName: secondName,
-      firstLastName: firstLastName,
-      secondLastName: secondLastName,
-      email: email,
-      password: password,
-      address: address,
-    });
+      const user = this.userRepository.create({
+        dni: dni,
+        firstName: firstName,
+        secondName: secondName,
+        firstLastName: firstLastName,
+        secondLastName: secondLastName,
+        email: email,
+        password: password,
+        address: address,
+      });
 
-    const count = await this.studentRepository.count();
-    let newAccountNumber = '';
-    if (count <= 9) {
-      newAccountNumber = `000${count}`;
-    } else if (count <= 99) {
-      newAccountNumber = `00${count}`;
-    } else if (count <= 999) {
-      newAccountNumber = `0${count}`;
-    } else {
-      newAccountNumber = `${count}`;
-    }
+      const count = await this.studentRepository.count();
+      let newAccountNumber = '';
+      if (count <= 9) {
+        newAccountNumber = `000${count}`;
+      } else if (count <= 99) {
+        newAccountNumber = `00${count}`;
+      } else if (count <= 999) {
+        newAccountNumber = `0${count}`;
+      } else {
+        newAccountNumber = `${count}`;
+      }
 
-    let newEmail = `${firstName}.${firstLastName}@unah.hn`;
-    let emailExists = await this.studentRepository.findOne({
-      where: { institutionalEmail: newEmail },
-    });
-    while (emailExists) {
-      const randomString = Math.floor(Math.random() * 99) + 1; // Generar una cadena aleatoria
-      newEmail = `${firstName}.${firstLastName}.${randomString}@unah.hn`;
-      emailExists = await this.studentRepository.findOne({
+      let newEmail = `${firstName}.${firstLastName}@unah.hn`;
+      let emailExists = await this.studentRepository.findOne({
         where: { institutionalEmail: newEmail },
       });
-    }
+      while (emailExists) {
+        const randomString = Math.floor(Math.random() * 99) + 1; // Generar una cadena aleatoria
+        newEmail = `${firstName}.${firstLastName}.${randomString}@unah.hn`;
+        emailExists = await this.studentRepository.findOne({
+          where: { institutionalEmail: newEmail },
+        });
+      }
 
-    const newStudent = new Student();
-    newStudent.accountNumber = newAccountNumber;
-    newStudent.institutionalEmail = newEmail;
-    newStudent.career = career;
+      const newStudent = new Student();
+      newStudent.accountNumber = newAccountNumber;
+      newStudent.institutionalEmail = newEmail;
+      newStudent.career = career;
 
-    newStudent.user = user;
+      newStudent.user = user;
 
-    await this.userRepository.save(user);
-    const savedStudent = await this.studentRepository.save(newStudent);
+      await this.userRepository.save(user);
+      const savedStudent = await this.studentRepository.save(newStudent);
 
-    if (savedStudent) {
-      const info = await transporter.sendMail({
-        from: '"¡Inicia sesión!" <eralejo2003@gmail.com>', // sender address
-        to: user.email as string, // list of receivers
-        subject: '¡Bienvenido a registro UNAH!', // Subject line
-        text: `Nombre: ${user.firstName} ${user.secondName} ${user.firstLastName} ${user.secondLastName}
-            \Número de cuenta: ${newStudent.accountNumber}\nContraseña ${newPassword}\nCorreo institucional: ${newStudent.institutionalEmail}`, // plain text body
-      });
+      if (savedStudent) {
+        const info = await transporter.sendMail({
+          from: '"¡Inicia sesión!" <eralejo2003@gmail.com>', // sender address
+          to: user.email as string, // list of receivers
+          subject: '¡Bienvenido a registro UNAH!', // Subject line
+          text: `Nombre: ${user.firstName} ${user.secondName} ${user.firstLastName} ${user.secondLastName}
+              \Número de cuenta: ${newStudent.accountNumber}\nContraseña ${newPassword}\nCorreo institucional: ${newStudent.institutionalEmail}`, // plain text body
+        });
+      }
+      newStudents.push(newStudent);
     }
 
     return {
-      student: newStudent,
+      student: newStudents,
     };
   }
 

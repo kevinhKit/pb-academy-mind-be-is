@@ -29,7 +29,6 @@ export class AuthService {
       });
       if (student) {
         authenticated = await bcrypt.compare(password, student.user.password);
-        console.log(authenticated);
         if (authenticated) {
           user = student;
         }
@@ -42,7 +41,6 @@ export class AuthService {
       });
       if (teacher) {
         authenticated = await bcrypt.compare(password, teacher.user.password);
-        console.log(authenticated);
         if (authenticated) {
           user = teacher;
         }
