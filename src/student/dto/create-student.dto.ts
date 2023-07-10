@@ -1,10 +1,4 @@
-import {
-  IsEmail,
-  IsPhoneNumber,
-  IsString,
-  MinLength,
-  IsBoolean,
-} from 'class-validator';
+import { IsEmail, IsString, MinLength } from 'class-validator';
 
 export class CreateStudentDto {
   @IsString({ message: 'El dni debe de ser de tipo texto.' })
