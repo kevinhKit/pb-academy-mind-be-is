@@ -32,7 +32,7 @@ export class TeacherController {
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateTeacherDto: UpdateTeacherDto) {
-    return this.teacherService.update(+id, updateTeacherDto);
+    return this.teacherService.update(id, updateTeacherDto);
   }
 
   @Delete(':id')
