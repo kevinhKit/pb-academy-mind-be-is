@@ -4,6 +4,7 @@ import {
   IsString,
   MinLength,
   IsBoolean,
+  IsOptional,
 } from 'class-validator';
 
 export class CreateTeacherDto {
@@ -32,6 +33,7 @@ export class CreateTeacherDto {
   isCoordinator: boolean;
   @IsBoolean()
   isAdmin: boolean;
+  @IsOptional()
   @IsString()
   video: string;
 }
