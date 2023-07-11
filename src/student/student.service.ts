@@ -8,6 +8,7 @@ import { Student } from './entities/student.entity';
 import * as bcrypt from 'bcrypt';
 import { transporter } from 'src/utils/mailer';
 import { HttpException, HttpStatus } from '@nestjs/common';
+import { UpdateStudentPasswordDto } from './dto/update-student-password.dto';
 
 @Injectable()
 export class StudentService {
@@ -111,5 +112,33 @@ export class StudentService {
 
   remove(id: number) {
     return `Está acción elimina al estudiante con el id #${id}`;
+  }
+
+  async resetPassword(updateStudentPasswordDto: UpdateStudentPasswordDto) {
+    const student = await this.studentRepository.findOne({
+      where: { accountNumber: updateStudentPasswordDto.accountNumber },
+      relations: ['user'],
+    });
+    if (!student) {
+      throw new HttpException(
+        'No se pudo encontrar el estudiante.',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+    const newPassword = Math.random().toString(36).substring(7);
+    const salt = await bcrypt.genSalt(10);
+    const password = await bcrypt.hash(newPassword, salt);
+    student.user.password = password;
+    const success = await this.userRepository.save(student.user);
+    if (success) {
+      await transporter.sendMail({
+        from: '"¡Inicia sesión!" <eralejo2003@gmail.com>', // sender address
+        to: student.user.email, // list of receivers
+        subject: '¡Bienvenido a registro UNAH!', // Subject line
+        text: `Nombre: ${student.user.firstName} ${student.user.secondName} ${student.user.firstLastName} ${student.user.secondLastName}
+            \Número de cuenta: ${student.accountNumber}\nContraseña ${newPassword}\nCorreo institucional: ${student.institutionalEmail}`, // plain text body
+      });
+    }
+    return new HttpException('Contraseña reiniciada.', HttpStatus.OK);
   }
 }
