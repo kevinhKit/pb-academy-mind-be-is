@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { CreateStudentDto } from './dto/create-student.dto';
 import { UpdateStudentDto } from './dto/update-student.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -12,6 +12,11 @@ import { UpdateStudentPasswordDto } from './dto/update-student-password.dto';
 
 @Injectable()
 export class StudentService {
+
+
+  private readonly logger = new Logger('teacherService');
+
+
   constructor(
     @InjectRepository(User) private userRepository: Repository<User>,
     @InjectRepository(Student) private studentRepository: Repository<Student>,
@@ -106,8 +111,35 @@ export class StudentService {
     return `Está acción devuelve al estudiante con el id  #${id}`;
   }
 
-  update(id: number, updateStudentDto: UpdateStudentDto) {
-    return `Está acción devuele al estudiante con el id #${id}`;
+  async update(id: string, updateStudentDto: UpdateStudentDto) {
+
+    try{
+
+      const user = await this.userRepository.preload(
+        {
+          dni: id,
+          ...updateStudentDto
+        }
+      );
+
+
+      if(!user){
+        throw new NotFoundException('El Estudiante no se ha encontrado.');
+      }
+
+      await this.userRepository.save(user);
+
+      return {
+        message: "Se ha actualizado correctamente el estudiante",
+        statusCode: 200
+      }
+
+
+    } catch (error) {
+      this.logger.error(error);
+      return error.response;
+    }
+
   }
 
   remove(id: number) {
