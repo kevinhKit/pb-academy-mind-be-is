@@ -14,7 +14,7 @@ import { UpdateStudentPasswordDto } from './dto/update-student-password.dto';
 export class StudentService {
 
 
-  private readonly logger = new Logger('teacherService');
+  private readonly logger = new Logger('teacherLogger');
 
 
   constructor(

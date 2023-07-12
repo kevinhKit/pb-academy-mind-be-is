@@ -1,41 +1,42 @@
-import { IsNotEmpty, IsOptional, IsString } from "class-validator";
+import { Allow, IsDefined, IsEmail, IsNotEmpty, IsOptional, IsString } from "class-validator";
 
 export class CreateUserDto {
 
-    
-    @IsNotEmpty({message: "No envió o dejo vacio el campo DNI"})
+  
     @IsString({message: "El DNI debe ser una cadena de texto."})
+    @IsNotEmpty({message: "No envió o dejo vacio el campo DNI"})
     dni: string;
     
-    @IsNotEmpty({message: "No envió o dejo vacio el campo primer nombre"})
     @IsString({message: "El primer nombre debe ser una cadena de texto."})
+    @IsNotEmpty({message: "No envió o dejo vacio el campo primer nombre"})
     firstName: string;
     
-    @IsNotEmpty({message: "No envió o dejo vacio el campo segundo nombre"})
     @IsString({message: "El segundo nombre debe ser una cadena de texto."})
+    @IsNotEmpty({message: "No envió o dejo vacio el campo segundo nombre"})
     secondName: string;
     
-    @IsNotEmpty({message: "No envió o dejo vacio el campo primer apellido"})
     @IsString({message: "El primer apellido debe ser una cadena de texto."})
+    @IsNotEmpty({message: "No envió o dejo vacio el campo primer apellido"})
     firstLastName: string;
     
-    @IsNotEmpty({message: "No envió o dejo vacio el campo segundo apellido"})
+    @IsOptional()
     @IsString({message: "El segundo apellido debe ser una cadena de texto."})
     secondLastName: string;
     
-    @IsNotEmpty({message: "No envió o dejo vacio el campo correo electrónico"})
+    @IsEmail({},{message:"El correo electrónico es inválido."})
     @IsString({message: "El correo electónico debe ser una cadena de texto."})
+    @IsNotEmpty({message: "No envió o dejo vacio el campo correo electrónico"})
     email: string;
     
-    @IsNotEmpty({message: "No envió o dejo vacio el campo dirección"})
     @IsString({message: "La dirección debe ser una cadena de texto."})
+    @IsNotEmpty({message: "No envió o dejo vacio el campo dirección"})
     address: string;
     
-    @IsNotEmpty({message: "No envió o dejo vacio el campo Teléfono"})
     @IsString({message: "El Telefono debe ser una cadena de texto."})
+    @IsNotEmpty({message: "No envió o dejo vacio el campo Teléfono"})
     phone: string;
     
-    @IsNotEmpty({message: "No envió o dejo vacio el campo descripción"})
+    @IsOptional()
     @IsString({message: "La descripción debe ser una cadena de texto."})
     description: string;
     
