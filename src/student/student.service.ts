@@ -13,7 +13,6 @@ import { UpdateStudentPasswordDto } from './dto/update-student-password.dto';
 @Injectable()
 export class StudentService {
 
-
   private readonly logger = new Logger('teacherLogger');
 
 
@@ -63,13 +62,17 @@ export class StudentService {
         newAccountNumber = `${count}`;
       }
 
-      let newEmail = `${firstName}.${firstLastName}@unah.hn`;
+      let newEmail = `${firstName.trim().toLowerCase()}.${firstLastName
+        .trim()
+        .toLowerCase()}@unah.hn`;
       let emailExists = await this.studentRepository.findOne({
         where: { institutionalEmail: newEmail },
       });
       while (emailExists) {
         const randomString = Math.floor(Math.random() * 99) + 1; // Generar una cadena aleatoria
-        newEmail = `${firstName}.${firstLastName}.${randomString}@unah.hn`;
+        newEmail = `${firstName.trim().toLowerCase()}.${firstLastName
+          .trim()
+          .toLowerCase()}.${randomString}@unah.hn`;
         emailExists = await this.studentRepository.findOne({
           where: { institutionalEmail: newEmail },
         });
@@ -112,34 +115,27 @@ export class StudentService {
   }
 
   async update(id: string, updateStudentDto: UpdateStudentDto) {
+    try {
+      const user = await this.userRepository.preload({
+        dni: id,
+        ...updateStudentDto,
+      });
 
-    try{
-
-      const user = await this.userRepository.preload(
-        {
-          dni: id,
-          ...updateStudentDto
-        }
-      );
-
-
-      if(!user){
+      if (!user) {
         throw new NotFoundException('El Estudiante no se ha encontrado.');
       }
 
       await this.userRepository.save(user);
 
       return {
-        message: "Se ha actualizado correctamente el estudiante",
-        statusCode: 200
-      }
-
-
+        message: 'Se ha actualizado correctamente el estudiante',
+        statusCode: 200,
+        user,
+      };
     } catch (error) {
       this.logger.error(error);
       return error.response;
     }
-
   }
 
   remove(id: number) {

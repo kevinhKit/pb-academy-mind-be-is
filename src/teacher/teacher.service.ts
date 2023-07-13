@@ -12,7 +12,6 @@ import { error } from 'console';
 
 @Injectable()
 export class TeacherService {
-
   private readonly logger = new Logger('teacherService');
 
   constructor(
@@ -33,7 +32,6 @@ export class TeacherService {
       isBoss,
       isCoordinator,
       isTeacher,
-      isAdmin,
       video,
     } = createTeacherDto;
 
@@ -63,14 +61,18 @@ export class TeacherService {
     } else {
       newEmployeeNumber = `${count}`;
     }
-    let newEmail = `${firstName}.${firstLastName}@unah.edu.hn`;
+    let newEmail = `${firstName.trim().toLowerCase()}.${firstLastName
+      .trim()
+      .toLowerCase()}@unah.edu.hn`;
     let emailExists = await this.teacherRepository.findOne({
       where: { institutionalEmail: newEmail },
     });
 
     while (emailExists) {
       const randomString = Math.floor(Math.random() * 99) + 1; // Generar una cadena aleatoria
-      newEmail = `${firstName}.${firstLastName}.${randomString}@unah.edu.hn`;
+      newEmail = `${firstName.trim().toLowerCase()}.${firstLastName
+        .trim()
+        .toLowerCase()}.${randomString}@unah.edu.hn`;
       emailExists = await this.teacherRepository.findOne({
         where: { institutionalEmail: newEmail },
       });
@@ -82,7 +84,6 @@ export class TeacherService {
     newTeacher.isBoss = isBoss;
     newTeacher.isCoordinator = isCoordinator;
     newTeacher.isTeacher = isTeacher;
-    newTeacher.isAdmin = isAdmin;
 
     newTeacher.user = user;
 
@@ -113,44 +114,37 @@ export class TeacherService {
     return `This action returns a #${id} teacher`;
   }
 
-  async update(id: string, {video, ...updateTeacher}: UpdateTeacherDto) {
-
+  async update(id: string, { video, ...updateTeacher }: UpdateTeacherDto) {
     try {
-
       const user = await this.userRepository
         .createQueryBuilder('user')
         .leftJoinAndSelect('user.teacher', 'teacher')
         .where('user.dni = :id', { id })
         .getOne();
- 
-      if(video){
-        const teacher = await this.teacherRepository.preload(
-          {
-            employeeNumber: JSON.parse(JSON.stringify(user.teacher)).employeeNumber,
-            video,
-          }
-        );
 
-        if(!teacher){
+      if (video) {
+        const teacher = await this.teacherRepository.preload({
+          employeeNumber: JSON.parse(JSON.stringify(user.teacher))
+            .employeeNumber,
+          video,
+        });
+
+        if (!teacher) {
           throw new NotFoundException('El Docente no se ha encontrado.');
         }
 
         await this.teacherRepository.save(teacher);
       }
 
-
-      Object.assign(user, updateTeacher)
+      Object.assign(user, updateTeacher);
 
       await this.userRepository.save(user);
 
-
+      return user;
     } catch (error) {
       this.logger.error(error);
       return error.response;
     }
-
-
-
 
     return `This action updates a #${id} teacher`;
   }

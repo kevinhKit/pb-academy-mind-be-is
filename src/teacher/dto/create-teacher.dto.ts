@@ -31,8 +31,6 @@ export class CreateTeacherDto {
   isBoss: boolean;
   @IsBoolean()
   isCoordinator: boolean;
-  @IsBoolean()
-  isAdmin: boolean;
   @IsOptional()
   @IsString()
   video: string;
