@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable, Logger } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -6,14 +6,52 @@ import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { HttpException, HttpStatus } from '@nestjs/common';
+import { createECDH } from 'crypto';
+import { response } from 'express';
 
 @Injectable()
 export class UserService {
+
+
+  private readonly logger = new Logger('userLogger');
+
   constructor(
     @InjectRepository(User) private userRepository: Repository<User>,
   ) {}
 
-  create(createUserDto: CreateUserDto) {
+  async create(createUserDto: CreateUserDto) {
+
+    try{
+      const user = await  this.userRepository.findOne({where: {
+        dni: createUserDto.dni
+      }}) 
+
+      if(user){
+        throw new ConflictException('Él usuario ya existe.')
+      }
+      const newPassword = await this.createPassword();
+      const newUser = await this.userRepository.create({
+        ...createUserDto,
+        password: newPassword
+      })
+
+      await this.userRepository.save(newUser);
+
+      this.logger.log('Se ha creado al usuario correctamente');
+      return {
+        message: "Se ha creado al usuario correctamente",
+        statusCode: 200
+    }
+
+    } 
+    catch (error){
+      	this.logger.error(error);
+        return error.response
+    }
+
+
+
+
     return 'Esta acción agrega un nuevo usuario.';
   }
 
@@ -71,4 +109,15 @@ export class UserService {
   remove(id: number) {
     return `Está acción elimina al usuario con el id #${id}.`;
   }
+
+
+  async createPassword(){
+    const newPassword = Math.random().toString(36).substring(7);
+    const salt = await bcrypt.genSalt(10);
+    return await bcrypt.hash(newPassword, salt);
+  }
+
+
+
+
 }

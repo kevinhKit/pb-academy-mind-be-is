@@ -12,7 +12,9 @@ import { UpdateStudentPasswordDto } from './dto/update-student-password.dto';
 
 @Injectable()
 export class StudentService {
-  private readonly logger = new Logger('teacherService');
+
+  private readonly logger = new Logger('teacherLogger');
+
 
   constructor(
     @InjectRepository(User) private userRepository: Repository<User>,
