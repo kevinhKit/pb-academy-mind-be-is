@@ -20,8 +20,10 @@ export class StudentService {
   ) {}
 
   async create(createStudentDto: CreateStudentDto[]) {
+    const newUsers = [];
     const newStudents = [];
-    for (const createStudent of createStudentDto) {
+    const newMails = [];
+    for (const [index, createStudent] of createStudentDto.entries()) {
       const {
         dni,
         firstLastName,
@@ -51,13 +53,13 @@ export class StudentService {
       const count = await this.studentRepository.count();
       let newAccountNumber = '';
       if (count <= 9) {
-        newAccountNumber = `000${count}`;
+        newAccountNumber = `000${count + index}`;
       } else if (count <= 99) {
-        newAccountNumber = `00${count}`;
+        newAccountNumber = `00${count + index}`;
       } else if (count <= 999) {
-        newAccountNumber = `0${count}`;
+        newAccountNumber = `0${count + index}`;
       } else {
-        newAccountNumber = `${count}`;
+        newAccountNumber = `${count + index}`;
       }
 
       let newEmail = `${firstName.trim().toLowerCase()}.${firstLastName
@@ -82,22 +84,25 @@ export class StudentService {
       newStudent.career = career;
 
       newStudent.user = user;
-
-      await this.userRepository.save(user);
-      const savedStudent = await this.studentRepository.save(newStudent);
-
+      newUsers.push(user);
+      newStudents.push(newStudent);
+      newMails.push({
+        from: '"¡Inicia sesión!" <eralejo2003@gmail.com>', // sender address
+        to: user.email as string, // list of receivers
+        subject: '¡Bienvenido a registro UNAH!', // Subject line
+        text: `Nombre: ${user.firstName} ${user.secondName} ${user.firstLastName} ${user.secondLastName}
+            \Número de cuenta: ${newStudent.accountNumber}\nContraseña ${newPassword}\nCorreo institucional: ${newStudent.institutionalEmail}`, // plain text body
+      });
+    }
+    const savedUsers = await this.userRepository.save(newUsers);
+    if (savedUsers) {
+      const savedStudent = await this.studentRepository.save(newStudents);
       if (savedStudent) {
-        const info = await transporter.sendMail({
-          from: '"¡Inicia sesión!" <eralejo2003@gmail.com>', // sender address
-          to: user.email as string, // list of receivers
-          subject: '¡Bienvenido a registro UNAH!', // Subject line
-          text: `Nombre: ${user.firstName} ${user.secondName} ${user.firstLastName} ${user.secondLastName}
-              \Número de cuenta: ${newStudent.accountNumber}\nContraseña ${newPassword}\nCorreo institucional: ${newStudent.institutionalEmail}`, // plain text body
+        newMails.forEach(async (mail) => {
+          const info = await transporter.sendMail(mail);
         });
       }
-      newStudents.push(newStudent);
     }
-
     return {
       student: newStudents,
     };

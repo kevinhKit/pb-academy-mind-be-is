@@ -1,4 +1,4 @@
-import { IsEmail, IsString, MinLength } from 'class-validator';
+import { IsEmail, IsString, MinLength, IsOptional } from 'class-validator';
 
 export class CreateStudentDto {
   @IsString({ message: 'El dni debe de ser de tipo texto.' })
@@ -6,6 +6,7 @@ export class CreateStudentDto {
   dni: string;
   @IsString({ message: 'El Nombre debe de ser de tipo texto.' })
   firstName: string;
+  @IsOptional()
   @IsString({ message: 'El Nombre debe de ser de tipo texto.' })
   secondName: string;
   @IsString({ message: 'El Nombre debe de ser de tipo texto.' })
