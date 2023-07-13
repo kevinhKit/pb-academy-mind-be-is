@@ -131,7 +131,8 @@ export class StudentService {
 
       return {
         message: "Se ha actualizado correctamente el estudiante",
-        statusCode: 200
+        statusCode: 200,
+        user
       }
 
 
