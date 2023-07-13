@@ -146,7 +146,7 @@ export class TeacherService {
       return error.response;
     }
 
-    return `This action updates a #${id} teacher`;
+
   }
 
   remove(id: number) {

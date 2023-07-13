@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -8,6 +8,7 @@ import * as bcrypt from 'bcrypt';
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { createECDH } from 'crypto';
 import { response } from 'express';
+import { LoginUserDto } from './dto/login-user.dto';
 
 @Injectable()
 export class UserService {
@@ -32,7 +33,9 @@ export class UserService {
       const newPassword = await this.createPassword();
       const newUser = await this.userRepository.create({
         ...createUserDto,
-        password: newPassword
+        password: newPassword,
+        isAdmin: true
+
       })
 
       await this.userRepository.save(newUser);
@@ -40,19 +43,55 @@ export class UserService {
       this.logger.log('Se ha creado al usuario correctamente');
       return {
         message: "Se ha creado al usuario correctamente",
-        statusCode: 200
-    }
-
+        statusCode: 200,
+        newUser
+      }
     } 
     catch (error){
       	this.logger.error(error);
         return error.response
     }
+  }
 
 
 
 
-    return 'Esta acción agrega un nuevo usuario.';
+
+  async login({email, password}: LoginUserDto){
+
+    try{
+
+      const user = await this.userRepository.findOne(
+        {
+          where:{
+            email: await email.toLowerCase()
+          }
+        }
+      )
+
+      if(!user){
+        throw new BadRequestException('El usuario no existe.')
+      }
+
+      if( !bcrypt.compareSync( password , user.password ) ){
+       throw new UnauthorizedException('Contraseña invalida.');
+      }
+      // 
+
+      
+
+      
+  
+      return user;
+
+    } catch(error){
+      this.logger.error(error);
+      return error.response;
+
+
+    }
+
+
   }
 
   findAll() {
@@ -70,16 +109,18 @@ export class UserService {
         where: { dni: id },
       });
       if (user) {
-        authenticated = await bcrypt.compare(
-          updateUserDto.password,
-          user.password,
-        );
+        authenticated = await bcrypt.compareSync( updateUserDto.password , user.password );
+        // authenticated = await bcrypt.compare(
+        //   updateUserDto.password,
+        //   user.password,
+        // );
         if (authenticated) {
-          const salt = await bcrypt.genSalt(10);
-          const newPassword = await bcrypt.hash(
-            updateUserDto.newPassword,
-            salt,
-          );
+          // const salt = await bcrypt.genSalt(10);
+          // const newPassword = await bcrypt.hash(
+          //   updateUserDto.newPassword,
+          //   salt,
+          // );
+          const newPassword =await  this.createPassword()
           const success = await this.userRepository.update(
             { dni: id },
             { password: newPassword },
@@ -113,8 +154,8 @@ export class UserService {
 
   async createPassword(){
     const newPassword = Math.random().toString(36).substring(7);
-    const salt = await bcrypt.genSalt(10);
-    return await bcrypt.hash(newPassword, salt);
+    const password = await bcrypt.hashSync( newPassword, 10)
+    return password;
   }
 
 
