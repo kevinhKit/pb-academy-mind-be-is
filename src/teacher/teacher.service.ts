@@ -139,6 +139,8 @@ export class TeacherService {
       Object.assign(user, updateTeacher);
 
       await this.userRepository.save(user);
+
+      return user;
     } catch (error) {
       this.logger.error(error);
       return error.response;

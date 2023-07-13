@@ -128,6 +128,7 @@ export class StudentService {
       return {
         message: 'Se ha actualizado correctamente el estudiante',
         statusCode: 200,
+        user,
       };
     } catch (error) {
       this.logger.error(error);
