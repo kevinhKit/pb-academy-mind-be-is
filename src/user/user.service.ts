@@ -9,6 +9,7 @@ import { HttpException, HttpStatus } from '@nestjs/common';
 import { createECDH } from 'crypto';
 import { response } from 'express';
 import { LoginUserDto } from './dto/login-user.dto';
+import { transporter } from 'src/utils/mailer';
 
 @Injectable()
 export class UserService {
@@ -21,6 +22,7 @@ export class UserService {
   ) {}
 
   async create(createUserDto: CreateUserDto) {
+    // const newMails = [];
 
     try{
       const user = await  this.userRepository.findOne({where: {
@@ -30,17 +32,37 @@ export class UserService {
       if(user){
         throw new ConflictException('Él usuario ya existe.')
       }
-      const newPassword = await this.createPassword();
+      const {newPasswordHash, newPassword} = await this.createPassword();
       const newUser = await this.userRepository.create({
         ...createUserDto,
-        password: newPassword,
+        password: newPasswordHash,
         isAdmin: true
 
       })
 
-      await this.userRepository.save(newUser);
+      const success = await this.userRepository.save(newUser);
+
+        console.log(success)
+
+      if(success){
+        const info = await transporter.sendMail({
+          from: '"¡Inicia sesión!" <eralejo2003@gmail.com>', // sender address
+          to: newUser.email as string, // list of receivers
+          subject: '¡Bienvenido a registro UNAH!', // Subject line
+          text: `Nombre: ${newUser.firstName} ${newUser.secondName} ${newUser.firstLastName} ${newUser.secondLastName}
+          \Correo de Acceso: ${newUser.email}\nContraseña ${newPassword}\n`, // plain text body
+        });
+      }
 
       this.logger.log('Se ha creado al usuario correctamente');
+
+      
+
+
+
+
+
+
       return {
         message: "Se ha creado al usuario correctamente",
         statusCode: 200,
@@ -120,10 +142,10 @@ export class UserService {
           //   updateUserDto.newPassword,
           //   salt,
           // );
-          const newPassword =await  this.createPassword()
+          const {newPasswordHash} =await  this.createPassword()
           const success = await this.userRepository.update(
             { dni: id },
-            { password: newPassword },
+            { password: newPasswordHash },
           );
           if (success) {
             throw new HttpException('Perfil actualizado.', HttpStatus.OK);
@@ -154,8 +176,8 @@ export class UserService {
 
   async createPassword(){
     const newPassword = Math.random().toString(36).substring(7);
-    const password = await bcrypt.hashSync( newPassword, 10)
-    return password;
+    const newPasswordHash = await bcrypt.hashSync( newPassword, 10)
+    return {newPasswordHash,newPassword};
   }
 
 
