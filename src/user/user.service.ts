@@ -1,4 +1,10 @@
-import { BadRequestException, ConflictException, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  Logger,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -13,8 +19,6 @@ import { transporter } from 'src/utils/mailer';
 
 @Injectable()
 export class UserService {
-
-
   private readonly logger = new Logger('userLogger');
 
   constructor(
@@ -24,27 +28,28 @@ export class UserService {
   async create(createUserDto: CreateUserDto) {
     // const newMails = [];
 
-    try{
-      const user = await  this.userRepository.findOne({where: {
-        dni: createUserDto.dni
-      }}) 
+    try {
+      const user = await this.userRepository.findOne({
+        where: {
+          dni: createUserDto.dni,
+        },
+      });
 
-      if(user){
-        throw new ConflictException('Él usuario ya existe.')
+      if (user) {
+        throw new ConflictException('Él usuario ya existe.');
       }
-      const {newPasswordHash, newPassword} = await this.createPassword();
+      const { newPasswordHash, newPassword } = await this.createPassword();
       const newUser = await this.userRepository.create({
         ...createUserDto,
         password: newPasswordHash,
-        isAdmin: true
-
-      })
+        isAdmin: true,
+      });
 
       const success = await this.userRepository.save(newUser);
 
-        console.log(success)
+      console.log(success);
 
-      if(success){
+      if (success) {
         const info = await transporter.sendMail({
           from: '"¡Inicia sesión!" <eralejo2003@gmail.com>', // sender address
           to: newUser.email as string, // list of receivers
@@ -56,64 +61,39 @@ export class UserService {
 
       this.logger.log('Se ha creado al usuario correctamente');
 
-      
-
-
-
-
-
-
       return {
-        message: "Se ha creado al usuario correctamente",
+        message: 'Se ha creado al usuario correctamente',
         statusCode: 200,
-        newUser
-      }
-    } 
-    catch (error){
-      	this.logger.error(error);
-        return error.response
+        newUser,
+      };
+    } catch (error) {
+      this.logger.error(error);
+      return error.response;
     }
   }
 
+  async login({ email, password }: LoginUserDto) {
+    try {
+      const user = await this.userRepository.findOne({
+        where: {
+          email: await email.toLowerCase(),
+        },
+      });
 
-
-
-
-  async login({email, password}: LoginUserDto){
-
-    try{
-
-      const user = await this.userRepository.findOne(
-        {
-          where:{
-            email: await email.toLowerCase()
-          }
-        }
-      )
-
-      if(!user){
-        throw new BadRequestException('El usuario no existe.')
+      if (!user) {
+        throw new BadRequestException('El usuario no existe.');
       }
 
-      if( !bcrypt.compareSync( password , user.password ) ){
-       throw new UnauthorizedException('Contraseña invalida.');
+      if (!bcrypt.compareSync(password, user.password)) {
+        throw new UnauthorizedException('Contraseña invalida.');
       }
-      // 
+      //
 
-      
-
-      
-  
-      return user;
-
-    } catch(error){
+      return { authenticated: true, user: { user: user } };
+    } catch (error) {
       this.logger.error(error);
       return error.response;
-
-
     }
-
-
   }
 
   findAll() {
@@ -131,21 +111,19 @@ export class UserService {
         where: { dni: id },
       });
       if (user) {
-        authenticated = await bcrypt.compareSync( updateUserDto.password , user.password );
-        // authenticated = await bcrypt.compare(
-        //   updateUserDto.password,
-        //   user.password,
-        // );
+        authenticated = await bcrypt.compare(
+          updateUserDto.password,
+          user.password,
+        );
         if (authenticated) {
-          // const salt = await bcrypt.genSalt(10);
-          // const newPassword = await bcrypt.hash(
-          //   updateUserDto.newPassword,
-          //   salt,
-          // );
-          const {newPasswordHash} =await  this.createPassword()
+          const salt = await bcrypt.genSalt(10);
+          const newPassword = await bcrypt.hash(
+            updateUserDto.newPassword,
+            salt,
+          );
           const success = await this.userRepository.update(
             { dni: id },
-            { password: newPasswordHash },
+            { password: newPassword },
           );
           if (success) {
             throw new HttpException('Perfil actualizado.', HttpStatus.OK);
@@ -173,14 +151,9 @@ export class UserService {
     return `Está acción elimina al usuario con el id #${id}.`;
   }
 
-
-  async createPassword(){
+  async createPassword() {
     const newPassword = Math.random().toString(36).substring(7);
-    const newPasswordHash = await bcrypt.hashSync( newPassword, 10)
-    return {newPasswordHash,newPassword};
+    const newPasswordHash = await bcrypt.hashSync(newPassword, 10);
+    return { newPasswordHash, newPassword };
   }
-
-
-
-
 }
