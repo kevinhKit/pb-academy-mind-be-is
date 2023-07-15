@@ -3,18 +3,28 @@ import { Teacher } from 'src/teacher/entities/teacher.entity';
 import {
   Column,
   Entity,
-  Index,
-  JoinColumn,
   OneToOne,
   PrimaryColumn,
-  PrimaryGeneratedColumn,
 } from 'typeorm';
 
 @Entity('User')
-// @Index('idx_unique_key',['dni','firstName'], {unique:true})
+
 export class User {
-  @PrimaryColumn('text')
+  @PrimaryColumn('text',{
+    unique: true
+  })
   dni: string;
+
+  @Column('text',{
+    unique: true,
+    default: null
+  })
+  email: string;
+
+  @Column('text',{
+    unique: true
+  })
+  employeeNumber: string;
 
   @Column('text')
   firstName: string;
@@ -27,9 +37,6 @@ export class User {
 
   @Column('text')
   secondLastName: string;
-
-  @Column('text')
-  email: string;
 
   @Column('text')
   password: string;
@@ -64,8 +71,23 @@ export class User {
   })
   photoThree: string;
 
-  @Column({ nullable: true })
+  @Column({
+    type: 'boolean',
+    nullable: true,
+    default: false
+  })
   isAdmin: boolean;
+
+  @Column('timestamp',{
+    default: () => "current_timestamp"
+  })
+  create_at: Date;
+
+  @Column({
+    type: 'boolean',
+    default: true
+  })
+  status: boolean
 
   @OneToOne(() => Student, (student) => student.user)
   student: string;

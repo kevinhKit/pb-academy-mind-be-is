@@ -4,28 +4,60 @@ import { Column, Entity, JoinColumn, OneToOne, PrimaryColumn } from 'typeorm';
 
 @Entity('Teacher')
 export class Teacher {
-  @PrimaryColumn('text')
+  @PrimaryColumn('text',{
+    unique: true
+  })
   employeeNumber: string;
 
-  @Column('text')
+  @Column('text',{
+    unique: true
+  })
   institutionalEmail: string;
+
+  @Column('text',{
+    unique: true
+  })
+  email: string;
+
+  @Column('text')
+  password: string;
 
   @Column('text', {
     nullable: true,
   })
   video: string;
 
-  @Column({ type: 'boolean', name: 'isTeacher', nullable: true })
-  isTeacher: boolean;
+  @Column('text', {
+    nullable: true,
+  })
+  photoOne: string;
 
-  @Column({ type: 'boolean', name: 'isBoss', nullable: true })
+  @Column('text', {
+    nullable: true,
+  })
+  description: string;
+
+   @Column('timestamp',{
+    default: () => "current_timestamp"
+  })
+  create_at: Date;
+
+  @Column({
+    type: 'boolean',
+    default: true
+  })
+  status: boolean
+
+  @Column({ type: 'boolean',
+    name: 'isBoss',
+    default: false,
+  })
   isBoss: boolean;
 
-  @Column({ type: 'boolean', name: 'isCoordinator', nullable: true })
+  @Column({
+    type: 'boolean',
+    default: false })
   isCoordinator: boolean;
-
-  @Column({ type: 'boolean', name: 'isAdmin', nullable: true })
-  isAdmin: boolean;
 
   @OneToOne(() => User, (user) => user.teacher)
   @JoinColumn({
