@@ -1,6 +1,7 @@
-import { Role } from 'src/role/entities/role.entity';
+
+import { TeachingCareer } from 'src/teaching-career/entities/teaching-career.entity';
 import { User } from 'src/user/entities/user.entity';
-import { Column, Entity, JoinColumn, OneToOne, PrimaryColumn } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryColumn } from 'typeorm';
 
 @Entity('Teacher')
 export class Teacher {
@@ -64,4 +65,8 @@ export class Teacher {
     name: 'idUser',
   })
   user: User;
+
+
+  @OneToMany(() => TeachingCareer, (teachingCareer) => teachingCareer.teacher)
+  teachingCareer: string;
 }
