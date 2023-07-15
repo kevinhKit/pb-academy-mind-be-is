@@ -9,6 +9,10 @@ import { TeacherModule } from './teacher/teacher.module';
 import { RoleModule } from './role/role.module';
 import { AuthModule } from './auth/auth.module';
 import { CareerModule } from './career/career.module';
+import { SharedModuleModule } from './shared-module/shared-module.module';
+import { SharedModule1Service } from './shared-module1/shared-module1.service';
+import { SharedModuleModule } from './shared-module/shared-module.module';
+import { SharedModuleModule } from './shared-module/shared-module.module';
 
 @Module({
   imports: [
@@ -36,10 +40,11 @@ import { CareerModule } from './career/career.module';
     RoleModule,
     AuthModule,
     CareerModule,
+    SharedModuleModule,
   ],
 
   controllers: [AppController],
 
-  providers: [AppService],
+  providers: [AppService, SharedModule1Service],
 })
 export class AppModule {}
