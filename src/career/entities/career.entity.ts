@@ -1,8 +1,10 @@
-import { Column } from "typeorm";
+import { TeachingCareer } from "src/teaching-career/entities/teaching-career.entity";
+import { Column, Entity, ManyToOne, OneToMany, PrimaryColumn } from "typeorm";
 
+@Entity('Career')
 export class Career {
 
-    @Column('text',{
+    @PrimaryColumn('text',{
         unique: true
     })
     idCareer: string;
@@ -20,5 +22,8 @@ export class Career {
         default: 700
     })
     minimumIncomeValue: number;
+
+    @OneToMany(() => TeachingCareer, (teachingCareer) => teachingCareer.career)
+    teachingCareer: string;
 
 }
