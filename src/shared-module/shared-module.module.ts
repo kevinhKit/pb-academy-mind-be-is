@@ -1,9 +1,10 @@
 import { Module } from '@nestjs/common';
-import { SharedModuleService } from './shared-module.service';
-import { SharedModuleController } from './shared-module.controller';
+import { GenerateTokenService } from './generate-token/generate-token.service';
+import { SendEmailService } from './send-email/send-email.service';
+import { EncryptPasswordService } from './encrypt-password/encrypt-password.service';
 
 @Module({
-  controllers: [SharedModuleController],
-  providers: [SharedModuleService]
+  controllers: [],
+  providers: [GenerateTokenService, SendEmailService, EncryptPasswordService]
 })
 export class SharedModuleModule {}
