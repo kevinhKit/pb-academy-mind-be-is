@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsOptional, IsPhoneNumber, IsString, Matches, MaxLength, MinLength } from "class-validator";
+import { IsNotEmpty, IsNumberString, IsOptional, IsPhoneNumber, IsString, Matches, MaxLength, MinLength } from "class-validator";
 
 export class CreateUserDto {
 
@@ -30,22 +30,23 @@ export class CreateUserDto {
     @IsNotEmpty({message:"No envió o dejo vacio el campo correo electrónico."})
     email: string;
 
-    @Matches(/^(?=.*\d)(?=.*[A-Z])(?=.*\W).{8,}$/, {message: "La contraseña no mide el minimo de seguridad."})
-    @IsString({ message: 'La contraseña debe ser una cadena de caracteres.' })
-    @IsNotEmpty({message:"No envió o dejo vacia la contraseña."})
-    password: string;
+    // @Matches(/^(?=.*\d)(?=.*[A-Z])(?=.*\W).{8,}$/, {message: "La contraseña no mide el minimo de seguridad."})
+    // @IsString({ message: 'La contraseña debe ser una cadena de caracteres.' })
+    // @IsNotEmpty({message:"No envió o dejo vacia la contraseña."})
+    // password: string;
     
     @IsString({ message: 'La dirección debe ser de tipo texto.' })
     @IsNotEmpty({message:"No envió o dejo vacia la dirección."})
     address: string;
     
     @IsPhoneNumber('HN', { message: 'Número de teléfono incorrecto.' })
-    @IsString({message: "El Telefono debe ser una cadena de texto."})
+    @IsNumberString({},{message: "El Telefono debe ser una cadena de números."})
     @IsNotEmpty({message: "No envió o dejo vacio el campo Teléfono"})
     phone: string;
     
     @IsOptional()
     @IsString({message: "La descripción debe ser una cadena de texto."})
+    @IsNotEmpty({message: "No envió o dejo vacio el campo descripción"})
     description: string;
     
 

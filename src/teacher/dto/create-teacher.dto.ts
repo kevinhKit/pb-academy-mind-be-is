@@ -6,7 +6,7 @@ import {
 } from 'class-validator';
 import { CreateUserDto } from 'src/user/dto/create-user.dto';
 
-export class CreateTeacherDto extends PartialType(PickType(CreateUserDto, ['dni','firstName','secondName','firstLastName', 'secondLastName', 'email', 'password', 'address', 'phone', 'description'])) {
+export class CreateTeacherDto extends PartialType(PickType(CreateUserDto, ['dni','firstName','secondName','firstLastName', 'secondLastName', 'email', 'address', 'phone', 'description'])) {
 
   @IsBoolean()
   isTeacher: boolean;

@@ -1,8 +1,8 @@
 import { PartialType, PickType } from '@nestjs/mapped-types';
-import { IsString, IsNotEmpty } from 'class-validator';
+import { IsString, IsNotEmpty, IsNumberString } from 'class-validator';
 import { CreateUserDto } from 'src/user/dto/create-user.dto';
 
-export class CreateStudentDto extends PartialType(PickType(CreateUserDto, ['dni','firstName','secondName','firstLastName', 'secondLastName', 'email', 'password', 'address', 'phone', 'description'])) {
+export class CreateStudentDto extends PartialType(PickType(CreateUserDto, ['dni','firstName','secondName','firstLastName', 'secondLastName', 'email', 'address', 'phone', 'description'])) {
 
 
 
@@ -12,6 +12,10 @@ export class CreateStudentDto extends PartialType(PickType(CreateUserDto, ['dni'
   @IsNotEmpty({message:"No envió o dejo vacio el campo Carrera."})
   career: string;
   
+  @IsNumberString({},{ message: 'La nota de ingreso debe ser de tipo número.' })
+  @IsNotEmpty({message:"No envió o dejo vacia la nota de ingreso."})
+  incomeNote: string;
+
   @IsString({ message: 'EL centro regional debe ser de tipo texto.' })
   @IsNotEmpty({message:"No envió o dejo vacio el centro regional."})
   regionalCenter: string;

@@ -1,42 +1,26 @@
-import { IsOptional, IsString } from 'class-validator';
+import { PartialType, PickType } from '@nestjs/mapped-types';
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { UpdateUserDto } from 'src/user/dto/update-user.dto';
 
-export class UpdateStudentDto{
+export class UpdateStudentDto extends PartialType(
+    PickType(UpdateUserDto, ['email', 'address', 'phone','description']),
+  ){
 
-    @IsOptional()        
-    @IsString({message: "El coreo electrónico debe ser una cadea da caracteres"})
-    email: string;
-    
-    @IsOptional()        
-    @IsString({message: "La Contraseña debe ser una cadea da caracteres"})
-    password: string;
-    
-    @IsOptional()        
-    @IsString({message: "La dirección debe ser una cadea da caracteres"})
-    address: string;
-    
-    @IsOptional()        
-    @IsString({message: "El Celuar debe ser una cadea da caracteres"})
-    phone: string;
-    
-    @IsOptional()        
-    @IsString({message: "La descripción debe ser una cadea da caracteres"})
-    description: string;
-    
-    @IsOptional()        
-    @IsString({message: "La Fotografia uno, no cumple el formtao requerido"})
+
+    @IsOptional()
+    @IsString({message: "La Fotografia uno, no cumple el formtao requerido."})
+    @IsNotEmpty({message: "No envió o dejo vacio el campo Fotografia uno"})
     photoOne: string;
-    
-    @IsOptional()        
-    @IsString({message: "La Fotografia dos, no cumple el formtao requerido"})
+
+    @IsOptional()
+    @IsString({message: "La Fotografia dos, no cumple el formtao requerido."})
+    @IsNotEmpty({message: "No envió o dejo vacio el campo Fotografia dos"})
     photoTwo: string;
-    
-    @IsOptional()        
-    @IsString({message: "La Fotografia tres, no cumple el formtao requerido"})
+
+    @IsOptional()
+    @IsString({message: "La Fotografia tres, no cumple el formtao requerido."})
+    @IsNotEmpty({message: "No envió o dejo vacio el campo Fotografia tres"})
     photoThree: string;
-    
-
-
-
 
 
 }

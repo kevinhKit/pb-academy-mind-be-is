@@ -56,20 +56,20 @@ export class User {
   })
   description: string;
 
-  @Column('text', {
-    nullable: true,
-  })
-  photoOne: string;
+  // @Column('text', {
+  //   nullable: true,
+  // })
+  // photoOne: string;
 
-  @Column('text', {
-    nullable: true,
-  })
-  photoTwo: string;
+  // @Column('text', {
+  //   nullable: true,
+  // })
+  // photoTwo: string;
 
-  @Column('text', {
-    nullable: true,
-  })
-  photoThree: string;
+  // @Column('text', {
+  //   nullable: true,
+  // })
+  // photoThree: string;
 
   @Column({
     type: 'boolean',
