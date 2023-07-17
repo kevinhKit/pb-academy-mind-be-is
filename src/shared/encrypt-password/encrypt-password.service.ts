@@ -25,7 +25,7 @@ export class EncryptPasswordService {
 
     async generatePassword(){
 
-        const newPassword = await Math.random().toString(36).substring(7);
+        const newPassword = Math.random().toString(36).substring(2, 10);            // const newPassword = await Math.random().toString(36).substring(7);
 
         return newPassword;
 

@@ -22,7 +22,8 @@ export class User {
   email: string;
 
   @Column('text',{
-    unique: true
+    unique: true,
+    nullable: true
   })
   employeeNumber: string;
 

@@ -1,4 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { info } from 'console';
 import * as nodemailer from 'nodemailer';
 
 @Injectable()
@@ -26,7 +27,8 @@ export class SendEmailService {
       
     }
   
-    async sendCreationRegister(user: any = process.env.EMAIL_FROM, message: string) {
+    async sendCreationRegister(user: any,pass:string, message: string,to:string =  process.env.EMAIL_FROM) {
+      console.log(user)
       const contentSubject = {
         admin: "Bienvenido a nuestro sistema, políticas de seguridad...",
         teacher: "",
@@ -35,11 +37,15 @@ export class SendEmailService {
     
       const info = await this.transporter.sendMail({
         from: await process.env.EMAIL_FROM,
-        to: user.email,
-        subject: await contentSubject[String(user.type)],
-        text: `Estimad@ ${user.firstName} ${user.secondName || ''} ${user.firstLastName} ${user.secondLastName}, sus credenciales de acceso a nuestros sistemas son:\n
-        Correo de Acceso: ${user.email}\nContraseña ${user.newPassword}\n\n\nNota:\n"No debe compartir sus credenciales a ningún tercero para evitar problemas de seguridad."`
+        to: "kevin.davidhr@gmail.com",
+        // subject: await contentSubject[String(user.type)],
+        subject: "Bienvenido a nuestro sistema, políticas de seguridad...",
+        text: `Estimad@ ${user.firstName} ${user.firstLastName}, sus credenciales de acceso a nuestros sistemas son:
+        \nNúmero de Empleado: ${user.employeeNumber}
+        \nNombre: ${user.firstName} ${user.secondName || ''} ${user.firstLastName} ${user.secondLastName}\nCorreo de Acceso: ${user.email}\nContraseña: ${pass}\n\n\nNota:\n"No debe compartir sus credenciales a ningún tercero para evitar problemas de seguridad."`
+
       });
+      console.log(info)
     }
   
     async sendStartProcessTuition(to: string, resource: string){

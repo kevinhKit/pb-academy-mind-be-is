@@ -4,8 +4,8 @@ export class CreateUserDto {
 
   
     @Matches(/^(?:\d{13}|[0-9]{4}-\d{4}-\d{5})$/, {message: "EL DNI no cumple el formato: XXXX-XXXX-XXXXX Ó XXXXXXXXXXXXX"})
-    @MaxLength(13, {message: 'El DNI debe tener maximo 15 caracteres'})
-    @MinLength(11, { message: 'El DNI debe tener minimo 13 caracteres.' })
+    @MaxLength(15, {message: 'El DNI debe tener maximo 15 caracteres'})
+    @MinLength(13, { message: 'El DNI debe tener minimo 13 caracteres.' })
     @IsString({ message: 'El DNI debe ser de tipo texto.' })
     @IsNotEmpty({message: "No envió o dejo vacio el campos DNI"})
     dni: string;

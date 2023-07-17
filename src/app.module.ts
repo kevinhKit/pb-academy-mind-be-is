@@ -9,7 +9,7 @@ import { TeacherModule } from './teacher/teacher.module';
 import { RoleModule } from './role/role.module';
 import { AuthModule } from './auth/auth.module';
 import { CareerModule } from './career/career.module';
-import { SharedModuleModule } from './shared-module/shared-module.module';
+import { SharedModule } from './shared/shared.module';
 
 @Module({
   imports: [
@@ -37,7 +37,7 @@ import { SharedModuleModule } from './shared-module/shared-module.module';
     RoleModule,
     AuthModule,
     CareerModule,
-    SharedModuleModule,
+    SharedModule,
   ],
 
   controllers: [AppController],
