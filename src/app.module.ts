@@ -10,9 +10,6 @@ import { RoleModule } from './role/role.module';
 import { AuthModule } from './auth/auth.module';
 import { CareerModule } from './career/career.module';
 import { SharedModuleModule } from './shared-module/shared-module.module';
-import { SharedModule1Service } from './shared-module1/shared-module1.service';
-import { SharedModuleModule } from './shared-module/shared-module.module';
-import { SharedModuleModule } from './shared-module/shared-module.module';
 
 @Module({
   imports: [
@@ -45,6 +42,6 @@ import { SharedModuleModule } from './shared-module/shared-module.module';
 
   controllers: [AppController],
 
-  providers: [AppService, SharedModule1Service],
+  providers: [AppService],
 })
 export class AppModule {}

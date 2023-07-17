@@ -1,37 +1,45 @@
-import { Allow, IsDefined, IsEmail, IsNotEmpty, IsOptional, IsString } from "class-validator";
+import { IsNotEmpty, IsOptional, IsPhoneNumber, IsString, Matches, MaxLength, MinLength } from "class-validator";
 
 export class CreateUserDto {
 
   
-    @IsString({message: "El DNI debe ser una cadena de texto."})
-    @IsNotEmpty({message: "No envió o dejo vacio el campo DNI"})
+    @Matches(/^(?:\d{13}|[0-9]{4}-\d{4}-\d{5})$/, {message: "EL DNI no cumple el formato: XXXX-XXXX-XXXXX Ó XXXXXXXXXXXXX"})
+    @MaxLength(13, {message: 'El DNI debe tener maximo 15 caracteres'})
+    @MinLength(11, { message: 'El DNI debe tener minimo 13 caracteres.' })
+    @IsString({ message: 'El DNI debe ser de tipo texto.' })
+    @IsNotEmpty({message: "No envió o dejo vacio el campos DNI"})
     dni: string;
     
-    @IsString({message: "El primer nombre debe ser una cadena de texto."})
-    @IsNotEmpty({message: "No envió o dejo vacio el campo primer nombre"})
+    @IsString({ message: 'El Primer Nombre debe ser de tipo texto.' })
+    @IsNotEmpty({message: "No envió o dejo vacio el campo Primer Nombre"})
     firstName: string;
     
-    @IsString({message: "El segundo nombre debe ser una cadena de texto."})
-    @IsNotEmpty({message: "No envió o dejo vacio el campo segundo nombre"})
+    @IsString({ message: 'El Segundo Nombre debe ser de tipo texto.' })
+    @IsOptional()
     secondName: string;
     
-    @IsString({message: "El primer apellido debe ser una cadena de texto."})
-    @IsNotEmpty({message: "No envió o dejo vacio el campo primer apellido"})
+    @IsString({ message: 'El Segundo Apellido debe ser de tipo texto.' })
+    @IsNotEmpty({message: "No envió o dejo vacio el campo Primer Apellido"})
     firstLastName: string;
     
-    @IsOptional()
-    @IsString({message: "El segundo apellido debe ser una cadena de texto."})
+    @IsString({ message: 'El Segundo Apellido debe ser de tipo texto.' })
+    @IsNotEmpty({message: "No envió o dejo vacio el campo Segundo Apellido"})
     secondLastName: string;
     
-    @IsEmail({},{message:"El correo electrónico es inválido."})
-    @IsString({message: "El correo electónico debe ser una cadena de texto."})
-    @IsNotEmpty({message: "No envió o dejo vacio el campo correo electrónico"})
+    @Matches(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(?:\.[a-zA-Z]{2,})?$/, { message: 'El correo electrónico no cumple el formato.' })
+    @IsNotEmpty({message:"No envió o dejo vacio el campo correo electrónico."})
     email: string;
+
+    @Matches(/^(?=.*\d)(?=.*[A-Z])(?=.*\W).{8,}$/, {message: "La contraseña no mide el minimo de seguridad."})
+    @IsString({ message: 'La contraseña debe ser una cadena de caracteres.' })
+    @IsNotEmpty({message:"No envió o dejo vacia la contraseña."})
+    password: string;
     
-    @IsString({message: "La dirección debe ser una cadena de texto."})
-    @IsNotEmpty({message: "No envió o dejo vacio el campo dirección"})
+    @IsString({ message: 'La dirección debe ser de tipo texto.' })
+    @IsNotEmpty({message:"No envió o dejo vacia la dirección."})
     address: string;
     
+    @IsPhoneNumber('HN', { message: 'Número de teléfono incorrecto.' })
     @IsString({message: "El Telefono debe ser una cadena de texto."})
     @IsNotEmpty({message: "No envió o dejo vacio el campo Teléfono"})
     phone: string;
@@ -42,19 +50,6 @@ export class CreateUserDto {
     
 
 
-
-
-    @IsOptional()
-    @IsString({message: "El photoOne debe ser una cadena de texto."})
-    photoOne: string;
-    
-    @IsOptional()
-    @IsString({message: "El photoTwo debe ser una cadena de texto."})
-    photoTwo: string;
-    
-    @IsOptional()
-    @IsString({message: "El photoThree debe ser una cadena de texto."})
-    photoThree: string;
 
 
 

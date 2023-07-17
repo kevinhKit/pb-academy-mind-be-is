@@ -1,36 +1,22 @@
+import { PartialType, PickType } from '@nestjs/mapped-types';
 import {
-  IsEmail,
-  IsPhoneNumber,
   IsString,
-  MinLength,
   IsBoolean,
   IsOptional,
 } from 'class-validator';
+import { CreateUserDto } from 'src/user/dto/create-user.dto';
 
-export class CreateTeacherDto {
-  @IsString({ message: 'El dni debe de ser de tipo texto.' })
-  @MinLength(11, { message: 'El dni debe tener 11 caracteres.' })
-  dni: string;
-  @IsString({ message: 'El Nombre debe de ser de tipo texto.' })
-  firstName: string;
-  @IsString({ message: 'El Nombre debe de ser de tipo texto.' })
-  secondName: string;
-  @IsString({ message: 'El Nombre debe de ser de tipo texto.' })
-  firstLastName: string;
-  @IsString({ message: 'El Nombre debe de ser de tipo texto.' })
-  secondLastName: string;
-  @IsEmail({}, { message: 'Formato de correo incorrecto.' })
-  email: string;
-  @IsString({ message: 'La dirección debe de ser de tipo texto.' })
-  address: string;
-  @IsPhoneNumber('HN', { message: 'Número de teléfono incorrecto.' })
-  phone: string;
+export class CreateTeacherDto extends PartialType(PickType(CreateUserDto, ['dni','firstName','secondName','firstLastName', 'secondLastName', 'email', 'password', 'address', 'phone', 'description'])) {
+
   @IsBoolean()
   isTeacher: boolean;
+
   @IsBoolean()
   isBoss: boolean;
+
   @IsBoolean()
   isCoordinator: boolean;
+  
   @IsOptional()
   @IsString()
   video: string;

@@ -17,8 +17,13 @@ export class StudentController {
   constructor(private readonly studentService: StudentService) {}
 
   @Post()
-  create(@Body() createStudentDto: CreateStudentDto[]) {
+  create(@Body() createStudentDto: CreateStudentDto) {
     return this.studentService.create(createStudentDto);
+  }
+
+  @Post('multiple')
+  createMultiple(@Body() createStudentDto: CreateStudentDto[]) {
+    return this.studentService.createMultiple(createStudentDto);
   }
 
   @Get()
