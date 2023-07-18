@@ -15,18 +15,15 @@ export class EncryptPasswordService {
 
     async decodePassword(password: string, encriptPassword: string){
 
-        if(!bcrypt.compareSync( password , encriptPassword ) ){
-            throw new UnauthorizedException('Contraseña invalida.');
+        if(!bcrypt.compareSync( password , encriptPassword) ){
+            return false;
         }
-
         return true;
-
     }
 
     async generatePassword(){
 
         const newPassword = Math.random().toString(36).substring(2, 10);            // const newPassword = await Math.random().toString(36).substring(7);
-
         return newPassword;
 
     }

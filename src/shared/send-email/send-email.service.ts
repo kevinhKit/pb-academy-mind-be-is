@@ -37,7 +37,7 @@ export class SendEmailService {
     
       const info = await this.transporter.sendMail({
         from: await process.env.EMAIL_FROM,
-        to: "kevin.davidhr@gmail.com",
+        to: user.email,
         // subject: await contentSubject[String(user.type)],
         subject: "Bienvenido a nuestro sistema, políticas de seguridad...",
         text: `Estimad@ ${user.firstName} ${user.firstLastName}, sus credenciales de acceso a nuestros sistemas son:
