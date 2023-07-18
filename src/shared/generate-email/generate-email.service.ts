@@ -4,6 +4,7 @@ import { Injectable } from '@nestjs/common';
 export class GenerateEmailService {
 
     async generate(nombre1, nombre2, apellido1, apellido2, repository, dominio = '@unah.hn') {
+      //remove the tildes from the emails
         nombre1 = this.removeAccents(nombre1.toLowerCase());
         nombre2 = this.removeAccents(nombre2.toLowerCase());
         apellido1 = this.removeAccents(apellido1.toLowerCase());
