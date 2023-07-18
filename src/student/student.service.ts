@@ -21,7 +21,10 @@ export class StudentService {
     @InjectRepository(Student) private studentRepository: Repository<Student>,
   ) {}
 
-  async create(createStudentDto: CreateStudentDto[]) {
+  async create(createStudentDto: CreateStudentDto) {
+    
+  }
+  async createMultiple(createStudentDto: CreateStudentDto[]) {
     // const newUsers = [];
     // const newStudents = [];
     // const newMails = [];

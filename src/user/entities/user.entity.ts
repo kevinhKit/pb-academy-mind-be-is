@@ -22,7 +22,8 @@ export class User {
   email: string;
 
   @Column('text',{
-    unique: true
+    unique: true,
+    nullable: true
   })
   employeeNumber: string;
 
@@ -56,20 +57,20 @@ export class User {
   })
   description: string;
 
-  @Column('text', {
-    nullable: true,
-  })
-  photoOne: string;
+  // @Column('text', {
+  //   nullable: true,
+  // })
+  // photoOne: string;
 
-  @Column('text', {
-    nullable: true,
-  })
-  photoTwo: string;
+  // @Column('text', {
+  //   nullable: true,
+  // })
+  // photoTwo: string;
 
-  @Column('text', {
-    nullable: true,
-  })
-  photoThree: string;
+  // @Column('text', {
+  //   nullable: true,
+  // })
+  // photoThree: string;
 
   @Column({
     type: 'boolean',
