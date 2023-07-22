@@ -8,6 +8,7 @@ export class GenerateEmailService {
         nombre2 = this.removeAccents(nombre2.trim().toLowerCase());
         apellido1 = this.removeAccents(apellido1.trim().toLowerCase());
         apellido2 = this.removeAccents(apellido2.trim().toLowerCase());
+
         // apellido2 = this.removeAccents(apellido2.toLowerCase()) || "";
         let emailCreate = `${nombre1}.${apellido1}${dominio}`;
         if ( await this.mailAvailable(emailCreate, repository)) {
