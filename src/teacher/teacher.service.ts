@@ -243,7 +243,42 @@ export class TeacherService {
     return message;
   }
 
-  async resetPassword(resetPasswordTeacherDto: ResetPasswordTeacherDto){
+  async resetPassword(id: string,{password, newPassword}: ResetPasswordTeacherDto){
+    try{
+      const user = await this.teacherRepository.findOne({
+        where:{
+          user:{
+            dni:id.replaceAll('-','')
+          }
+        }
+      })
 
+      if(!user){
+        throw new NotFoundException('El Docente no se ha encontrado.');
+      }
+
+      const ispassword = await this.encryptService.decodePassword(password, user.password)
+      if(!ispassword){
+        throw new UnauthorizedException('Contraseña invalida.');
+      }
+      
+      const encripPassword = await this.encryptService.encodePassword(newPassword);
+      
+      const teacherChange = await this.teacherRepository.preload({
+        employeeNumber:user.employeeNumber,
+        password:encripPassword
+      })
+
+      await this.teacherRepository.save(teacherChange);
+
+      return {
+        statusCode: 200,
+        // user,
+        message: this.printMessageLog("La contraseña se ha cambiado exitosamente")
+      }
+
+    } catch (error){
+      return this.printMessageError(error);
+    }
   }
 }

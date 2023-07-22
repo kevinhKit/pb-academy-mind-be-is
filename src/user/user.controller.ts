@@ -27,11 +27,6 @@ export class UserController {
     return this.userService.login(loginUserDto);
   }
 
-  @Post('reset-password')
-  resetPassword(@Body() resetPasswordUserDto: ResetPasswordUserDto) {
-    return this.userService.resetPassword(resetPasswordUserDto);
-  }
-
   @Get()
   findAll() {
     return this.userService.findAll();
@@ -40,6 +35,10 @@ export class UserController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.userService.findOne(+id);
+  }
+  @Patch('reset-password/:id')
+  resetPassword(@Param('id') id: string, @Body() resetPasswordUserDto: ResetPasswordUserDto) {
+    return this.userService.resetPassword(id, resetPasswordUserDto);
   }
 
   @Patch(':id')

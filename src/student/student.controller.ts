@@ -12,6 +12,7 @@ import { CreateStudentDto } from './dto/create-student.dto';
 import { UpdateStudentDto } from './dto/update-student.dto';
 import { UpdateStudentPasswordDto } from './dto/update-student-password.dto';
 import { LoginStudentDto } from './dto/login-student.dto';
+import { ResetPasswordStudentDto } from './dto/reset-password-student.dto';
 
 @Controller('student')
 export class StudentController {
@@ -30,6 +31,11 @@ export class StudentController {
   @Post('login')
   login(@Body() loginStudentDto: LoginStudentDto) {
     return this.studentService.login(loginStudentDto);
+  }
+  
+  @Patch('reset-password/:id')
+  resetPassword(@Param('id') id: string, @Body() resetPasswordStudentDto: ResetPasswordStudentDto) {
+    return this.studentService.resetPassword(id, resetPasswordStudentDto);
   }
 
   @Get()
@@ -53,12 +59,12 @@ export class StudentController {
   }
 }
 
-@Controller('v2/student')
-export class StudentControllerV2 {
-  constructor(private readonly studentService: StudentService) {}
+// @Controller('v2/student')
+// export class StudentControllerV2 {
+//   constructor(private readonly studentService: StudentService) {}
 
-  @Post()
-  create(@Body() updateStudentPassword: UpdateStudentPasswordDto) {
-    return this.studentService.resetPassword(updateStudentPassword);
-  }
-}
+//   @Post()
+//   create(@Body() updateStudentPassword: UpdateStudentPasswordDto) {
+//     return this.studentService.resetPassword(updateStudentPassword);
+//   }
+// }

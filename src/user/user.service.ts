@@ -218,8 +218,42 @@ export class UserService {
     return message;
   }
 
-  async resetPassword(resetPasswordUserDto: ResetPasswordUserDto){
+  async resetPassword(id: string,{password, newPassword}: ResetPasswordUserDto){
+    try{
 
+      const user = await this.userRepository.findOne({
+        where:{
+          dni:id.replaceAll('-','')
+        }
+      })
+
+      if(!user){
+        throw new NotFoundException('El Administrador no se ha encontrado.');
+      }
+
+      const ispassword = await this.encryptService.decodePassword(password, user.password)
+      if(!ispassword){
+        throw new UnauthorizedException('Contraseña invalida.');
+      }
+
+      const encripPassword = await this.encryptService.encodePassword(newPassword);
+
+      const userChange = await this.userRepository.preload({
+        dni:id.replaceAll('-',''),
+        password:encripPassword
+      })
+
+      await this.userRepository.save(userChange);
+
+      return {
+        statusCode: 200,
+        // user,
+        message: this.printMessageLog("La contraseña se ha cambiado exitosamente")
+      }
+
+    } catch (error){
+      return this.printMessageError(error);
+    }
   }
 
 }

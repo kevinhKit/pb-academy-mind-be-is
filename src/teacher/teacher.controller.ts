@@ -27,9 +27,9 @@ export class TeacherController {
     return this.teacherService.login(loginTeacherDto);
   }
 
-  @Post('reset-password')
-  resetPassword(@Body() resetPasswordTeacherDto: ResetPasswordTeacherDto) {
-    return this.teacherService.resetPassword(resetPasswordTeacherDto);
+  @Patch('reset-password/:id')
+  resetPassword(@Param('id') id: string, @Body() resetPasswordTeacherDto: ResetPasswordTeacherDto) {
+    return this.teacherService.resetPassword(id, resetPasswordTeacherDto);
   }
 
   @Get()
