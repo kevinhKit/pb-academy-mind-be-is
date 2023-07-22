@@ -81,7 +81,6 @@ export class UserService {
         throw new BadRequestException('El usuario ya es un Administrador');
       }
 
-      // const emailExists = await this.userRepository.findOne({where:{email}});
       const emailExists = await this.userRepository.findOne(
         {
           where:{
@@ -90,13 +89,10 @@ export class UserService {
           }
       });
 
-      // console.log(emailExists);
-
       if(emailExists){
         throw new ConflictException('El Correo Electrónico ya esta siendo usado por otro Usuario');
       }
       
-
       const generatePassword = await this.encryptService.generatePassword();
       const encripPassword = await this.encryptService.encodePassword(generatePassword);
       userExists.isAdmin = true;

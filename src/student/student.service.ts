@@ -22,7 +22,6 @@ export class StudentService {
 
   private readonly logger = new Logger('studentLogger');
 
-
   constructor(
     private readonly sendEmailService: SendEmailService,
     private readonly encryptService: EncryptPasswordService,
@@ -76,16 +75,14 @@ export class StudentService {
       })
 
       let lastNumber = '0';
-      // let lastNumber = '';
-      // if(number){
-      //   lastNumber  = number[0].accountNumber.slice(-5);
-      // } else {
-      //   lastNumber = '0';
-      // }
+      if(number.length > 0){
+        lastNumber  = number[0].accountNumber.slice(-5);
+      }
 
       const generatePassword = await this.encryptService.generatePassword()
       const encripPassword = await this.encryptService.encodePassword(generatePassword)
       const accountNumber = await this.accountNumberService.generate(lastNumber);
+
       const newStudent = await this.studentRepository.create({
         institutionalEmail : await this.generateEmailService.generate(
           others.firstName,
@@ -123,11 +120,6 @@ export class StudentService {
         message: this.printMessageLog('El Estudiante se ha creado exitosamente'),
         user: returnUser
       }
-
-
-
-
-
 
     } catch (error){
       return this.printMessageError(error);
@@ -269,18 +261,39 @@ export class StudentService {
     return `Está acción devuelve al estudiante con el id  #${id}`;
   }
 
-  async update(id: string, updateStudentDto: UpdateStudentDto) {
+  async update(id: string, {email, photoOne, photoTwo, photoThree,description, ...others}: UpdateStudentDto) {
     try {
-      const user = await this.userRepository.preload({
-        dni: id,
-        ...updateStudentDto,
+      const student = await this.studentRepository.findOne({
+        where: {
+          user: {
+            dni: id.replaceAll('-','')
+          },
+        },
+        relations: ['user'],
       });
 
-      if (!user) {
-        throw new NotFoundException('El Estudiante no se ha encontrado.');
+      if(!student){
+       throw new NotFoundException('El Estudiante no se ha encontrado.');
       }
 
+
+      const user = await this.userRepository.preload({
+        dni: id.replaceAll('-',''),
+        ...others,
+      });
+
+      const updateChangeStudent = await this.studentRepository.preload({
+        accountNumber:student.accountNumber,
+        photoOne,
+        photoTwo,
+        photoThree,
+        description,
+        email: email.toLowerCase(),
+      });
+
       await this.userRepository.save(user);
+
+      await this.studentRepository.save(updateChangeStudent);
 
       return {
         message: 'Se ha actualizado correctamente el estudiante',
@@ -288,8 +301,7 @@ export class StudentService {
         user,
       };
     } catch (error) {
-      this.logger.error(error);
-      return error.response;
+      return this.printMessageError(error)
     }
   }
 

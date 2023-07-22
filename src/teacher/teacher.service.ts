@@ -24,7 +24,7 @@ export class TeacherService {
     private readonly generateEmailService: GenerateEmailService,
 
     @InjectRepository(User) private userRepository: Repository<User>,
-    @InjectRepository(Teacher) private teacherRepository: Repository<Teacher>, // @InjectRepository(Teacher) // private readonly teacherRepository: Repository<Teacher>, // private readonly dataSource: DataSource,
+    @InjectRepository(Teacher) private teacherRepository: Repository<Teacher>,
   ) {}
 
   async create({dni, email, isBoss, isCoordinator,video,...others}: CreateTeacherDto) {
@@ -47,7 +47,6 @@ export class TeacherService {
       const arrayDniEmployeeNumber = [...new Set(allUsersDni.concat(allTeacherDNIs))];
       const count = arrayDniEmployeeNumber.length || 0;
 
-      // let userTeacher = (userExists) ? userExists : await this.userRepository.create(
       let userTeacher = new User();
       if(!userExists){
         userTeacher = await this.userRepository.create(
@@ -103,8 +102,6 @@ export class TeacherService {
       newTeacher.user = userTeacher;
 
       await this.teacherRepository.save(newTeacher);
-
-      // await this.sendEmailService.sendCreationRegister(userTeacher,generatePassword,'admin');
 
       const returnUser = {...JSON.parse(JSON.stringify(newTeacher.user))};
       returnUser.teacher = {...JSON.parse(JSON.stringify(newTeacher))};
@@ -164,11 +161,12 @@ export class TeacherService {
     return allTeachers;
   }
 
+
   findOne(id: number) {
     return `This action returns a #${id} teacher`;
   }
 
-  // async update(id: string, { video, ...updateTeacher }: UpdateTeacherDto) {
+
   async update(id: string, {email, video, photoOne,description, ...updateTeacher}: UpdateTeacherDto) {
 
     try{
@@ -215,49 +213,19 @@ export class TeacherService {
      return this.printMessageError(error)
     }
 
-
-    // try {
-    //   const user = await this.userRepository
-    //     .createQueryBuilder('user')
-    //     .leftJoinAndSelect('user.teacher', 'teacher')
-    //     .where('user.dni = :id', { id })
-    //     .getOne();
-
-    //   if (video) {
-    //     const teacher = await this.teacherRepository.preload({
-    //       employeeNumber: JSON.parse(JSON.stringify(user.teacher))
-    //         .employeeNumber,
-    //       video,
-    //     });
-
-    //     if (!teacher) {
-    //       throw new NotFoundException('El Docente no se ha encontrado.');
-    //     }
-
-    //     await this.teacherRepository.save(teacher);
-    //   }
-
-    //   Object.assign(user, updateTeacher);
-
-    //   await this.userRepository.save(user);
-
-    //   return user;
-    // } catch (error) {
-    //   this.logger.error(error);
-    //   return error.response;
-    // }
-
-
   }
+
 
   remove(id: number) {
     return `This action removes a #${id} teacher`;
   }
 
+
   printMessageLog(message){
     this.logger.log(message);
     return message;
   }
+  
 
   printMessageError(message){
     if(message.response){
