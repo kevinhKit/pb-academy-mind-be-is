@@ -1,4 +1,4 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateTeacherDto } from './dto/create-teacher.dto';
 import { UpdateTeacherDto } from './dto/update-teacher.dto';
@@ -6,104 +6,195 @@ import { DataSource, Equal, Repository } from 'typeorm';
 import { Teacher } from './entities/teacher.entity';
 import { User } from 'src/user/entities/user.entity';
 import * as bcrypt from 'bcrypt';
-import { transporter } from 'src/utils/mailer';
+// import { transporter } from 'src/utils/mailer';
 import { HttpException, HttpStatus } from '@nestjs/common';
-import { error } from 'console';
+import { SendEmailService } from 'src/shared/send-email/send-email.service';
+import { EncryptPasswordService } from 'src/shared/encrypt-password/encrypt-password.service';
+import { GenerateEmployeeNumberService } from 'src/shared/generte-employee-number/generate-employee-number.service';
+import { GenerateEmailService } from 'src/shared/generate-email/generate-email.service';
+import { count } from 'console';
+import { LoginTeacherDto } from './dto/login-teacher.dto';
 
 @Injectable()
 export class TeacherService {
   private readonly logger = new Logger('teacherService');
 
+
+
   constructor(
+
+    private readonly sendEmailService: SendEmailService,
+    private readonly encryptService: EncryptPasswordService,
+    private readonly generateEmployeeNumberService: GenerateEmployeeNumberService,
+    private readonly generateEmailService: GenerateEmailService,
+
     @InjectRepository(User) private userRepository: Repository<User>,
     @InjectRepository(Teacher) private teacherRepository: Repository<Teacher>, // @InjectRepository(Teacher) // private readonly teacherRepository: Repository<Teacher>, // private readonly dataSource: DataSource,
   ) {}
 
-  async create(createTeacherDto: CreateTeacherDto) {
-    // const {
-    //   dni,
-    //   firstName,
-    //   secondName,
-    //   firstLastName,
-    //   secondLastName,
-    //   email,
-    //   address,
-    //   phone,
-    //   isBoss,
-    //   isCoordinator,
-    //   isTeacher,
-    //   video,
-    // } = createTeacherDto;
+  async create({dni, email, isBoss, isCoordinator,video,...others}: CreateTeacherDto) {
 
-    // const newPassword = Math.random().toString(36).substring(7);
-    // const salt = await bcrypt.genSalt(10);
-    // const password = await bcrypt.hash(newPassword, salt);
+    try{
 
-    // const user = this.userRepository.create({
-    //   dni: dni,
-    //   firstName: firstName,
-    //   secondName: secondName,
-    //   firstLastName: firstLastName,
-    //   secondLastName: secondLastName,
-    //   email: email,
-    //   password: password,
-    //   address: address,
-    //   phone: phone,
-    // });
-    // const count = await this.teacherRepository.count();
-    // let newEmployeeNumber = '';
-    // if (count <= 9) {
-    //   newEmployeeNumber = `000${count}`;
-    // } else if (count <= 99) {
-    //   newEmployeeNumber = `00${count}`;
-    // } else if (count <= 999) {
-    //   newEmployeeNumber = `0${count}`;
-    // } else {
-    //   newEmployeeNumber = `${count}`;
-    // }
-    // let newEmail = `${firstName.trim().toLowerCase()}.${firstLastName
-    //   .trim()
-    //   .toLowerCase()}@unah.edu.hn`;
-    // let emailExists = await this.teacherRepository.findOne({
-    //   where: { institutionalEmail: newEmail },
-    // });
+      const user = await this.userRepository.findOne({
+        where:{
+          dni:dni.replace('-','').replace('-','')
+        },
+        relations: ['teacher']
+      });
 
-    // while (emailExists) {
-    //   const randomString = Math.floor(Math.random() * 99) + 1; // Generar una cadena aleatoria
-    //   newEmail = `${firstName.trim().toLowerCase()}.${firstLastName
-    //     .trim()
-    //     .toLowerCase()}.${randomString}@unah.edu.hn`;
-    //   emailExists = await this.teacherRepository.findOne({
-    //     where: { institutionalEmail: newEmail },
-    //   });
-    // }
+      // console.log(`El usuario es: ${user}`);
 
-    // const newTeacher = new Teacher();
-    // newTeacher.employeeNumber = newEmployeeNumber;
-    // newTeacher.institutionalEmail = newEmail;
-    // newTeacher.isBoss = isBoss;
-    // newTeacher.isCoordinator = isCoordinator;
-    // newTeacher.isTeacher = isTeacher;
+      if( user && Boolean(user.teacher)){
+        throw new ConflictException('El usuario ya existe como docente.')
+      }
 
-    // newTeacher.user = user;
+      const Emailteacher = await this.teacherRepository.findOne({
+        where:{
+          email:email.toLowerCase()
+        }
+      });
 
-    // await this.userRepository.save(user);
-    // const savedTeacher = await this.teacherRepository.save(newTeacher);
 
-    // if (savedTeacher) {
-    //   const info = await transporter.sendMail({
-    //     from: '"¡Inicia sesión!" <eralejo2003@gmail.com>', // sender address
-    //     to: user.email as string, // list of receivers
-    //     subject: '¡Bienvenido a registro UNAH!', // Subject line
-    //     text: `Nombre: ${user.firstName} ${user.secondName} ${user.firstLastName} ${user.secondLastName}
-    //         \Número de empleado: ${newTeacher.employeeNumber}\nContraseña ${newPassword}\nCorreo institucional: ${newTeacher.institutionalEmail}`, // plain text body
-    //   });
-    // }
+      if(Emailteacher){
+        throw new ConflictException('El correo electrónico ya está siendo usado por otro usuario.')
+      }
 
-    // return {
-    //   teacher: newTeacher,
-    // };
+      // const count = await this.userRepository.count({
+      //   where: [
+      //     { employeeNumber: Not(IsNull()) },
+      //     { teacher: { employeeNumber: Not(IsNull()) } }
+      //   ]
+      // });
+
+      // const count = await this.userRepository.count({
+      //   where: [
+      //     { employeeNumber: Not(IsNull()) },
+      //     { teacher: { employeeNumber: Not(IsNull()) } }
+      //   ]
+      // });
+
+  
+
+    
+
+
+      
+      
+      const usersWithEmployeeNumber = await this.userRepository
+        .createQueryBuilder('user')
+        .select('user.dni')
+        .where('user.employeeNumber IS NOT NULL')
+        .getMany();
+
+      const teachers4 = await this.teacherRepository
+        .find({ relations: ['user'] });
+  
+      const teacherDNIs = teachers4.map((teacher) => teacher.user.dni);
+
+      const usersDni = usersWithEmployeeNumber.map(user => user.dni);
+  
+      const array = [...new Set(usersDni.concat(teacherDNIs))]
+
+      const count = array.length || 0;
+      
+
+      // console.log(count)
+      // console.log(`conteo:  ${count1}`)
+
+
+      let userTeacher = new User();
+      if(!user){
+        userTeacher = await this.userRepository.create(
+          {
+            dni:dni.replace('-','').replace('-',''),
+            ...others,
+            // email: email.toLowerCase(),
+  
+          }
+        );
+      } else {
+        userTeacher = user;
+      }
+
+      const generatePassword = await this.encryptService.generatePassword()
+      const encripPassword = await this.encryptService.encodePassword(generatePassword)
+
+
+      const newTeacher = await this.teacherRepository.create({
+        employeeNumber: await this.generateEmployeeNumberService.generate(Number(count)),
+        institutionalEmail : await this.generateEmailService.generate(
+          others.firstName,
+          others.secondName,
+          others.firstLastName,
+          others.secondLastName,
+          this.teacherRepository,
+          '@unah.edu.hn'  
+        ),
+        email: email.toLowerCase(),
+        password: encripPassword,
+        isBoss: isBoss || false,
+        isCoordinator: isCoordinator || false
+      })
+
+      if(!newTeacher){
+        throw new BadRequestException('No se ha podido crear al docente');
+      }
+
+      await this.userRepository.save(userTeacher);
+
+      newTeacher.user = userTeacher;
+
+      await this.teacherRepository.save(newTeacher);
+
+      const returnUser = {...JSON.parse(JSON.stringify(newTeacher.user))};
+      returnUser.teacher = {...JSON.parse(JSON.stringify(newTeacher))};
+      delete returnUser.teacher.user;
+      await this.sendEmailService.sendCreationRegister(returnUser,generatePassword,'teacher')
+
+
+      return {
+        statusCode: 200,
+        message: this.printMessageLog('El docente se ha creado exitosamente'),
+        user: returnUser
+      }
+
+    } catch(error){
+      // console.log(error)
+      return this.printMessageError(error);
+    }
   }
+
+
+  async login({ employeeNumber, email, password }: LoginTeacherDto) {
+    try {
+      const user = await this.teacherRepository.findOne({
+        where: {
+          employeeNumber
+        },
+      });
+
+      if (!user) {
+        throw new BadRequestException('El Docente no existe.');
+      }
+
+      const ispassword = await this.encryptService.decodePassword(password, user.password)
+      if(!ispassword){
+        throw new UnauthorizedException('Contraseña invalida.');
+      }
+      
+
+      return {
+        authenticated: true,
+        user,
+        statusCode: 200
+      };
+    } catch (error) {
+      return this.printMessageError(error)
+    }
+  }
+
+
 
   findAll() {
     const allTeachers = this.teacherRepository.find({ relations: ['user'] });
@@ -115,7 +206,82 @@ export class TeacherService {
   }
 
   // async update(id: string, { video, ...updateTeacher }: UpdateTeacherDto) {
-  async update(id: string, updateTeacher: UpdateTeacherDto) {
+  async update(id: string, {email, video, photoOne,description, ...updateTeacher}: UpdateTeacherDto) {
+
+    try{
+
+      // const usersWithEmployeeNumber = await this.userRepository
+      //   .createQueryBuilder('user')
+      //   .select('user.dni')
+      //   .where('user.employeeNumber IS NOT NULL')
+      //   .getMany();
+
+      // const teachers4 = await this.teacherRepository
+      //   .find({ relations: ['user'] });
+  
+      // const teacherDNIs = teachers4.map((teacher) => teacher.user.dni);
+
+      // const usersDni = usersWithEmployeeNumber.map(user => user.dni);
+  
+      // const array = [...new Set(usersDni.concat(teacherDNIs))]
+
+      // const count = array.length;
+
+      // console.log(count)
+
+      const teacher = await this.teacherRepository.findOne({
+        relations: ['user'],
+        where: {
+          user: {
+            dni: id.replace('-','').replace('-','')
+          },
+        },
+      });
+
+      // console.log(teacher)
+      // console.log(teacher.user)
+
+      if(!teacher){
+       throw new NotFoundException('El Docente no se ha encontrado.');
+      }
+
+      const updateChangeTeacher = await this.teacherRepository.preload({
+        employeeNumber: teacher.employeeNumber,
+        video,
+        photoOne,
+        description,
+        email: email.toLowerCase()
+      });
+
+      const updateUser = await this.userRepository.preload({
+        dni: id.replaceAll('-',''),
+        ...updateTeacher
+      });
+
+      
+
+      // console.log('#############')
+      // console.log(teacher)
+
+      const saveTeacher = await this.teacherRepository.save(updateChangeTeacher)
+      const saveUser = await this.userRepository.save(updateUser)
+      
+
+      const returnTeacher = JSON.parse(JSON.stringify(saveUser));
+      returnTeacher.teacher = JSON.parse(JSON.stringify(saveTeacher));
+      delete returnTeacher.teacher.user;
+
+      return {
+        statusCode: 200,
+        user:returnTeacher,
+        message: this.printMessageLog("El Usuario se ha Actualizado Exitosamente")
+      }
+    }
+    catch (error){
+     return this.printMessageError(error)
+    }
+
+
     // try {
     //   const user = await this.userRepository
     //     .createQueryBuilder('user')
@@ -152,5 +318,27 @@ export class TeacherService {
 
   remove(id: number) {
     return `This action removes a #${id} teacher`;
+  }
+
+  printMessageLog(message){
+    this.logger.log(message);
+    return message;
+  }
+
+  printMessageError(message){
+    // console.log(message)
+    if(message.response){
+
+      if(message.response.message){
+        this.logger.error(message.response.message);
+        return message.response;
+      }
+
+      this.logger.error(message.response);
+      return message.response;
+    }
+
+    this.logger.error(message);
+    return message;
   }
 }

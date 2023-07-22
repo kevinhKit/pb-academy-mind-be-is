@@ -25,16 +25,19 @@ export class Teacher {
 
   @Column('text', {
     nullable: true,
+    default: null
   })
   video: string;
 
   @Column('text', {
     nullable: true,
+    default: null
   })
   photoOne: string;
 
   @Column('text', {
     nullable: true,
+    default: null
   })
   description: string;
 
@@ -57,7 +60,8 @@ export class Teacher {
 
   @Column({
     type: 'boolean',
-    default: false })
+    default: false
+  })
   isCoordinator: boolean;
 
   @OneToOne(() => User, (user) => user.teacher)

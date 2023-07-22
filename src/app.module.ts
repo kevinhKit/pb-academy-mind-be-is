@@ -10,6 +10,7 @@ import { RoleModule } from './role/role.module';
 import { AuthModule } from './auth/auth.module';
 import { CareerModule } from './career/career.module';
 import { SharedModule } from './shared/shared.module';
+import { SendEmailService } from './shared/send-email/send-email.service';
 
 @Module({
   imports: [

@@ -11,16 +11,13 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
-import * as bcrypt from 'bcrypt';
-import { HttpException, HttpStatus } from '@nestjs/common';
-import { createECDH } from 'crypto';
-import { response } from 'express';
 import { LoginUserDto } from './dto/login-user.dto';
-import { transporter } from 'src/utils/mailer';
+// import { transporter } from 'src/utils/mailer';
 import { SendEmailService } from 'src/shared/send-email/send-email.service';
 import { EncryptPasswordService } from 'src/shared/encrypt-password/encrypt-password.service';
-import { GenerteEmployeeNumberService } from 'src/shared/generte-employee-number/generte-employee-number.service';
+import { GenerateEmployeeNumberService } from 'src/shared/generte-employee-number/generate-employee-number.service';
 import { GenerateEmailService } from 'src/shared/generate-email/generate-email.service';
+import { Teacher } from 'src/teacher/entities/teacher.entity';
 
 @Injectable()
 export class UserService {
@@ -31,9 +28,10 @@ export class UserService {
 
     private readonly sendEmailService: SendEmailService,
     private readonly encryptService: EncryptPasswordService,
-    private readonly generteEmployeeNumberService: GenerteEmployeeNumberService,
+    private readonly generateEmployeeNumberService: GenerateEmployeeNumberService,
     private readonly generateEmailService: GenerateEmailService,
     @InjectRepository(User) private userRepository: Repository<User>,
+    @InjectRepository(Teacher) private teacherRepository: Repository<Teacher>,
 
 
   ) {}
@@ -41,22 +39,27 @@ export class UserService {
   async create({dni, email, ...others}: CreateUserDto) {
     try {
       const userExists = await this.userRepository.findOne({
-        where:{
-          dni: dni.replace('-','').replace('-',''),
-          email
-        }
+        where:{dni: dni.replace('-','').replace('-','')},
+        relations:['teacher','student'],
       });
-      const emailExists = await this.userRepository.findOne({
-        where:{
-          email
-        }
-      })
 
-      if(emailExists){
-        throw new ConflictException('El correo electrónico ya esta siendo usado por otro Usuario');
-      }
+      const allTeacher = await this.teacherRepository.find({ relations: ['user'] });
+      const usersWithEmployeeNumber = await this.userRepository
+        .createQueryBuilder('user').select('user.dni')
+        .where('user.employeeNumber IS NOT NULL').getMany();
 
-      const count = await this.userRepository.count() || 0;
+      const allTeacherDNIs = allTeacher.map((teacher) => teacher.user.dni);
+      const allUsersDni = usersWithEmployeeNumber.map(user => user.dni);
+
+      const arrayDniEmployeeNumber = [...new Set(allUsersDni.concat(allTeacherDNIs))]
+      const count = arrayDniEmployeeNumber.length || 0;
+
+      console.log(userExists)
+      console.log('@@@@@@@@@@@@@@@@@')
+      console.log(`${Boolean(userExists.teacher)} : docente`)
+      console.log(`${Boolean(userExists.student)} : estudiante`)
+      console.log(`${Boolean(null)} : nullo`)
+      console.log(`${Boolean(undefined)} : undefined`)
 
       if(!userExists){
         const generatePassword = await this.encryptService.generatePassword()
@@ -68,22 +71,11 @@ export class UserService {
           isAdmin: true,
           ...others,
           password: encripPassword,
-          employeeNumber: await this.generteEmployeeNumberService.generate(Number(count+1))
+          employeeNumber: await this.generateEmployeeNumberService.generate(Number(count))
         }))
        
         await this.userRepository.save(user);
-
-        // console.log( await this.generateEmailService.generate(
-        //   JSON.parse(JSON.stringify(user)).firstName,
-        //   JSON.parse(JSON.stringify(user)).secondName,
-        //   JSON.parse(JSON.stringify(user)).firstLastName,
-        //   JSON.parse(JSON.stringify(user)).secondLastName,
-        //   this.userRepository,
-        //   '@unah.hn'  
-        // ))
-
-        await this.sendEmailService.sendCreationRegister(user,generatePassword,'hola')
-
+        await this.sendEmailService.sendCreationRegister(user,generatePassword,'admin')
 
         return {
           statusCode: 200,
@@ -92,15 +84,46 @@ export class UserService {
         }
       }
 
+
+      // if( Boolean(userExists) && Boolean(userExists.employeeNumber) === true && userExists.isAdmin == true){
+      if( Boolean(userExists)  && userExists.isAdmin == true){
+        throw new BadRequestException('El usuario ya es un Administrador');
+      }
+
+      const emailExists = await this.userRepository.findOne({
+        where:{
+          email
+        }
+      })
+
+      if(emailExists){
+        throw new ConflictException('El Correo Electrónico ya esta siendo usado por otro Usuario');
+      }
+
+      const teacherExist = this.teacherRepository.findOne({
+        where:{
+          user:{
+            dni: dni.replace('-','').replace('-',''),
+          }
+        }
+      });
+      
+      // console.log(count)
+      // #########################
+      // console.log(count)
+
+
+
       const generatePassword = await this.encryptService.generatePassword()
       const encripPassword = await this.encryptService.encodePassword(generatePassword)
 
       userExists.isAdmin = true;
+      userExists.email = email;
       userExists.password = encripPassword;
       if(userExists.employeeNumber === null){
-        userExists.employeeNumber = await this.generteEmployeeNumberService.generate(Number(count+1));
+        userExists.employeeNumber = (teacherExist) ? (await teacherExist).employeeNumber: await this.generateEmployeeNumberService.generate(Number(count));
       }
-      await this.sendEmailService.sendCreationRegister(userExists,generatePassword,'d')
+      await this.sendEmailService.sendCreationRegister(userExists,generatePassword,'admin')
       // console.log( await this.generateEmailService.generate(
       //   userExists.firstName,
       //   userExists.secondName,
@@ -118,10 +141,14 @@ export class UserService {
         message: this.printMessageLog("Usuario Actualizado Exitosamente")
       }
     } catch (error) {
-      return this.printMessageError(error.response)
+      // console.log(error)
+      return this.printMessageError(error)
     }
-    // console.log(this.generteEmployeeNumberService.generate(1))
+    // console.log(this.generateEmployeeNumberService.generate(1))
   }
+
+
+  
 
   async login({ employeeNumber, email, password }: LoginUserDto) {
     try {
@@ -149,7 +176,7 @@ export class UserService {
         statusCode: 200
       };
     } catch (error) {
-      return this.printMessageError(error.response)
+      return this.printMessageError(error)
     }
   }
 
@@ -173,7 +200,7 @@ export class UserService {
       }
     }
     catch (error){
-      return this.printMessageError(error.response)
+      return this.printMessageError(error)
     }
   }
 
@@ -197,12 +224,25 @@ export class UserService {
 
 
   printMessageLog(message){
+    
     this.logger.log(message);
     return message;
   }
 
   printMessageError(message){
-    this.logger.error(message.message);
+
+    if(message.response){
+
+      if(message.response.message){
+        this.logger.error(message.response.message);
+        return message.response;
+      }
+
+      this.logger.error(message.response);
+      return message.response;
+    }
+
+    this.logger.error(message);
     return message;
   }
 

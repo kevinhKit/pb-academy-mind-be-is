@@ -17,20 +17,25 @@ export class User {
 
   @Column('text',{
     unique: true,
+    nullable:true,
     default: null
   })
   email: string;
 
   @Column('text',{
     unique: true,
-    nullable: true
+    nullable: true,
+    default: null
   })
   employeeNumber: string;
 
   @Column('text')
   firstName: string;
 
-  @Column('text')
+  @Column('text',{
+    nullable: true,
+    default:''
+  })
   secondName: string;
 
   @Column('text')
@@ -39,21 +44,27 @@ export class User {
   @Column('text')
   secondLastName: string;
 
-  @Column('text')
+  @Column('text',{
+    nullable: true,
+    default: null
+  })
   password: string;
 
   @Column('text', {
     nullable: true,
+    default: null
   })
   address: string;
 
   @Column('text', {
     nullable: true,
+    default: null
   })
   phone: string;
 
   @Column('text', {
     nullable: true,
+    default: null
   })
   description: string;
 
@@ -75,7 +86,7 @@ export class User {
   @Column({
     type: 'boolean',
     nullable: true,
-    default: false
+    default: null
   })
   isAdmin: boolean;
 
@@ -88,8 +99,8 @@ export class User {
     type: 'boolean',
     default: true
   })
-  status: boolean
-
+  status: boolean;
+  
   @OneToOne(() => Student, (student) => student.user)
   student: string;
 

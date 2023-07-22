@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
-export class GenerteEmployeeNumberService {
+export class GenerateEmployeeNumberService {
 
     private readonly amountNumbers = 5;
 

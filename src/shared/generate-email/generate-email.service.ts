@@ -4,15 +4,13 @@ import { Injectable } from '@nestjs/common';
 export class GenerateEmailService {
 
     async generate(nombre1, nombre2, apellido1, apellido2, repository, dominio = '@unah.hn') {
-        nombre1 = this.removeAccents(nombre1.toLowerCase());
-        nombre2 = this.removeAccents(nombre2.toLowerCase());
-        apellido1 = this.removeAccents(apellido1.toLowerCase());
-        apellido2 = this.removeAccents(apellido2.toLowerCase());
+        nombre1 = this.removeAccents(nombre1.trim().toLowerCase());
+        nombre2 = this.removeAccents(nombre2.trim().toLowerCase());
+        apellido1 = this.removeAccents(apellido1.trim().toLowerCase());
+        apellido2 = this.removeAccents(apellido2.trim().toLowerCase());
         // apellido2 = this.removeAccents(apellido2.toLowerCase()) || "";
         let emailCreate = `${nombre1}.${apellido1}${dominio}`;
         if ( await this.mailAvailable(emailCreate, repository)) {
-          console.log(  await this.mailAvailable(emailCreate, repository))
-          console.log(1)
           return emailCreate;
         }
 
@@ -137,9 +135,10 @@ export class GenerateEmailService {
     }
       
     async mailAvailable(emailCreate, repository) {
+
       return (await repository.findOne({
         where:{
-          email: emailCreate
+          institutionalEmail: emailCreate
         }
       })) ? false : true
     }
