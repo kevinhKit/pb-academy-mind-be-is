@@ -10,9 +10,8 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
-import { Repository } from 'typeorm';
+import { Not, Repository } from 'typeorm';
 import { LoginUserDto } from './dto/login-user.dto';
-// import { transporter } from 'src/utils/mailer';
 import { SendEmailService } from 'src/shared/send-email/send-email.service';
 import { EncryptPasswordService } from 'src/shared/encrypt-password/encrypt-password.service';
 import { GenerateEmployeeNumberService } from 'src/shared/generte-employee-number/generate-employee-number.service';
@@ -39,7 +38,7 @@ export class UserService {
   async create({dni, email, ...others}: CreateUserDto) {
     try {
       const userExists = await this.userRepository.findOne({
-        where:{dni: dni.replace('-','').replace('-','')},
+        where:{dni: dni.replaceAll('-','')},
         relations:['teacher','student'],
       });
 
@@ -51,31 +50,24 @@ export class UserService {
       const allTeacherDNIs = allTeacher.map((teacher) => teacher.user.dni);
       const allUsersDni = usersWithEmployeeNumber.map(user => user.dni);
 
-      const arrayDniEmployeeNumber = [...new Set(allUsersDni.concat(allTeacherDNIs))]
+      const arrayDniEmployeeNumber = [...new Set(allUsersDni.concat(allTeacherDNIs))];
       const count = arrayDniEmployeeNumber.length || 0;
 
-      console.log(userExists)
-      console.log('@@@@@@@@@@@@@@@@@')
-      console.log(`${Boolean(userExists.teacher)} : docente`)
-      console.log(`${Boolean(userExists.student)} : estudiante`)
-      console.log(`${Boolean(null)} : nullo`)
-      console.log(`${Boolean(undefined)} : undefined`)
-
       if(!userExists){
-        const generatePassword = await this.encryptService.generatePassword()
-        const encripPassword = await this.encryptService.encodePassword(generatePassword)
+        const generatePassword = await this.encryptService.generatePassword();
+        const encripPassword = await this.encryptService.encodePassword(generatePassword);
         const user = {}
         Object.assign( user, await this.userRepository.create({
-          dni:dni.replace('-','').replace('-',''),
+          dni:dni.replaceAll('-',''),
           email: email.toLowerCase(),
           isAdmin: true,
           ...others,
           password: encripPassword,
           employeeNumber: await this.generateEmployeeNumberService.generate(Number(count))
-        }))
+        }));
        
         await this.userRepository.save(user);
-        await this.sendEmailService.sendCreationRegister(user,generatePassword,'admin')
+        await this.sendEmailService.sendCreationRegister(user,generatePassword,'admin');
 
         return {
           statusCode: 200,
@@ -84,56 +76,41 @@ export class UserService {
         }
       }
 
-
-      // if( Boolean(userExists) && Boolean(userExists.employeeNumber) === true && userExists.isAdmin == true){
-      if( Boolean(userExists)  && userExists.isAdmin == true){
+      if(userExists.isAdmin == true){
         throw new BadRequestException('El usuario ya es un Administrador');
       }
 
-      const emailExists = await this.userRepository.findOne({
-        where:{
-          email
-        }
-      })
+      // const emailExists = await this.userRepository.findOne({where:{email}});
+      const emailExists = await this.userRepository.findOne(
+        {
+          where:{
+            email:email.toLowerCase(),
+            dni:Not(dni.replaceAll('-',''))
+          }
+      });
+
+      // console.log(emailExists);
 
       if(emailExists){
         throw new ConflictException('El Correo Electrónico ya esta siendo usado por otro Usuario');
       }
-
-      const teacherExist = this.teacherRepository.findOne({
-        where:{
-          user:{
-            dni: dni.replace('-','').replace('-',''),
-          }
-        }
-      });
       
-      // console.log(count)
-      // #########################
-      // console.log(count)
 
-
-
-      const generatePassword = await this.encryptService.generatePassword()
-      const encripPassword = await this.encryptService.encodePassword(generatePassword)
-
+      const generatePassword = await this.encryptService.generatePassword();
+      const encripPassword = await this.encryptService.encodePassword(generatePassword);
       userExists.isAdmin = true;
       userExists.email = email;
       userExists.password = encripPassword;
+
+
       if(userExists.employeeNumber === null){
-        userExists.employeeNumber = (teacherExist) ? (await teacherExist).employeeNumber: await this.generateEmployeeNumberService.generate(Number(count));
+        userExists.employeeNumber = (userExists.teacher) ? JSON.parse(JSON.stringify(userExists.teacher)).employeeNumber: await this.generateEmployeeNumberService.generate(Number(count));
       }
-      await this.sendEmailService.sendCreationRegister(userExists,generatePassword,'admin')
-      // console.log( await this.generateEmailService.generate(
-      //   userExists.firstName,
-      //   userExists.secondName,
-      //   userExists.firstLastName,
-      //   userExists.secondLastName,
-      //   this.userRepository,
-      //   '@unah.hn'  
-      // ))
 
       await this.userRepository.save(userExists);
+
+      await this.sendEmailService.sendCreationRegister(userExists,generatePassword,'admin');
+
 
       return {
         statusCode: 200,
@@ -141,10 +118,9 @@ export class UserService {
         message: this.printMessageLog("Usuario Actualizado Exitosamente")
       }
     } catch (error) {
-      // console.log(error)
-      return this.printMessageError(error)
+    
+      return this.printMessageError(error);
     }
-    // console.log(this.generateEmployeeNumberService.generate(1))
   }
 
 
@@ -160,10 +136,9 @@ export class UserService {
       });
 
       if (!user) {
-        throw new BadRequestException('El usuario no existe.');
+        throw new BadRequestException('El Usuario no existe.');
       }
 
-      // if (!bcrypt.compareSync(password, user.password)) {throw new UnauthorizedException('Contraseña invalida.');}
       const ispassword = await this.encryptService.decodePassword(password, user.password)
       if(!ispassword){
         throw new UnauthorizedException('Contraseña invalida.');
@@ -183,7 +158,7 @@ export class UserService {
   async update(id: string, updateUserDto: UpdateUserDto) {
     try{
       const user = await this.userRepository.preload({
-        dni:id,
+        dni:id.replaceAll('-',''),
         ...updateUserDto
       })
 

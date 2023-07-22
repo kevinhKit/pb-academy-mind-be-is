@@ -2,24 +2,18 @@ import { BadRequestException, ConflictException, Injectable, Logger, NotFoundExc
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateTeacherDto } from './dto/create-teacher.dto';
 import { UpdateTeacherDto } from './dto/update-teacher.dto';
-import { DataSource, Equal, Repository } from 'typeorm';
+import { Not, Repository } from 'typeorm';
 import { Teacher } from './entities/teacher.entity';
 import { User } from 'src/user/entities/user.entity';
-import * as bcrypt from 'bcrypt';
-// import { transporter } from 'src/utils/mailer';
-import { HttpException, HttpStatus } from '@nestjs/common';
 import { SendEmailService } from 'src/shared/send-email/send-email.service';
 import { EncryptPasswordService } from 'src/shared/encrypt-password/encrypt-password.service';
 import { GenerateEmployeeNumberService } from 'src/shared/generte-employee-number/generate-employee-number.service';
 import { GenerateEmailService } from 'src/shared/generate-email/generate-email.service';
-import { count } from 'console';
 import { LoginTeacherDto } from './dto/login-teacher.dto';
 
 @Injectable()
 export class TeacherService {
   private readonly logger = new Logger('teacherService');
-
-
 
   constructor(
 
@@ -36,93 +30,59 @@ export class TeacherService {
 
     try{
 
-      const user = await this.userRepository.findOne({
-        where:{
-          dni:dni.replace('-','').replace('-','')
-        },
-        relations: ['teacher']
+      const userExists = await this.userRepository.findOne({
+        where:{dni: dni.replace('-','').replace('-','')},
+        relations:['teacher','student'],
       });
 
-      // console.log(`El usuario es: ${user}`);
+      const allTeacher = await this.teacherRepository.find({ relations: ['user'] });
+      const usersWithEmployeeNumber = await this.userRepository
+        .createQueryBuilder('user').select('user.dni')
+        .where('user.employeeNumber IS NOT NULL').getMany();
 
-      if( user && Boolean(user.teacher)){
+      const allTeacherDNIs = allTeacher.map((teacher) => teacher.user.dni);
+      const allUsersDni = usersWithEmployeeNumber.map(user => user.dni);
+
+      const arrayDniEmployeeNumber = [...new Set(allUsersDni.concat(allTeacherDNIs))];
+      const count = arrayDniEmployeeNumber.length || 0;
+
+      // let userTeacher = (userExists) ? userExists : await this.userRepository.create(
+      let userTeacher = new User();
+      if(!userExists){
+        userTeacher = await this.userRepository.create(
+          {dni:dni.replaceAll('-',''),
+          ...others}
+        );
+      } else {
+        userTeacher = userExists;
+      }
+
+      console.log(userTeacher)
+
+      if(Boolean(userTeacher.teacher)){
         throw new ConflictException('El usuario ya existe como docente.')
       }
 
       const Emailteacher = await this.teacherRepository.findOne({
         where:{
-          email:email.toLowerCase()
+          email:email.toLowerCase(),
+          user:{
+            dni:Not(dni.replaceAll('-',''))
+          }
         }
       });
-
+      console.log(`Correo enviado: ${email}`)
+      console.log(`registro guardado: ${Emailteacher}`)
 
       if(Emailteacher){
-        throw new ConflictException('El correo electrónico ya está siendo usado por otro usuario.')
-      }
-
-      // const count = await this.userRepository.count({
-      //   where: [
-      //     { employeeNumber: Not(IsNull()) },
-      //     { teacher: { employeeNumber: Not(IsNull()) } }
-      //   ]
-      // });
-
-      // const count = await this.userRepository.count({
-      //   where: [
-      //     { employeeNumber: Not(IsNull()) },
-      //     { teacher: { employeeNumber: Not(IsNull()) } }
-      //   ]
-      // });
-
-  
-
-    
-
-
-      
-      
-      const usersWithEmployeeNumber = await this.userRepository
-        .createQueryBuilder('user')
-        .select('user.dni')
-        .where('user.employeeNumber IS NOT NULL')
-        .getMany();
-
-      const teachers4 = await this.teacherRepository
-        .find({ relations: ['user'] });
-  
-      const teacherDNIs = teachers4.map((teacher) => teacher.user.dni);
-
-      const usersDni = usersWithEmployeeNumber.map(user => user.dni);
-  
-      const array = [...new Set(usersDni.concat(teacherDNIs))]
-
-      const count = array.length || 0;
-      
-
-      // console.log(count)
-      // console.log(`conteo:  ${count1}`)
-
-
-      let userTeacher = new User();
-      if(!user){
-        userTeacher = await this.userRepository.create(
-          {
-            dni:dni.replace('-','').replace('-',''),
-            ...others,
-            // email: email.toLowerCase(),
-  
-          }
-        );
-      } else {
-        userTeacher = user;
+        throw new ConflictException('El Correo electrónico ya está siendo usado por otro Docente.')
       }
 
       const generatePassword = await this.encryptService.generatePassword()
       const encripPassword = await this.encryptService.encodePassword(generatePassword)
 
-
       const newTeacher = await this.teacherRepository.create({
-        employeeNumber: await this.generateEmployeeNumberService.generate(Number(count)),
+        employeeNumber: (userTeacher.employeeNumber)? userTeacher.employeeNumber : await this.generateEmployeeNumberService.generate(Number(count)),
         institutionalEmail : await this.generateEmailService.generate(
           others.firstName,
           others.secondName,
@@ -135,7 +95,7 @@ export class TeacherService {
         password: encripPassword,
         isBoss: isBoss || false,
         isCoordinator: isCoordinator || false
-      })
+      });
 
       if(!newTeacher){
         throw new BadRequestException('No se ha podido crear al docente');
@@ -147,11 +107,12 @@ export class TeacherService {
 
       await this.teacherRepository.save(newTeacher);
 
+      // await this.sendEmailService.sendCreationRegister(userTeacher,generatePassword,'admin');
+
       const returnUser = {...JSON.parse(JSON.stringify(newTeacher.user))};
       returnUser.teacher = {...JSON.parse(JSON.stringify(newTeacher))};
       delete returnUser.teacher.user;
       await this.sendEmailService.sendCreationRegister(returnUser,generatePassword,'teacher')
-
 
       return {
         statusCode: 200,
@@ -160,7 +121,7 @@ export class TeacherService {
       }
 
     } catch(error){
-      // console.log(error)
+      console.log(error)
       return this.printMessageError(error);
     }
   }
@@ -175,7 +136,7 @@ export class TeacherService {
       });
 
       if (!user) {
-        throw new BadRequestException('El Docente no existe.');
+        throw new BadRequestException('El Usuario no existe.');
       }
 
       const ispassword = await this.encryptService.decodePassword(password, user.password)
