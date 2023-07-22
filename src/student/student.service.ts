@@ -2,19 +2,14 @@ import { BadRequestException, ConflictException, Injectable, Logger, NotFoundExc
 import { CreateStudentDto } from './dto/create-student.dto';
 import { UpdateStudentDto } from './dto/update-student.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Equal, Not, Repository } from 'typeorm';
+import { Not, Repository } from 'typeorm';
 import { User } from 'src/user/entities/user.entity';
 import { Student } from './entities/student.entity';
-import * as bcrypt from 'bcrypt';
-import { transporter } from 'src/utils/mailer';
-import { HttpException, HttpStatus } from '@nestjs/common';
-import { UpdateStudentPasswordDto } from './dto/update-student-password.dto';
 import { SendEmailService } from 'src/shared/send-email/send-email.service';
 import { EncryptPasswordService } from 'src/shared/encrypt-password/encrypt-password.service';
 import { GenerateEmployeeNumberService } from 'src/shared/generte-employee-number/generate-employee-number.service';
 import { GenerateEmailService } from 'src/shared/generate-email/generate-email.service';
 import { AccountNumberService } from 'src/shared/account-number/account-number.service';
-import { max } from 'class-validator';
 import { LoginStudentDto } from './dto/login-student.dto';
 import { ResetPasswordStudentDto } from './dto/reset-password-student.dto';
 
@@ -26,7 +21,7 @@ export class StudentService {
   constructor(
     private readonly sendEmailService: SendEmailService,
     private readonly encryptService: EncryptPasswordService,
-    private readonly generateEmployeeNumberService: GenerateEmployeeNumberService,
+    // private readonly generateEmployeeNumberService: GenerateEmployeeNumberService,
     private readonly accountNumberService: AccountNumberService,
     private readonly generateEmailService: GenerateEmailService,
 
@@ -164,7 +159,27 @@ export class StudentService {
   }
 
 
+
+
   async createMultiple(createStudentDto: CreateStudentDto[]) {
+
+    const response = []
+
+    for (const [, createStudent] of createStudentDto.entries()) {
+
+      let student = await this.create(createStudent);
+
+      response.push({
+        message:student.message,
+        student:createStudent.dni,
+        success:(student.statusCode == 200) ? true : false
+      });
+
+    }
+
+    return response;
+    
+  
     // const newUsers = [];
     // const newStudents = [];
     // const newMails = [];
