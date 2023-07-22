@@ -11,6 +11,7 @@ import { TeacherService } from './teacher.service';
 import { CreateTeacherDto } from './dto/create-teacher.dto';
 import { UpdateTeacherDto } from './dto/update-teacher.dto';
 import { LoginTeacherDto } from './dto/login-teacher.dto';
+import { ResetPasswordTeacherDto } from './dto/reset-password-teacher.dto';
 
 @Controller('teacher')
 export class TeacherController {
@@ -24,6 +25,11 @@ export class TeacherController {
   @Post('login')
   login(@Body() loginTeacherDto: LoginTeacherDto) {
     return this.teacherService.login(loginTeacherDto);
+  }
+
+  @Post('reset-password')
+  resetPassword(@Body() resetPasswordTeacherDto: ResetPasswordTeacherDto) {
+    return this.teacherService.resetPassword(resetPasswordTeacherDto);
   }
 
   @Get()

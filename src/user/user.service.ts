@@ -17,6 +17,7 @@ import { EncryptPasswordService } from 'src/shared/encrypt-password/encrypt-pass
 import { GenerateEmployeeNumberService } from 'src/shared/generte-employee-number/generate-employee-number.service';
 import { GenerateEmailService } from 'src/shared/generate-email/generate-email.service';
 import { Teacher } from 'src/teacher/entities/teacher.entity';
+import { ResetPasswordUserDto } from './dto/reset-password-user.dto';
 
 @Injectable()
 export class UserService {
@@ -130,9 +131,8 @@ export class UserService {
     try {
       const user = await this.userRepository.findOne({
         where: {
-          // email: await email.toLowerCase(),
           employeeNumber
-        },
+        }
       });
 
       if (!user) {
@@ -144,6 +144,7 @@ export class UserService {
         throw new UnauthorizedException('Contraseña invalida.');
       }
       
+      delete user.password;
 
       return {
         authenticated: true,
@@ -219,6 +220,10 @@ export class UserService {
 
     this.logger.error(message);
     return message;
+  }
+
+  async resetPassword(resetPasswordUserDto: ResetPasswordUserDto){
+
   }
 
 }

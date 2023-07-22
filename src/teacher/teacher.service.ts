@@ -10,10 +10,11 @@ import { EncryptPasswordService } from 'src/shared/encrypt-password/encrypt-pass
 import { GenerateEmployeeNumberService } from 'src/shared/generte-employee-number/generate-employee-number.service';
 import { GenerateEmailService } from 'src/shared/generate-email/generate-email.service';
 import { LoginTeacherDto } from './dto/login-teacher.dto';
+import { ResetPasswordTeacherDto } from './dto/reset-password-teacher.dto';
 
 @Injectable()
 export class TeacherService {
-  private readonly logger = new Logger('teacherService');
+  private readonly logger = new Logger('teacherLogger');
 
   constructor(
 
@@ -31,7 +32,7 @@ export class TeacherService {
     try{
 
       const userExists = await this.userRepository.findOne({
-        where:{dni: dni.replace('-','').replace('-','')},
+        where:{dni: dni.replaceAll('-','')},
         relations:['teacher','student'],
       });
 
@@ -57,8 +58,6 @@ export class TeacherService {
         userTeacher = userExists;
       }
 
-      console.log(userTeacher)
-
       if(Boolean(userTeacher.teacher)){
         throw new ConflictException('El usuario ya existe como docente.')
       }
@@ -71,8 +70,6 @@ export class TeacherService {
           }
         }
       });
-      console.log(`Correo enviado: ${email}`)
-      console.log(`registro guardado: ${Emailteacher}`)
 
       if(Emailteacher){
         throw new ConflictException('El Correo electrónico ya está siendo usado por otro Docente.')
@@ -121,7 +118,6 @@ export class TeacherService {
       }
 
     } catch(error){
-      console.log(error)
       return this.printMessageError(error);
     }
   }
@@ -133,6 +129,7 @@ export class TeacherService {
         where: {
           employeeNumber
         },
+        relations:['user']
       });
 
       if (!user) {
@@ -143,11 +140,16 @@ export class TeacherService {
       if(!ispassword){
         throw new UnauthorizedException('Contraseña invalida.');
       }
-      
 
+      let returnUser = {...JSON.parse(JSON.stringify(user.user))};
+      returnUser.teacher = JSON.parse(JSON.stringify(user));
+      delete returnUser.teacher.user;
+      delete returnUser.teacher.password;
+      delete returnUser.password;
+      
       return {
         authenticated: true,
-        user,
+        user:returnUser,
         statusCode: 200
       };
     } catch (error) {
@@ -170,37 +172,14 @@ export class TeacherService {
   async update(id: string, {email, video, photoOne,description, ...updateTeacher}: UpdateTeacherDto) {
 
     try{
-
-      // const usersWithEmployeeNumber = await this.userRepository
-      //   .createQueryBuilder('user')
-      //   .select('user.dni')
-      //   .where('user.employeeNumber IS NOT NULL')
-      //   .getMany();
-
-      // const teachers4 = await this.teacherRepository
-      //   .find({ relations: ['user'] });
-  
-      // const teacherDNIs = teachers4.map((teacher) => teacher.user.dni);
-
-      // const usersDni = usersWithEmployeeNumber.map(user => user.dni);
-  
-      // const array = [...new Set(usersDni.concat(teacherDNIs))]
-
-      // const count = array.length;
-
-      // console.log(count)
-
       const teacher = await this.teacherRepository.findOne({
-        relations: ['user'],
         where: {
           user: {
-            dni: id.replace('-','').replace('-','')
+            dni: id.replaceAll('-','')
           },
         },
+        relations: ['user'],
       });
-
-      // console.log(teacher)
-      // console.log(teacher.user)
 
       if(!teacher){
        throw new NotFoundException('El Docente no se ha encontrado.');
@@ -219,15 +198,9 @@ export class TeacherService {
         ...updateTeacher
       });
 
-      
-
-      // console.log('#############')
-      // console.log(teacher)
-
       const saveTeacher = await this.teacherRepository.save(updateChangeTeacher)
       const saveUser = await this.userRepository.save(updateUser)
       
-
       const returnTeacher = JSON.parse(JSON.stringify(saveUser));
       returnTeacher.teacher = JSON.parse(JSON.stringify(saveTeacher));
       delete returnTeacher.teacher.user;
@@ -287,7 +260,6 @@ export class TeacherService {
   }
 
   printMessageError(message){
-    // console.log(message)
     if(message.response){
 
       if(message.response.message){
@@ -301,5 +273,9 @@ export class TeacherService {
 
     this.logger.error(message);
     return message;
+  }
+
+  async resetPassword(resetPasswordTeacherDto: ResetPasswordTeacherDto){
+
   }
 }

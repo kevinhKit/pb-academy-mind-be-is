@@ -11,6 +11,7 @@ import { StudentService } from './student.service';
 import { CreateStudentDto } from './dto/create-student.dto';
 import { UpdateStudentDto } from './dto/update-student.dto';
 import { UpdateStudentPasswordDto } from './dto/update-student-password.dto';
+import { LoginStudentDto } from './dto/login-student.dto';
 
 @Controller('student')
 export class StudentController {
@@ -24,6 +25,11 @@ export class StudentController {
   @Post('multiple')
   createMultiple(@Body() createStudentDto: CreateStudentDto[]) {
     return this.studentService.createMultiple(createStudentDto);
+  }
+
+  @Post('login')
+  login(@Body() loginStudentDto: LoginStudentDto) {
+    return this.studentService.login(loginStudentDto);
   }
 
   @Get()

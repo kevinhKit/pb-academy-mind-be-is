@@ -3,10 +3,6 @@ import { IsString, IsNotEmpty, IsNumberString } from 'class-validator';
 import { CreateUserDto } from 'src/user/dto/create-user.dto';
 
 export class CreateStudentDto extends PartialType(PickType(CreateUserDto, ['dni','firstName','secondName','firstLastName', 'secondLastName', 'email', 'address', 'phone', 'description'])) {
-
-
-
-
   
   @IsString({ message: 'La carrera debe ser tipo texto.' })
   @IsNotEmpty({message:"No envió o dejo vacio el campo Carrera."})

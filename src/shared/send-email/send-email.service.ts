@@ -39,7 +39,7 @@ export class SendEmailService {
 
         from: await process.env.EMAIL_FROM,
 
-        to: `${role == "admin" ? `${user.email}`:`${role == "teacher" ? `${user.teacher.email}`:`${user.stundent.email}`}`}`,
+        to: `${role == "admin" ? `${user.email}`:`${role == "teacher" ? `${user.teacher.email}`:`${user.student.email}`}`}`,
 
         subject: await `${contentSubject[role]}`,
 
