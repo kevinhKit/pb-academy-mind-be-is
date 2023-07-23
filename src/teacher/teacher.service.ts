@@ -27,7 +27,7 @@ export class TeacherService {
     @InjectRepository(Teacher) private teacherRepository: Repository<Teacher>,
   ) {}
 
-  async create({dni, email, isBoss, isCoordinator,video,...others}: CreateTeacherDto) {
+  async create({dni, email, photoOne, isBoss, isCoordinator,video,...others}: CreateTeacherDto) {
 
     try{
 
@@ -51,7 +51,7 @@ export class TeacherService {
       if(!userExists){
         userTeacher = await this.userRepository.create(
           {dni:dni.replaceAll('-',''),
-          ...others}
+          ...others,}
         );
       } else {
         userTeacher = userExists;
@@ -87,6 +87,7 @@ export class TeacherService {
           this.teacherRepository,
           '@unah.edu.hn'  
         ),
+        photoOne,
         email: email.toLowerCase(),
         password: encripPassword,
         isBoss: isBoss || false,
