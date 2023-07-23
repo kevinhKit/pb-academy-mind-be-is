@@ -43,23 +43,40 @@ export class SendEmailService {
 
         subject: await `${contentSubject[role]}`,
 
-        
-        
         text: `Estimad@ ${user.firstName} ${user.firstLastName}, sus credenciales de acceso a nuestros sistemas son:
-        ${(role == "admin") ? `\nNúmero de Empleado: ${user.employeeNumber}`:`${role == "teacher" ? `\nNúmero de Empleado: ${user.teacher.employeeNumber}` :`` }`}
+        ${(role == "admin") ? `\nNúmero de Empleado: ${user.employeeNumber}`:`${role == "teacher" ? `\nNúmero de Empleado: ${user.teacher.employeeNumber}` :`${user.student.accountNumber}` }`}
         \nNombre: ${user.firstName} ${user.secondName || ''} ${user.firstLastName} ${user.secondLastName}
         \nCorreo electrónico: ${(role == "admin") ? `${user.email}`:`${role=="teacher" ? `${user.teacher.institutionalEmail}` : `${user.student.institutionalEmail}`}`}
         \nContraseña: ${pass}
         ${(role == "admin") ? `\n Url de inicio de Sesión: ${process.env.FE_API_URL}/admin/inicio-sesion ` : ``}
         \n\n¡IMPORTANTE!\nPara acceder a nuestro sistema debera ingresar su número de ${(role == "admin" || role == "teacher") ? `Empleado` : `Cuenta`} y contraseña, se recomienda cambiar la contraseña generada por el sistema a una que pueda ser recordada por el usuario.
         \nNOTA:\n"No debe compartir sus credenciales a ningún tercero para evitar problemas de seguridad."
-        
         `
-        // COLOCAR LA URL SI ES ADMINISTRADOR
       });
-      // console.log(info)
+
     }
+
+    
   
+    async sendNewPassword(user: any,pass:string, role: string,to:string =  process.env.EMAIL_FROM){
+      const info = await this.transporter.sendMail({
+
+        from: await process.env.EMAIL_FROM,
+
+        to: `${role == "admin" ? `${user.email}`:`${role == "teacher" ? `${user.email}`:`${user.email}`}`}`,
+
+        // subject: await `${contentSubject[role]}`,
+        subject: await `Su contraseña se ha reseteado Exitosamente`,
+
+        text: `Estimad@ ${user.firstName} ${user.firstLastName}, Su nueva contraseña es:
+        \n${pass}
+        \n\n¡IMPORTANTE!\nSe recomienda cambiar la contraseña generada por el sistema a una que pueda ser recordada por el usuario.
+        \nNOTA:\n"No debe compartir sus credenciales a ningún tercero para evitar problemas de seguridad."
+        `
+      });
+    }
+
+
     async sendStartProcessTuition(to: string, resource: string){
   
     }

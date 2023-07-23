@@ -12,6 +12,7 @@ import { CreateTeacherDto } from './dto/create-teacher.dto';
 import { UpdateTeacherDto } from './dto/update-teacher.dto';
 import { LoginTeacherDto } from './dto/login-teacher.dto';
 import { ResetPasswordTeacherDto } from './dto/reset-password-teacher.dto';
+import { ChangePasswordTeacherDto } from './dto/change-password-teacher.dto';
 
 @Controller('teacher')
 export class TeacherController {
@@ -27,9 +28,14 @@ export class TeacherController {
     return this.teacherService.login(loginTeacherDto);
   }
 
-  @Patch('reset-password/:id')
-  resetPassword(@Param('id') id: string, @Body() resetPasswordTeacherDto: ResetPasswordTeacherDto) {
-    return this.teacherService.resetPassword(id, resetPasswordTeacherDto);
+  @Post('reset-password')
+  resetPassword(@Body() resetPasswordTeacherDto: ResetPasswordTeacherDto) {
+    return this.teacherService.resetPassword(resetPasswordTeacherDto);
+  }
+
+  @Patch('change-password/:id')
+  changePassword(@Param('id') id: string, @Body() resetPasswordTeacherDto: ChangePasswordTeacherDto) {
+    return this.teacherService.changePassword(id, resetPasswordTeacherDto);
   }
 
   @Get()

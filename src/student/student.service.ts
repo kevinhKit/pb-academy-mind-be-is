@@ -12,6 +12,7 @@ import { GenerateEmailService } from 'src/shared/generate-email/generate-email.s
 import { AccountNumberService } from 'src/shared/account-number/account-number.service';
 import { LoginStudentDto } from './dto/login-student.dto';
 import { ResetPasswordStudentDto } from './dto/reset-password-student.dto';
+import { ChangePasswordStudentDto } from './dto/change-password-student.dto';
 
 @Injectable()
 export class StudentService {
@@ -325,7 +326,7 @@ export class StudentService {
     return `Está acción elimina al estudiante con el id #${id}`;
   }
 
-  async resetPassword(id: string,{password, newPassword}: ResetPasswordStudentDto){
+  async changePassword(id: string,{password, newPassword}: ChangePasswordStudentDto){
     try{
       const user = await this.studentRepository.findOne({
         where:{
@@ -346,12 +347,10 @@ export class StudentService {
       
       const encripPassword = await this.encryptService.encodePassword(newPassword);
       
-      console.log('@@')
       const studentChange = await this.studentRepository.preload({
         accountNumber:user.accountNumber,
         password:encripPassword
       })
-      console.log('33')
 
       await this.studentRepository.save(studentChange);
 
@@ -414,4 +413,42 @@ export class StudentService {
     this.logger.error(message);
     return message;
   }
+
+  async resetPassword( {dni}: ResetPasswordStudentDto){
+    try{
+      const user = await this.studentRepository.findOne({
+        where:{
+          user:{
+            dni:dni.replaceAll('-','')
+          }
+        }
+      })
+
+      if(!user){
+        throw new NotFoundException('El Usuario no se ha encontrado.');
+      }
+
+      const generatePassword = await this.encryptService.generatePassword();
+      const encripPassword = await this.encryptService.encodePassword(generatePassword);
+      
+      const studentChange = await this.studentRepository.preload({
+        accountNumber:user.accountNumber,
+        password:encripPassword
+      })
+      
+      await this.studentRepository.save(studentChange);
+      await this.sendEmailService.sendNewPassword(studentChange,generatePassword,'teacher');
+
+      return {
+        statusCode: 200,
+        message: this.printMessageLog("La contraseña se ha cambiado exitosamente")
+      }
+
+    } catch (error){
+      return this.printMessageError(error);
+    }
+  }
+
+
+
 }

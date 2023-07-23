@@ -11,6 +11,7 @@ import { GenerateEmployeeNumberService } from 'src/shared/generte-employee-numbe
 import { GenerateEmailService } from 'src/shared/generate-email/generate-email.service';
 import { LoginTeacherDto } from './dto/login-teacher.dto';
 import { ResetPasswordTeacherDto } from './dto/reset-password-teacher.dto';
+import { ChangePasswordTeacherDto } from './dto/change-password-teacher.dto';
 
 @Injectable()
 export class TeacherService {
@@ -244,7 +245,7 @@ export class TeacherService {
     return message;
   }
 
-  async resetPassword(id: string,{password, newPassword}: ResetPasswordTeacherDto){
+  async changePassword(id: string,{password, newPassword}: ChangePasswordTeacherDto){
     try{
       const user = await this.teacherRepository.findOne({
         where:{
@@ -282,4 +283,41 @@ export class TeacherService {
       return this.printMessageError(error);
     }
   }
+
+  async resetPassword( {dni}: ResetPasswordTeacherDto){
+    try{
+      const user = await this.teacherRepository.findOne({
+        where:{
+          user:{
+            dni:dni.replaceAll('-','')
+          }
+        }
+      })
+
+      if(!user){
+        throw new NotFoundException('El Usuario no se ha encontrado.');
+      }
+
+      const generatePassword = await this.encryptService.generatePassword();
+      const encripPassword = await this.encryptService.encodePassword(generatePassword);
+      
+      const teacherChange = await this.teacherRepository.preload({
+        employeeNumber:user.employeeNumber,
+        password:encripPassword
+      })
+
+      await this.teacherRepository.save(teacherChange);
+      await this.sendEmailService.sendNewPassword(teacherChange,generatePassword,'teacher');
+
+      return {
+        statusCode: 200,
+        message: this.printMessageLog("La contraseña se ha cambiado exitosamente")
+      }
+
+    } catch (error){
+      return this.printMessageError(error);
+    }
+  }
+
+
 }
