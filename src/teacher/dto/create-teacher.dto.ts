@@ -29,4 +29,9 @@ export class CreateTeacherDto extends PartialType(PickType(CreateUserDto, ['dni'
   @IsNotEmpty({message:"No envió o dejo vacio el campo video"})
   @IsOptional()
   video: string;
+
+  @IsOptional()
+  @IsString({message: "La Fotografia uno, no cumple el formtao requerido."})
+  @IsNotEmpty({message: "No envió o dejo vacio el campo primer fotografia"})
+  photoOne: string;
 }
