@@ -1,3 +1,4 @@
+import { CareerClass } from "src/career-class/entities/career-class.entity";
 import { RequirementClass } from "src/requirement-class/entities/requirement-class.entity";
 import { Column, Entity, OneToMany, PrimaryColumn } from "typeorm";
 
@@ -28,6 +29,9 @@ export class Class {
         () => RequirementClass, (requirementClass) => requirementClass.idClass
     )
     classCurrent: RequirementClass;
+
+    @OneToMany(() => CareerClass, (careerClass) => careerClass.idClass)
+    careerClass: CareerClass;
 
 
 }
