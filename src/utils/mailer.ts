@@ -2,7 +2,7 @@ import { Logger } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
 require('dotenv').config();
 
-const logger = new Logger('loggerTransporter');
+const logger = new Logger('loggerTransporterTwo');
 
 export const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,

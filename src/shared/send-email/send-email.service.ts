@@ -7,7 +7,7 @@ export class SendEmailService {
 
 
     private transporter;
-    private readonly logger = new Logger('loggerTransporter2');
+    private readonly logger = new Logger('loggerTransporter');
 
     constructor() {
 
