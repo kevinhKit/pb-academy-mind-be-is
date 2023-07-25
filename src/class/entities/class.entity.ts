@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryColumn } from "typeorm";
+import { RequirementClass } from "src/requirement-class/entities/requirement-class.entity";
+import { Column, Entity, OneToMany, PrimaryColumn } from "typeorm";
 
 @Entity('Class')
 export class Class {
@@ -16,6 +17,17 @@ export class Class {
     
     @Column('smallint')
     valueUnits: string;
+
+
+    @OneToMany(
+        () => RequirementClass, (requirementClass) => requirementClass.idRequirement
+    )
+    requirementClass: RequirementClass;
+
+    @OneToMany(
+        () => RequirementClass, (requirementClass) => requirementClass.idClass
+    )
+    classCurrent: RequirementClass;
 
 
 }
