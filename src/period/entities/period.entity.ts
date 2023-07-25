@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryColumn } from "typeorm";
+import { StatePeriod } from "src/state-period/entities/state-period.entity";
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryColumn } from "typeorm";
 
 @Entity('Period')
 export class Period {
@@ -19,8 +20,16 @@ export class Period {
     })
     numberPeriod: number;
 
-    @Column('smallint')
-    status: number;
+    // @Column('smallint')
+    // status: number;
+
+    @ManyToOne(
+        () => StatePeriod, (statePeriod) => statePeriod.period
+    )
+    @JoinColumn({
+        name: 'idPeriod'
+    })
+    idStatus: StatePeriod;
 
 
 }
