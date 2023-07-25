@@ -16,6 +16,7 @@ import { BuildingModule } from './building/building.module';
 import { ClassroomModule } from './classroom/classroom.module';
 import { StudentCareerModule } from './student-career/student-career.module';
 import { PeriodModule } from './period/period.module';
+import { StatePeriodModule } from './state-period/state-period.module';
 
 @Module({
   imports: [
@@ -49,6 +50,7 @@ import { PeriodModule } from './period/period.module';
     ClassroomModule,
     StudentCareerModule,
     PeriodModule,
+    StatePeriodModule,
   ],
 
   controllers: [AppController],
