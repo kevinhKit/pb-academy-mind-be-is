@@ -12,6 +12,7 @@ import { CareerModule } from './career/career.module';
 import { SharedModule } from './shared/shared.module';
 import { SendEmailService } from './shared/send-email/send-email.service';
 import { RegionalCenterModule } from './regional-center/regional-center.module';
+import { StudentCareerModule } from './student-career/student-career.module';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { RegionalCenterModule } from './regional-center/regional-center.module';
     CareerModule,
     SharedModule,
     RegionalCenterModule,
+    StudentCareerModule,
   ],
 
   controllers: [AppController],
