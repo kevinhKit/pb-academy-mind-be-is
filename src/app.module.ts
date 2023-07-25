@@ -11,6 +11,7 @@ import { AuthModule } from './auth/auth.module';
 import { CareerModule } from './career/career.module';
 import { SharedModule } from './shared/shared.module';
 import { SendEmailService } from './shared/send-email/send-email.service';
+import { RegionalCenterModule } from './regional-center/regional-center.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { SendEmailService } from './shared/send-email/send-email.service';
     AuthModule,
     CareerModule,
     SharedModule,
+    RegionalCenterModule,
   ],
 
   controllers: [AppController],
