@@ -299,23 +299,29 @@ export class StudentService {
         ...others,
       });
 
+      email = (email) ? email.toLowerCase() : email;
+
       const updateChangeStudent = await this.studentRepository.preload({
         accountNumber:student.accountNumber,
         photoOne,
         photoTwo,
         photoThree,
         description,
-        email: email.toLowerCase(),
+        email: email,
       });
 
       await this.userRepository.save(user);
 
       await this.studentRepository.save(updateChangeStudent);
 
+      const returnStudent = JSON.parse(JSON.stringify(user));
+      returnStudent.teacher = JSON.parse(JSON.stringify(updateChangeStudent));
+      delete returnStudent.teacher.user;
+
       return {
         message: 'Se ha actualizado correctamente el estudiante',
         statusCode: 200,
-        user,
+        user:returnStudent,
       };
     } catch (error) {
       return this.printMessageError(error)

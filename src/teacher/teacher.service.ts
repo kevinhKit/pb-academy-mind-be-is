@@ -185,12 +185,14 @@ export class TeacherService {
        throw new NotFoundException('El Docente no se ha encontrado.');
       }
 
+      email = (email) ? email.toLowerCase() : email;
+
       const updateChangeTeacher = await this.teacherRepository.preload({
         employeeNumber: teacher.employeeNumber,
         video,
         photoOne,
         description,
-        email: email.toLowerCase()
+        email: email
       });
 
       const updateUser = await this.userRepository.preload({
@@ -212,6 +214,7 @@ export class TeacherService {
       }
     }
     catch (error){
+      console.log(error)
      return this.printMessageError(error)
     }
 
