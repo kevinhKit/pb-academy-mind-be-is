@@ -100,6 +100,12 @@ export class User {
     default: true
   })
   status: boolean;
+
+  @Column('text', {
+    nullable: true,
+    default: null
+  })
+  photoOne: string;
   
   @OneToOne(() => Student, (student) => student.user)
   student: string;

@@ -49,7 +49,11 @@ export class CreateUserDto {
     @IsNotEmpty({message: "No envió o dejo vacio el campo descripción"})
     description: string;
     
-
+    
+    @IsOptional()
+    @IsString({message: "La Fotografia uno, no cumple el formtao requerido."})
+    @IsNotEmpty({message: "No envió o dejo vacio el campo primer fotografia"})
+    photoOne: string;
 
 
 
