@@ -15,6 +15,7 @@ import { RegionalCenterModule } from './regional-center/regional-center.module';
 import { BuildingModule } from './building/building.module';
 import { ClassroomModule } from './classroom/classroom.module';
 import { StudentCareerModule } from './student-career/student-career.module';
+import { PeriodModule } from './period/period.module';
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { StudentCareerModule } from './student-career/student-career.module';
     BuildingModule,
     ClassroomModule,
     StudentCareerModule,
+    PeriodModule,
   ],
 
   controllers: [AppController],
