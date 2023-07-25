@@ -1,5 +1,5 @@
 import { Class } from "src/class/entities/class.entity";
-import { Column, Entity, ManyToOne, PrimaryColumn } from "typeorm";
+import { Entity, ManyToOne, PrimaryColumn } from "typeorm";
 
 @Entity('RequirementClass')
 export class RequirementClass {
