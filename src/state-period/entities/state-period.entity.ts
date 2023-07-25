@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryColumn } from "typeorm";
+import { Period } from "src/period/entities/period.entity";
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryColumn } from "typeorm";
 
 export enum Rol {
     STUDENT = "student",
@@ -29,7 +30,12 @@ export class StatePeriod {
     
     
     @Column('boolean')
-    exceptionalCancellationSate: boolean;
+    exceptionalCancellationDate: boolean;
+
+    @OneToMany(
+        () => Period, (period) => period.idStatus
+    )
+    period: Period;
 
 
 }
