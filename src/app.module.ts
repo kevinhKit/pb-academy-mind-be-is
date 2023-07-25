@@ -17,6 +17,7 @@ import { ClassroomModule } from './classroom/classroom.module';
 import { StudentCareerModule } from './student-career/student-career.module';
 import { PeriodModule } from './period/period.module';
 import { StatePeriodModule } from './state-period/state-period.module';
+import { ClassModule } from './class/class.module';
 
 @Module({
   imports: [
@@ -51,6 +52,7 @@ import { StatePeriodModule } from './state-period/state-period.module';
     StudentCareerModule,
     PeriodModule,
     StatePeriodModule,
+    ClassModule,
   ],
 
   controllers: [AppController],
