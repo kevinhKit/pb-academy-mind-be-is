@@ -315,7 +315,7 @@ export class StudentService {
       await this.studentRepository.save(updateChangeStudent);
 
       const returnStudent = JSON.parse(JSON.stringify(user));
-      returnStudent.teacher = JSON.parse(JSON.stringify(updateChangeStudent));
+      returnStudent.student = JSON.parse(JSON.stringify(updateChangeStudent));
       delete returnStudent.teacher.user;
 
       return {
