@@ -26,6 +26,10 @@
 
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
 
+## Crear modulos, entidades, servicios, etc
+
+
+
 
 ## System Requirements
 Before you begin, make sure you meet the following system requirements:
