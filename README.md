@@ -28,7 +28,7 @@
 
 ## Crear modulos, entidades, servicios, etc
 
-
+nest g resource <nombre> --no-spec
 
 
 ## System Requirements
