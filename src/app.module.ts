@@ -22,6 +22,7 @@ import { RequirementClassModule } from './requirement-class/requirement-class.mo
 import { CareerClassModule } from './career-class/career-class.module';
 import { CenterCareerModule } from './center-career/center-career.module';
 import { CareerChangeModule } from './career-change/career-change.module';
+import { SectionModule } from './section/section.module';
 
 @Module({
   imports: [
@@ -61,6 +62,7 @@ import { CareerChangeModule } from './career-change/career-change.module';
     CareerClassModule,
     CenterCareerModule,
     CareerChangeModule,
+    SectionModule,
   ],
 
   controllers: [AppController],
