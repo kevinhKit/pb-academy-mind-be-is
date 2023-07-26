@@ -19,6 +19,7 @@ import { PeriodModule } from './period/period.module';
 import { StatePeriodModule } from './state-period/state-period.module';
 import { ClassModule } from './class/class.module';
 import { RequirementClassModule } from './requirement-class/requirement-class.module';
+import { SectionModule } from './section/section.module';
 
 @Module({
   imports: [
@@ -55,6 +56,7 @@ import { RequirementClassModule } from './requirement-class/requirement-class.mo
     StatePeriodModule,
     ClassModule,
     RequirementClassModule,
+    SectionModule,
   ],
 
   controllers: [AppController],
