@@ -316,7 +316,7 @@ import { ChangePasswordStudentDto } from './dto/change-password-student.dto';
 
       const returnStudent = JSON.parse(JSON.stringify(user));
       returnStudent.student = JSON.parse(JSON.stringify(updateChangeStudent));
-      delete returnStudent.teacher.user;
+      // delete returnStudent.student.user;
 
       return {
         message: 'Se ha actualizado correctamente el estudiante',
@@ -324,6 +324,7 @@ import { ChangePasswordStudentDto } from './dto/change-password-student.dto';
         user:returnStudent,
       };
     } catch (error) {
+      console.log(error)
       return this.printMessageError(error)
     }
   }
