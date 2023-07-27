@@ -1,16 +1,31 @@
-import { Column, Entity, PrimaryColumn } from "typeorm";
+import { Class } from "src/class/entities/class.entity";
+import { Period } from "src/period/entities/period.entity";
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from "typeorm";
 
 @Entity('Section')
 export class Section {
 
-    @PrimaryColumn('text')
-    idPeriod: string;
-
+    
     @PrimaryColumn('text')
     codeSection: string;
 
     @PrimaryColumn('text')
-    codeClass: string;
+    @JoinColumn({
+        name:"idPeriod"
+    })
+    @ManyToOne(
+        () => Period, (period) => period.section
+    )
+    idPeriod: Period;
+
+    @PrimaryColumn('text')
+    @JoinColumn({
+        name:"codeClass"
+    })
+    @ManyToOne(
+        () => Class, (class1) => class1.section
+    )
+    codeClass: Class;
 
     @Column('text')
     idTeacher: string;

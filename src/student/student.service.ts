@@ -15,7 +15,7 @@ import { ResetPasswordStudentDto } from './dto/reset-password-student.dto';
 import { ChangePasswordStudentDto } from './dto/change-password-student.dto';
 
 @Injectable()
-export class StudentService {
+  export class StudentService {
 
   private readonly logger = new Logger('studentLogger');
 
@@ -427,13 +427,15 @@ export class StudentService {
           user:{
             dni:dni.replaceAll('-','')
           }
-        }
+        },
+        relations:['user']
       })
 
+      
       if(!user){
         throw new NotFoundException('El Usuario no se ha encontrado.');
       }
-
+      
       const generatePassword = await this.encryptService.generatePassword();
       const encripPassword = await this.encryptService.encodePassword(generatePassword);
       
@@ -441,9 +443,10 @@ export class StudentService {
         accountNumber:user.accountNumber,
         password:encripPassword
       })
+      studentChange.user = user.user
       
       await this.studentRepository.save(studentChange);
-      await this.sendEmailService.sendNewPassword(studentChange,generatePassword,'teacher');
+      await this.sendEmailService.sendNewPassword(studentChange,generatePassword,'student');
 
       return {
         statusCode: 200,

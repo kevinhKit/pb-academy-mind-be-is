@@ -214,7 +214,6 @@ export class TeacherService {
       }
     }
     catch (error){
-      console.log(error)
      return this.printMessageError(error)
     }
 
@@ -294,7 +293,8 @@ export class TeacherService {
           user:{
             dni:dni.replaceAll('-','')
           }
-        }
+        },
+        relations:['user']
       })
 
       if(!user){
@@ -308,6 +308,7 @@ export class TeacherService {
         employeeNumber:user.employeeNumber,
         password:encripPassword
       })
+      teacherChange.user = user.user
 
       await this.teacherRepository.save(teacherChange);
       await this.sendEmailService.sendNewPassword(teacherChange,generatePassword,'teacher');

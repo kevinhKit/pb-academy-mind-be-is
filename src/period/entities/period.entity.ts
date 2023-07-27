@@ -1,3 +1,4 @@
+import { Section } from "src/section/entities/section.entity";
 import { StatePeriod } from "src/state-period/entities/state-period.entity";
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryColumn } from "typeorm";
 
@@ -30,6 +31,9 @@ export class Period {
         name: 'idPeriod'
     })
     idStatus: StatePeriod;
+
+    @OneToMany(() => Section, (section) => section.idPeriod)
+    section: Section;
 
 
 }

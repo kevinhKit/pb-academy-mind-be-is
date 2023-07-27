@@ -1,5 +1,6 @@
 import { CareerClass } from "src/career-class/entities/career-class.entity";
 import { RequirementClass } from "src/requirement-class/entities/requirement-class.entity";
+import { Section } from "src/section/entities/section.entity";
 import { Column, Entity, OneToMany, PrimaryColumn } from "typeorm";
 
 @Entity('Class')
@@ -32,6 +33,9 @@ export class Class {
 
     @OneToMany(() => CareerClass, (careerClass) => careerClass.idClass)
     careerClass: CareerClass;
+
+    @OneToMany(() => Section, (section) => section.codeClass)
+    section: Section;
 
 
 }

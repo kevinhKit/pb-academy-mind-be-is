@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
+import { User } from 'src/user/entities/user.entity';
 require('dotenv').config();
 
 @Injectable()
@@ -68,8 +69,9 @@ export class SendEmailService {
         // subject: await `${contentSubject[role]}`,
         subject: await `Su contraseña se ha reseteado Exitosamente`,
 
-        text: `Estimad@ ${user.firstName} ${user.firstLastName}, Su nueva contraseña es:
+        text: `Estimad@ ${user.user.firstName} ${user.user.firstLastName}, Su nueva contraseña es:
         \n${pass}
+        ${(role == "teacher" ? `\nUrl de Reinicio: http://localhost:3000/reinicio-clave` : ``)}
         \n\n¡IMPORTANTE!\nSe recomienda cambiar la contraseña generada por el sistema a una que pueda ser recordada por el usuario.
         \nNOTA:\n"No debe compartir sus credenciales a ningún tercero para evitar problemas de seguridad."
         `
