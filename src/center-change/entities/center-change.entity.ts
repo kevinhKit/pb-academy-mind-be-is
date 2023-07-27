@@ -1,4 +1,4 @@
-import { Career } from 'src/career/entities/career.entity';
+import { RegionalCenter } from 'src/regional-center/entities/regional-center.entity';
 import { Student } from 'src/student/entities/student.entity';
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
 
@@ -8,21 +8,21 @@ export enum applicationStatus {
   REJECTED = 'Rechazada',
 }
 
-@Entity('CareerChange')
-export class CareerChange {
+@Entity('CenterChange')
+export class CenterChange {
   @PrimaryColumn('text')
   accountNumber: string;
 
-  @PrimaryColumn('text')
-  idCareer: string;
+  @PrimaryColumn('smallint')
+  id: number;
 
   @ManyToOne(() => Student, (student) => student.accountNumber)
   @JoinColumn({ name: 'accountNumber' })
   student: Student;
 
-  @ManyToOne(() => Career, (career) => career.idCareer)
-  @JoinColumn({ name: 'idCareer' })
-  career: Career;
+  @ManyToOne(() => RegionalCenter, (center) => center.id)
+  @JoinColumn({ name: 'id' })
+  regionlCenter: RegionalCenter;
 
   @Column({ type: 'date', nullable: true })
   applicationDate: Date;
