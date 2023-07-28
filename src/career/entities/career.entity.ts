@@ -25,18 +25,12 @@ export class Career {
     })
     minimumIncomeValue: number;
 
-    @OneToMany(() => TeachingCareer, (teachingCareer) => teachingCareer.career)
-    teachingCareer: string;
-
-    @OneToMany(() => StudentCareer, (studentCareer) => studentCareer.career)
-    studentCareer: string;
-
     @OneToMany(() => CareerClass, (careerClass) => careerClass.idClass)
-    careerClass: string;
+    careerClass: CareerClass[];
 
     @Column('timestamptz',{
         default: () => "current_timestamp"
       })
-      create_at: Date;
+    create_at: Date;
 
 }
