@@ -11,21 +11,29 @@ export enum applicationStatus {
 
 @Entity('CenterChange')
 export class CenterChange {
-  @PrimaryColumn('text')
-  accountNumber: string;
 
-  @PrimaryColumn('smallint')
-  id: number;
+
+  @PrimaryColumn('uuid')
+  idCenterChange: string;
+
+
+  @Column('text',{
+    nullable: false,
+    unique: true
+  })
+  accountNumber: string;
 
   @ManyToOne(() => Student, (student) => student.accountNumber)
   @JoinColumn({ name: 'accountNumber' })
-  student: Student;
+  student : Student;
 
   @ManyToOne(() => CenterCareer, (centerCareer) => centerCareer.idCenterCareer)
   @JoinColumn({ name: 'centerCareer' })
   centerCareer: CenterCareer;
 
-  @Column({ type: 'date', nullable: true })
+  @Column('timestamptz',{
+    default: () => "current_timestamp",
+  })
   applicationDate: Date;
 
   @Column({

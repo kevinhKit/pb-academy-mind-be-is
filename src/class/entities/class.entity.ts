@@ -9,7 +9,10 @@ export class Class {
     @PrimaryColumn('text')
     id: string;
 
-    @Column('text')
+    @Column('text',{
+        nullable: false,
+        unique: true
+    })
     code: string;
     
     
@@ -17,7 +20,9 @@ export class Class {
     name: string;
     
     
-    @Column('smallint')
+    @Column('smallint',{
+        nullable: false
+    })
     valueUnits: string;
 
 

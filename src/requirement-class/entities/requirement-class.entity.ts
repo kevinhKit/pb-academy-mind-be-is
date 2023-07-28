@@ -1,10 +1,10 @@
 import { Class } from "src/class/entities/class.entity";
-import { Entity, ManyToOne, PrimaryColumn } from "typeorm";
+import { Entity, ManyToOne, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity('RequirementClass')
 export class RequirementClass {
 
-    @PrimaryColumn('text')
+    @PrimaryGeneratedColumn('uuid')
     id: string;
 
     @ManyToOne(

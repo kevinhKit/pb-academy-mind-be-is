@@ -1,18 +1,16 @@
 import { Building } from "src/building/entities/building.entity";
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity('Classroom')
 export class Classroom {
 
 
-    @PrimaryColumn('text',{
-        unique: true,
-      })
+    @PrimaryGeneratedColumn('uuid')
     id: string;
 
     @Column('text',{
         unique: true,
-        // nullable:true,
+        nullable:false,
         // default: null
       })
     code: string;

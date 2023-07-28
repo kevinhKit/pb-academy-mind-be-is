@@ -1,3 +1,4 @@
+import { ExceptionalCancellation } from "src/exceptional-cancellation/entities/exceptional-cancellation.entity";
 import { Section } from "src/section/entities/section.entity";
 import { Student } from "src/student/entities/student.entity";
 import { Collection, Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
@@ -34,8 +35,13 @@ export class Tuition {
     @Column('text')
     teacherEvaluation: string;
 
-    @Column('text')
-    idCancellation: string;
+    @ManyToOne(
+        () => ExceptionalCancellation, (exceptionalCancellation) => exceptionalCancellation.id, {nullable: true}
+    )
+    @JoinColumn({
+        name: 'idCancellation'
+    })
+    idCancellation: ExceptionalCancellation;
 
 
 
