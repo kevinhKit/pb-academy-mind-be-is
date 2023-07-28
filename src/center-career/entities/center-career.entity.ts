@@ -28,16 +28,16 @@ export class CenterCareer {
   @JoinColumn({ name: 'idCenter' })
   regionalCenter: string;
 
-  @Column('timestamptz',{
-    default: () => "current_timestamp"
-  })
-  create_at: Date;
-
   @Column({
     type: 'boolean',
     default: true
   })
   status: boolean;
+
+  @Column('timestamptz',{
+    default: () => "current_timestamp"
+  })
+  create_at: Date;
 
   @OneToMany(() => StudentCareer, (studentCareer) => studentCareer.centerCareer)
   studentCareer: StudentCareer[];
