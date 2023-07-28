@@ -1,4 +1,5 @@
 import { Career } from "src/career/entities/career.entity";
+import { CenterCareer } from "src/center-career/entities/center-career.entity";
 import { Teacher } from "src/teacher/entities/teacher.entity";
 import { Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryColumn } from "typeorm";
 
@@ -6,7 +7,9 @@ import { Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryColumn } fro
 @Entity('TeachingCareer')
 export class TeachingCareer {
 
-    @PrimaryColumn('text')
+    @PrimaryColumn('text',{
+        nullable: false
+    })
     idTeachingCareer: string;
 
     @ManyToOne(() => Teacher, (teacher) => teacher.teachingCareer)
@@ -16,11 +19,11 @@ export class TeachingCareer {
     teacher?: Teacher[];
 
 
-    @ManyToOne(() => Career, (career) => career.teachingCareer)
+    @ManyToOne(() => CenterCareer, (CenterCareer) => CenterCareer.teachingCareer)
     @JoinColumn({   
-        name: 'idCareer',
+        name: 'idCenterCareer',
     })
-    career?: Career[];
+    centerCareer?: CenterCareer[];
 
 
 }

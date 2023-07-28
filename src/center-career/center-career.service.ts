@@ -22,8 +22,8 @@ export class CenterCareerService {
     try {
       const careerExists = await this.centerCareerRepository.findOne({
         where:{
-          idCareer,
-          idCenter
+          career:idCareer,
+          regionalCenter: idCenter
         }
       });
 
@@ -32,8 +32,8 @@ export class CenterCareerService {
       }
 
       const career = await this.centerCareerRepository.create({
-        idCareer: idCareer.toUpperCase(),
-        idCenter: idCenter.toUpperCase()
+        career: idCareer.toUpperCase(),
+        regionalCenter: idCenter.toUpperCase()
       });
 
       await this.centerCareerRepository.save(career);
