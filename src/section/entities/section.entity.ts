@@ -9,10 +9,8 @@ export class Section {
 
     
     @PrimaryColumn('text')
-    codeSection: string;
+    id: string;
 
-    // @PrimaryColumn('text')
-    // @Column('text')
     @ManyToOne(
     () => Period, (period) => period.id
     )
@@ -21,8 +19,9 @@ export class Section {
     })
     idPeriod: Period;
 
-    // @PrimaryColumn('text')
-    // @Column('text')
+    @Column('text')
+    codeSection: string;
+
     @ManyToOne(
         () => Class, (class1) => class1.id
         )
@@ -31,7 +30,6 @@ export class Section {
     })
     idClass: Class;
 
-    // @Column('text')
     @ManyToOne(
         () => Teacher, (teacher) => teacher.employeeNumber
     )
