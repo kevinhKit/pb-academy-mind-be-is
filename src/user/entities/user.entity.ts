@@ -90,7 +90,7 @@ export class User {
   })
   isAdmin: boolean;
 
-  @Column('timestamp',{
+  @Column('timestamptz',{
     default: () => "current_timestamp"
   })
   create_at: Date;

@@ -4,10 +4,10 @@ import { Column, Entity, OneToMany, PrimaryColumn } from "typeorm";
 @Entity('RegionalCenter')
 export class RegionalCenter {
 
-    @PrimaryColumn('smallint',{
+    @PrimaryColumn('text',{
         unique: true
       })
-    id: number;
+    id: string;
     
     @Column('text',{
       unique: true
@@ -21,6 +21,11 @@ export class RegionalCenter {
       () => Building, (building) => building.idRegionalCenter
     )
     building: string;
+
+    @Column('timestamptz',{
+      default: () => "current_timestamp"
+    })
+    create_at: Date;
 
 
 }

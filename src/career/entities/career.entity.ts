@@ -9,7 +9,7 @@ export class Career {
     @PrimaryColumn('text',{
         unique: true
     })
-    idCareer: string;
+    id: string;
 
     @Column('text',{
         unique: true
@@ -33,5 +33,10 @@ export class Career {
 
     @OneToMany(() => CareerClass, (careerClass) => careerClass.idClass)
     careerClass: string;
+
+    @Column('timestamptz',{
+        default: () => "current_timestamp"
+      })
+      create_at: Date;
 
 }

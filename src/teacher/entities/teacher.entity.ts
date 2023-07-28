@@ -41,9 +41,12 @@ export class Teacher {
   })
   description: string;
 
-   @Column('timestamp',{
-    default: () => "current_timestamp"
-  })
+  //  @Column('timestamp',{
+  //   default: () => "current_timestamp"
+  // })
+  
+  // @Column('timestamp',{default: () => "current_timestamp"})
+  @Column('timestamptz',{default: () => "current_timestamp"})
   create_at: Date;
 
   @Column({
