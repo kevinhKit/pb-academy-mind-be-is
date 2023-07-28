@@ -7,14 +7,13 @@ import { User } from 'src/user/entities/user.entity';
 import { Student } from './entities/student.entity';
 import { SendEmailService } from 'src/shared/send-email/send-email.service';
 import { EncryptPasswordService } from 'src/shared/encrypt-password/encrypt-password.service';
-import { GenerateEmployeeNumberService } from 'src/shared/generte-employee-number/generate-employee-number.service';
 import { GenerateEmailService } from 'src/shared/generate-email/generate-email.service';
 import { AccountNumberService } from 'src/shared/account-number/account-number.service';
 import { LoginStudentDto } from './dto/login-student.dto';
 import { ResetPasswordStudentDto } from './dto/reset-password-student.dto';
 import { ChangePasswordStudentDto } from './dto/change-password-student.dto';
-import { Career } from 'src/career/entities/career.entity';
-import { RegionalCenter } from 'src/regional-center/entities/regional-center.entity';
+import { CenterCareer } from 'src/center-career/entities/center-career.entity';
+import { StudentCareer } from 'src/student-career/entities/student-career.entity';
 
 @Injectable()
   export class StudentService {
@@ -30,8 +29,8 @@ import { RegionalCenter } from 'src/regional-center/entities/regional-center.ent
 
     @InjectRepository(User) private userRepository: Repository<User>,
     @InjectRepository(Student) private studentRepository: Repository<Student>,
-    @InjectRepository(Career) private careerRepository: Repository<Career>,
-    @InjectRepository(RegionalCenter) private regionalCenterRepository: Repository<RegionalCenter>,
+    @InjectRepository(CenterCareer) private centerCareerRepository: Repository<CenterCareer>,
+    @InjectRepository(StudentCareer) private studentCareerRepository: Repository<StudentCareer>,
   ) {}
 
   async create({dni, email, career, regionalCenter, ...others}: CreateStudentDto) {
@@ -42,29 +41,22 @@ import { RegionalCenter } from 'src/regional-center/entities/regional-center.ent
         relations:['teacher','student'],
       });
 
-      
-      // const regionalCenterExists = await this.regionalCenterRepository.findOne({
-      //   where:{
-      //     id: regionalCenter
-      //   },
-      //   relations: ['Caeer']
-      // })
+      const centerCareer = await this.centerCareerRepository.findOne({
+        where:{
+          career:{
+            id:career.toUpperCase()
+          },
+          regionalCenter:{
+            id:regionalCenter.toUpperCase()
+          },
+          status:true
+        },
+        relations:['career','regionalCenter']
+      });
 
-      // if(regionalCenterExists){
-      //   console.log(regionalCenterExists)
-      //   throw new NotFoundException('El centro enviada no existe')
-      // }
-
-      // const careerExists = await this.careerRepository.findOne({
-      //   where:{
-      //     idCareer: career
-      //   }
-      // })
-
-      // if(careerExists){
-      //   console.log(careerExists)
-      //   throw new NotFoundException('La carrear enviada no existe')
-      // }
+      if(!centerCareer){
+        throw new NotFoundException('La carrera no existe en el centro regional enviado')
+      }
 
       let userStudent = new User();
       if(!userExists){
@@ -133,10 +125,30 @@ import { RegionalCenter } from 'src/regional-center/entities/regional-center.ent
 
       await this.studentRepository.save(newStudent);
 
+      const studentCareer = await this.studentCareerRepository.create({
+        student: {
+          accountNumber: newStudent.accountNumber
+        },
+        centerCareer:{
+          idCenterCareer: centerCareer.idCenterCareer
+        }
+        })
+
+      await this.studentCareerRepository.save(studentCareer);
+
+
+
       const returnUser = {...JSON.parse(JSON.stringify(newStudent.user))};
       returnUser.student = {...JSON.parse(JSON.stringify(newStudent))};
       delete returnUser.teacher;
       delete returnUser.student.user;
+      returnUser.student.centerCareer = JSON.parse(JSON.stringify(centerCareer.idCenterCareer));
+      returnUser.student.career = JSON.parse(JSON.stringify(centerCareer.career.name));
+      returnUser.student.regionalCenter = JSON.parse(JSON.stringify(centerCareer.regionalCenter.name));
+      // returnUser.student.career = JSON.parse(JSON.stringify(centerCareer.idCenterCareer));
+      // returnUser.student.regionalCenter = JSON.parse(JSON.stringify(centerCareer.idCenterCareer));
+
+
       
       await this.sendEmailService.sendCreationRegister(returnUser,generatePassword,'student')
 
@@ -147,7 +159,6 @@ import { RegionalCenter } from 'src/regional-center/entities/regional-center.ent
       }
 
     } catch (error){
-      console.log(error)
       return this.printMessageError(error);
     }
    
@@ -353,7 +364,6 @@ import { RegionalCenter } from 'src/regional-center/entities/regional-center.ent
         user:returnStudent,
       };
     } catch (error) {
-      console.log(error)
       return this.printMessageError(error)
     }
   }

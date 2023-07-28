@@ -6,6 +6,7 @@ import { Career } from 'src/career/entities/career.entity';
 import { Repository } from 'typeorm';
 import { RegionalCenter } from 'src/regional-center/entities/regional-center.entity';
 import { CenterCareer } from './entities/center-career.entity';
+import { json } from 'node:stream/consumers';
 
 @Injectable()
 export class CenterCareerService {
@@ -20,10 +21,16 @@ export class CenterCareerService {
 
   async create({idCareer, idCenter}: CreateCenterCareerDto) {
     try {
+
       const careerExists = await this.centerCareerRepository.findOne({
         where:{
-          career:idCareer,
-          regionalCenter: idCenter
+          career:{
+            id:idCareer.toUpperCase()
+          },
+          regionalCenter:{
+            id:idCenter.toUpperCase()
+          },
+          status:true
         }
       });
 
@@ -31,17 +38,23 @@ export class CenterCareerService {
         throw new NotFoundException('La Carrera ya existe en este Centro Regional');
       }
 
-      const career = await this.centerCareerRepository.create({
-        career: idCareer.toUpperCase(),
-        regionalCenter: idCenter.toUpperCase()
+      const centerCareer = await this.centerCareerRepository.create({
+        career: { id: idCareer.toUpperCase() },
+        regionalCenter: { id: idCenter.toUpperCase() },
+        // idCenterCareer:'d'
       });
+      
+      
 
-      await this.centerCareerRepository.save(career);
+      const newCenterCareer = JSON.parse(JSON.stringify(await this.centerCareerRepository.save(centerCareer)))
+      newCenterCareer.career = newCenterCareer.career.id;
+      newCenterCareer.regionalCenter = newCenterCareer.regionalCenter.id;
+
 
       return {
         statusCode: 200,
         message: this.printMessageLog('La Carrera se ha agregado exitosamente'),
-        career
+        centerCareer: newCenterCareer
       }
 
     } catch (error) {

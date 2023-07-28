@@ -3,15 +3,14 @@ import { Career } from 'src/career/entities/career.entity';
 import { RegionalCenter } from 'src/regional-center/entities/regional-center.entity';
 import { StudentCareer } from 'src/student-career/entities/student-career.entity';
 import { TeachingCareer } from 'src/teaching-career/entities/teaching-career.entity';
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryColumn } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryColumn, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity('CenterCareer')
 export class CenterCareer {
 
   
-  @PrimaryColumn('text',{
-    nullable: false
-  })
+  @PrimaryGeneratedColumn('uuid')
+  // @PrimaryColumn('text')
   idCenterCareer: string;
   
   // @PrimaryColumn('text')
@@ -21,12 +20,12 @@ export class CenterCareer {
   // idCenter: string;
 
   @ManyToOne(() => Career, (career) => career.id)
-  @JoinColumn({ name: 'idCareer' })
-  career: string;
+  @JoinColumn({ name: 'career' })
+  career: Career;
 
   @ManyToOne(() => RegionalCenter, (center) => center.id)
-  @JoinColumn({ name: 'idCenter' })
-  regionalCenter: string;
+  @JoinColumn({ name: 'regionalCenter' })
+  regionalCenter: RegionalCenter;
 
   @Column({
     type: 'boolean',
@@ -43,7 +42,7 @@ export class CenterCareer {
   studentCareer: StudentCareer[];
   
   @OneToMany(() => TeachingCareer, (teachingCareer) => teachingCareer.centerCareer)
-  teachingCareer: StudentCareer[];
+  teachingCareer: TeachingCareer[];
 
 
 }
