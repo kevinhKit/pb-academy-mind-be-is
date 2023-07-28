@@ -19,7 +19,7 @@ export class Classroom {
 
 
     @ManyToOne(
-        () => Building, (building) => building.classroom,
+        () => Building, (building) => building.id,
     )
     @JoinColumn({name:"idBuilding"})
     idBuilding: Building;

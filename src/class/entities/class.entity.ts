@@ -34,7 +34,7 @@ export class Class {
     @OneToMany(() => CareerClass, (careerClass) => careerClass.idClass)
     careerClass: CareerClass;
 
-    @OneToMany(() => Section, (section) => section.codeClass)
+    @OneToMany(() => Section, (section) => section.idClass)
     section: Section;
 
 

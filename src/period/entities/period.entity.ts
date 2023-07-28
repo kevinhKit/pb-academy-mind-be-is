@@ -28,9 +28,9 @@ export class Period {
         () => StatePeriod, (statePeriod) => statePeriod.period
     )
     @JoinColumn({
-        name: 'idPeriod'
+        name: 'idStatePeriod'
     })
-    idStatus: StatePeriod;
+    idStatePeriod: StatePeriod;
 
     @OneToMany(() => Section, (section) => section.idPeriod)
     section: Section;

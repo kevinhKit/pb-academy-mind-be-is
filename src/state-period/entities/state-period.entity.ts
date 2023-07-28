@@ -33,7 +33,7 @@ export class StatePeriod {
     exceptionalCancellationDate: boolean;
 
     @OneToMany(
-        () => Period, (period) => period.idStatus
+        () => Period, (period) => period.idStatePeriod
     )
     period: Period;
 

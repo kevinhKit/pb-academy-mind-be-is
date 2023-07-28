@@ -27,15 +27,15 @@ export class Building {
 
 
     @ManyToOne(
-        () => RegionalCenter, (regionalCenter) => regionalCenter.building
+        () => RegionalCenter, (regionalCenter) => regionalCenter.id
     )
     @JoinColumn({name:"idRegionalCenter"})
     idRegionalCenter: string;
 
-    @OneToMany(
-        () => Classroom, (classroom) => classroom.idBuilding
-    )
-    classroom: Classroom;
+    // @OneToMany(
+    //     () => Classroom, (classroom) => classroom.idBuilding
+    // )
+    // classroom: Classroom;
 
 
 }

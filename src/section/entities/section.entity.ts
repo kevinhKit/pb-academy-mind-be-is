@@ -1,5 +1,7 @@
 import { Class } from "src/class/entities/class.entity";
+import { Classroom } from "src/classroom/entities/classroom.entity";
 import { Period } from "src/period/entities/period.entity";
+import { Teacher } from "src/teacher/entities/teacher.entity";
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from "typeorm";
 
 @Entity('Section')
@@ -9,26 +11,34 @@ export class Section {
     @PrimaryColumn('text')
     codeSection: string;
 
-    @PrimaryColumn('text')
+    // @PrimaryColumn('text')
+    // @Column('text')
+    @ManyToOne(
+    () => Period, (period) => period.id
+    )
     @JoinColumn({
         name:"idPeriod"
     })
-    @ManyToOne(
-        () => Period, (period) => period.section
-    )
     idPeriod: Period;
 
-    @PrimaryColumn('text')
-    @JoinColumn({
-        name:"codeClass"
-    })
+    // @PrimaryColumn('text')
+    // @Column('text')
     @ManyToOne(
-        () => Class, (class1) => class1.section
-    )
-    codeClass: Class;
+        () => Class, (class1) => class1.id
+        )
+    @JoinColumn({
+        name:"idClass"
+    })
+    idClass: Class;
 
-    @Column('text')
-    idTeacher: string;
+    // @Column('text')
+    @ManyToOne(
+        () => Teacher, (teacher) => teacher.employeeNumber
+    )
+    @JoinColumn({
+        name: "idTeacher"
+    })
+    idTeacher: Teacher;
 
     @Column('text')
     space: string;
@@ -36,8 +46,14 @@ export class Section {
     @Column('text')
     days: string;
 
-    @Column('text')
-    idClassroom: string;
+    // @Column('text')
+    @ManyToOne(
+        () => Classroom, (clssroom) => clssroom.id
+    )
+    @JoinColumn({
+        name: "idClassroom"
+    })
+    idClassroom: Classroom;
 
     @Column('text')
     hour: string;
