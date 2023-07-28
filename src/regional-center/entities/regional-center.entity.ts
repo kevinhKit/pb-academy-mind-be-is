@@ -10,7 +10,8 @@ export class RegionalCenter {
     id: string;
     
     @Column('text',{
-      unique: true
+      unique: true,
+      nullable: false
     })
     name: string;
 

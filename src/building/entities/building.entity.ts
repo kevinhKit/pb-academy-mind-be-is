@@ -7,6 +7,7 @@ export class Building {
 
     @PrimaryColumn('text',{
         unique: true,
+        nullable: false
       })
     id: string;
 

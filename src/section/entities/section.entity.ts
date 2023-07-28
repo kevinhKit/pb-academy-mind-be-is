@@ -2,13 +2,13 @@ import { Class } from "src/class/entities/class.entity";
 import { Classroom } from "src/classroom/entities/classroom.entity";
 import { Period } from "src/period/entities/period.entity";
 import { Teacher } from "src/teacher/entities/teacher.entity";
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity('Section')
 export class Section {
 
     
-    @PrimaryColumn('text')
+    @PrimaryGeneratedColumn('uuid')
     id: string;
 
     @ManyToOne(
@@ -19,7 +19,10 @@ export class Section {
     })
     idPeriod: Period;
 
-    @Column('text')
+    @Column('text',{
+        unique: true,
+        nullable: false
+    })
     codeSection: string;
 
     @ManyToOne(
@@ -38,11 +41,13 @@ export class Section {
     })
     idTeacher: Teacher;
 
-    @Column('text')
+    @Column('text',{
+        nullable: false
+    })
     space: string;
 
     @Column('text')
-    days: string;
+    days: string; //esto deberia ser un enum
 
     // @Column('text')
     @ManyToOne(
@@ -53,7 +58,9 @@ export class Section {
     })
     idClassroom: Classroom;
 
-    @Column('text')
+    @Column('text',{
+        nullable: false
+    })
     hour: string;
 
     @Column('text')
