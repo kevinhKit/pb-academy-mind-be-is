@@ -47,7 +47,7 @@ export class Student {
   })
   description: string;
 
-  @Column('timestamp',{
+  @Column('timestamptz',{
     default: () => "current_timestamp"
   })
   create_at: Date;

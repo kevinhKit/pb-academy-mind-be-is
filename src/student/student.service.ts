@@ -13,6 +13,8 @@ import { AccountNumberService } from 'src/shared/account-number/account-number.s
 import { LoginStudentDto } from './dto/login-student.dto';
 import { ResetPasswordStudentDto } from './dto/reset-password-student.dto';
 import { ChangePasswordStudentDto } from './dto/change-password-student.dto';
+import { Career } from 'src/career/entities/career.entity';
+import { RegionalCenter } from 'src/regional-center/entities/regional-center.entity';
 
 @Injectable()
   export class StudentService {
@@ -28,15 +30,41 @@ import { ChangePasswordStudentDto } from './dto/change-password-student.dto';
 
     @InjectRepository(User) private userRepository: Repository<User>,
     @InjectRepository(Student) private studentRepository: Repository<Student>,
+    @InjectRepository(Career) private careerRepository: Repository<Career>,
+    @InjectRepository(RegionalCenter) private regionalCenterRepository: Repository<RegionalCenter>,
   ) {}
 
-  async create({dni, email,...others}: CreateStudentDto) {
+  async create({dni, email, career, regionalCenter, ...others}: CreateStudentDto) {
     try {
 
       const userExists = await this.userRepository.findOne({
         where:{dni: dni.replaceAll('-','')},
         relations:['teacher','student'],
       });
+
+      
+      // const regionalCenterExists = await this.regionalCenterRepository.findOne({
+      //   where:{
+      //     id: regionalCenter
+      //   },
+      //   relations: ['Caeer']
+      // })
+
+      // if(regionalCenterExists){
+      //   console.log(regionalCenterExists)
+      //   throw new NotFoundException('El centro enviada no existe')
+      // }
+
+      // const careerExists = await this.careerRepository.findOne({
+      //   where:{
+      //     idCareer: career
+      //   }
+      // })
+
+      // if(careerExists){
+      //   console.log(careerExists)
+      //   throw new NotFoundException('La carrear enviada no existe')
+      // }
 
       let userStudent = new User();
       if(!userExists){
@@ -119,6 +147,7 @@ import { ChangePasswordStudentDto } from './dto/change-password-student.dto';
       }
 
     } catch (error){
+      console.log(error)
       return this.printMessageError(error);
     }
    

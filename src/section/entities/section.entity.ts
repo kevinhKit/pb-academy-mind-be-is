@@ -48,5 +48,10 @@ export class Section {
     @Column('text')
     deletionJustification: string;
 
+    @Column('timestamptz',{
+        default: () => "current_timestamp"
+      })
+    create_at: Date;
+
 
 }

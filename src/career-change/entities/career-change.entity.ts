@@ -20,7 +20,7 @@ export class CareerChange {
   @JoinColumn({ name: 'accountNumber' })
   student: Student;
 
-  @ManyToOne(() => Career, (career) => career.idCareer)
+  @ManyToOne(() => Career, (career) => career.id)
   @JoinColumn({ name: 'idCareer' })
   career: Career;
 
@@ -39,4 +39,9 @@ export class CareerChange {
 
   @Column('text', { nullable: true })
   justificationPdf: string;
+
+  @Column('timestamptz',{
+    default: () => "current_timestamp"
+  })
+  create_at: Date;
 }
