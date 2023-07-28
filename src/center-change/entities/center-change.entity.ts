@@ -1,3 +1,4 @@
+import { CenterCareer } from 'src/center-career/entities/center-career.entity';
 import { RegionalCenter } from 'src/regional-center/entities/regional-center.entity';
 import { Student } from 'src/student/entities/student.entity';
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
@@ -20,9 +21,9 @@ export class CenterChange {
   @JoinColumn({ name: 'accountNumber' })
   student: Student;
 
-  @ManyToOne(() => RegionalCenter, (center) => center.id)
-  @JoinColumn({ name: 'id' })
-  regionlCenter: RegionalCenter;
+  @ManyToOne(() => CenterCareer, (centerCareer) => centerCareer.idCenterCareer)
+  @JoinColumn({ name: 'centerCareer' })
+  centerCareer: CenterCareer;
 
   @Column({ type: 'date', nullable: true })
   applicationDate: Date;
@@ -39,4 +40,15 @@ export class CenterChange {
 
   @Column('text', { nullable: true })
   justificationPdf: string;
+
+  @Column({
+    type: 'boolean',
+    default: true
+  })
+  status: boolean;
+
+  @Column('timestamptz',{
+    default: () => "current_timestamp",
+  })
+  opinionDate: Date;
 }
