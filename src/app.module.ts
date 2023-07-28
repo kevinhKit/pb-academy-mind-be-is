@@ -24,6 +24,7 @@ import { CenterCareerModule } from './center-career/center-career.module';
 import { CareerChangeModule } from './career-change/career-change.module';
 import { SectionModule } from './section/section.module';
 import { CenterChangeModule } from './center-change/center-change.module';
+import { TuitionModule } from './tuition/tuition.module';
 
 @Module({
   imports: [
@@ -65,6 +66,7 @@ import { CenterChangeModule } from './center-change/center-change.module';
     CareerChangeModule,
     SectionModule,
     CenterChangeModule,
+    TuitionModule,
   ],
 
   controllers: [AppController],
