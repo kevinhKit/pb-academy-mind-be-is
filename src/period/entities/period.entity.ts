@@ -1,39 +1,57 @@
-import { Section } from "src/section/entities/section.entity";
-import { StatePeriod } from "src/state-period/entities/state-period.entity";
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryColumn } from "typeorm";
+import { Section } from 'src/section/entities/section.entity';
+import { StatePeriod } from 'src/state-period/entities/state-period.entity';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+
+export enum numberPeriodOptions {
+  first = 1,
+  second = 2,
+  third = 3,
+}
 
 @Entity('Period')
 export class Period {
+  @PrimaryGeneratedColumn('increment')
+  id: number;
 
-    @PrimaryColumn('smallint',{
-        nullable: false
-    })
-    id: number;
+  @Column('smallint', {
+    default: new Date().getFullYear(),
+    nullable: false,
+  })
+  year: number;
 
-    @Column('smallint',{
-        default: new Date().getFullYear(),
-        nullable: false
-    })
-    year: number;
+  @Column({
+    type: 'enum',
+    enum: numberPeriodOptions,
+    nullable: false,
+  })
+  numberPeriod: number;
 
-    @Column('smallint',{
-        nullable: false
-    })
-    numberPeriod: number;
+  @Column('boolean', {
+    default: false,
+  })
+  replacementPaymentDate: boolean;
 
-    // @Column('smallint')
-    // status: number;
+  @Column('boolean', {
+    default: false,
+  })
+  exceptionalCancellationDate: boolean;
 
-    @ManyToOne(
-        () => StatePeriod, (statePeriod) => statePeriod.period
-    )
-    @JoinColumn({
-        name: 'idStatePeriod'
-    })
-    idStatePeriod: StatePeriod;
+  // @Column('smallint')
+  // status: number;
 
-    @OneToMany(() => Section, (section) => section.idPeriod)
-    section: Section;
+  @ManyToOne(() => StatePeriod, (statePeriod) => statePeriod.period)
+  @JoinColumn({
+    name: 'idStatePeriod',
+  })
+  idStatePeriod: StatePeriod;
 
-
+  @OneToMany(() => Section, (section) => section.idPeriod)
+  section: Section;
 }
