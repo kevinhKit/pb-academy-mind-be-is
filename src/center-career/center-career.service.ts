@@ -10,32 +10,31 @@ import { json } from 'node:stream/consumers';
 
 @Injectable()
 export class CenterCareerService {
-
   private readonly logger = new Logger('careerLogger');
 
   constructor(
-
-    @InjectRepository(CenterCareer) private centerCareerRepository: Repository<CenterCareer>,
-
+    @InjectRepository(CenterCareer)
+    private centerCareerRepository: Repository<CenterCareer>,
   ) {}
 
-  async create({idCareer, idCenter}: CreateCenterCareerDto) {
+  async create({ idCareer, idCenter }: CreateCenterCareerDto) {
     try {
-
       const careerExists = await this.centerCareerRepository.findOne({
-        where:{
-          career:{
-            id:idCareer.toUpperCase()
+        where: {
+          career: {
+            id: idCareer.toUpperCase(),
           },
-          regionalCenter:{
-            id:idCenter.toUpperCase()
+          regionalCenter: {
+            id: idCenter.toUpperCase(),
           },
-          status:true
-        }
+          status: true,
+        },
       });
 
-      if(careerExists){
-        throw new NotFoundException('La Carrera ya existe en este Centro Regional');
+      if (careerExists) {
+        throw new NotFoundException(
+          'La Carrera ya existe en este Centro Regional',
+        );
       }
 
       const centerCareer = await this.centerCareerRepository.create({
@@ -43,20 +42,18 @@ export class CenterCareerService {
         regionalCenter: { id: idCenter.toUpperCase() },
         // idCenterCareer:'d'
       });
-      
-      
 
-      const newCenterCareer = JSON.parse(JSON.stringify(await this.centerCareerRepository.save(centerCareer)))
+      const newCenterCareer = JSON.parse(
+        JSON.stringify(await this.centerCareerRepository.save(centerCareer)),
+      );
       newCenterCareer.career = newCenterCareer.career.id;
       newCenterCareer.regionalCenter = newCenterCareer.regionalCenter.id;
-
 
       return {
         statusCode: 200,
         message: this.printMessageLog('La Carrera se ha agregado exitosamente'),
-        centerCareer: newCenterCareer
-      }
-
+        centerCareer: newCenterCareer,
+      };
     } catch (error) {
       return this.printMessageError(error);
     }
@@ -78,15 +75,14 @@ export class CenterCareerService {
     return `This action removes a #${id} centerCareer`;
   }
 
-  printMessageLog(message){
+  printMessageLog(message) {
     this.logger.log(message);
     return message;
   }
 
-  printMessageError(message){
-    if(message.response){
-
-      if(message.response.message){
+  printMessageError(message) {
+    if (message.response) {
+      if (message.response.message) {
         this.logger.error(message.response.message);
         return message.response;
       }
