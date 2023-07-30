@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { StatePeriodService } from './state-period.service';
 import { CreateStatePeriodDto } from './dto/create-state-period.dto';
 import { UpdateStatePeriodDto } from './dto/update-state-period.dto';
@@ -23,7 +31,10 @@ export class StatePeriodController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateStatePeriodDto: UpdateStatePeriodDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateStatePeriodDto: UpdateStatePeriodDto,
+  ) {
     return this.statePeriodService.update(+id, updateStatePeriodDto);
   }
 
