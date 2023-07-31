@@ -28,7 +28,7 @@ export class StatePeriod {
     enum: Rol,
     default: Rol.DEFINNING,
   })
-  name: string;
+  name: Rol;
 
   @Column('boolean', {
     default: false,

@@ -1,9 +1,10 @@
-import { IsBoolean, IsString, IsOptional } from 'class-validator';
+import { IsBoolean, IsString, IsOptional, IsEnum } from 'class-validator';
+import { Rol } from '../entities/state-period.entity';
 
 export class CreateStatePeriodDto {
   @IsOptional()
-  @IsString({ message: 'El estado del periodo debe ser de tipo texto' })
-  name: string;
+  @IsEnum(Rol, { message: 'El estado del periodo debe ser de tipo texto' })
+  name: Rol;
 
   @IsOptional()
   @IsBoolean({ message: 'La fecha de reposicion debe ser de tipo booleano' })
