@@ -119,6 +119,19 @@ export class PeriodService {
           updatePeriodDto.exceptionalCancellationDate;
       }
 
+      if (updatePeriodDto.idStatePeriod !== undefined) {
+        const statePeriod = await this.statePeriodRepository.findOne({
+          where: { id: updatePeriodDto.idStatePeriod.id },
+        });
+
+        if (!statePeriod) {
+          throw new NotFoundException(
+            'El Estado del periodo proporcionado no fue encontrado',
+          );
+        }
+        period.idStatePeriod = updatePeriodDto.idStatePeriod;
+      }
+
       const updatedPeriod = await this.periodRepository.save(period);
 
       return {
