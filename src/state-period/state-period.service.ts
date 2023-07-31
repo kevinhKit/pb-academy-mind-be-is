@@ -16,6 +16,18 @@ export class StatePeriodService {
 
   async create(createStatePeriodDto: CreateStatePeriodDto) {
     try {
+      const statePeriodAlreadyExists = await this.statePeriodRepository.findOne(
+        {
+          where: {
+            name: createStatePeriodDto.name,
+          },
+        },
+      );
+
+      if (statePeriodAlreadyExists) {
+        throw new NotFoundException('El estado del periodo ya existe.');
+      }
+
       const statePeriod = await this.statePeriodRepository.create({
         name: createStatePeriodDto.name,
         replacementPaymentDate: createStatePeriodDto.replacementPaymentDate,
