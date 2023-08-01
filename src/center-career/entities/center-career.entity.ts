@@ -39,10 +39,10 @@ export class CenterCareer {
   create_at: Date;
 
   @OneToMany(() => StudentCareer, (studentCareer) => studentCareer.centerCareer)
-  studentCareer: StudentCareer[];
+  studentCareer: StudentCareer;
   
   @OneToMany(() => TeachingCareer, (teachingCareer) => teachingCareer.centerCareer)
-  teachingCareer: TeachingCareer[];
+  teachingCareer: TeachingCareer;
 
 
 }

@@ -34,4 +34,13 @@ export class CreateTeacherDto extends PartialType(PickType(CreateUserDto, ['dni'
   @IsString({message: "La Fotografia uno, no cumple el formtao requerido."})
   @IsNotEmpty({message: "No envió o dejo vacio el campo primer fotografia"})
   photoOne: string;
+
+
+  @IsString({message: "EL campo carrera debe ser de tipo texto"})
+  @IsNotEmpty({message: "No envió o dejo vacio el campo carrera"})
+  career: string;
+
+  @IsString({message: "EL centro regional debe ser de tipo texto"})
+  @IsNotEmpty({message: "No envió o dejo vacio el campo centro regional"})
+  regionalCenter: string;
 }

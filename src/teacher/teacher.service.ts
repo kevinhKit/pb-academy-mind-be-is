@@ -12,6 +12,8 @@ import { GenerateEmailService } from 'src/shared/generate-email/generate-email.s
 import { LoginTeacherDto } from './dto/login-teacher.dto';
 import { ResetPasswordTeacherDto } from './dto/reset-password-teacher.dto';
 import { ChangePasswordTeacherDto } from './dto/change-password-teacher.dto';
+import { CenterCareer } from 'src/center-career/entities/center-career.entity';
+import { TeachingCareer } from 'src/teaching-career/entities/teaching-career.entity';
 
 @Injectable()
 export class TeacherService {
@@ -26,9 +28,11 @@ export class TeacherService {
 
     @InjectRepository(User) private userRepository: Repository<User>,
     @InjectRepository(Teacher) private teacherRepository: Repository<Teacher>,
+    @InjectRepository(CenterCareer) private centerCareerRepository: Repository<CenterCareer>,
+    @InjectRepository(TeachingCareer) private teacherCareerRepository: Repository<TeachingCareer>,
   ) {}
 
-  async create({dni, email, photoOne, isBoss, isCoordinator,video,...others}: CreateTeacherDto) {
+  async create({dni, email, photoOne, isBoss, isCoordinator,video, regionalCenter, career,...others}: CreateTeacherDto) {
 
     try{
 
@@ -71,6 +75,21 @@ export class TeacherService {
         }
       });
 
+      const centerCareer = await this.centerCareerRepository.findOne({
+        where:{
+          career:{
+            id: career.toUpperCase()
+          },
+          regionalCenter:{
+            id: regionalCenter.toUpperCase()
+          }
+        }
+      });
+
+      if(!centerCareer){
+        throw new NotFoundException('La Carrera no existe en el centro regional proporcionado.')
+      }
+
       if(Emailteacher){
         throw new ConflictException('El Correo electrónico ya está siendo usado por otro Docente.')
       }
@@ -99,15 +118,31 @@ export class TeacherService {
         throw new BadRequestException('No se ha podido crear al docente');
       }
 
+      const teacherCareer = await this.teacherCareerRepository.create({
+        centerCareer: {
+          idCenterCareer: centerCareer.idCenterCareer
+        },
+        teacher: {
+          employeeNumber: newTeacher.employeeNumber
+        }
+      });
+
       await this.userRepository.save(userTeacher);
 
       newTeacher.user = userTeacher;
 
       await this.teacherRepository.save(newTeacher);
+      
+      await this.teacherCareerRepository.save(teacherCareer);
 
       const returnUser = {...JSON.parse(JSON.stringify(newTeacher.user))};
       returnUser.teacher = {...JSON.parse(JSON.stringify(newTeacher))};
+      returnUser.centerCareer = {...JSON.parse(JSON.stringify(teacherCareer))};
+      console.log(returnUser.centerCareer.idTeachingCareer)
+      returnUser.teachingCareer = returnUser.centerCareer.idTeachingCareer;
+      returnUser.centerCareer = returnUser.centerCareer.centerCareer.idCenterCareer;
       delete returnUser.teacher.user;
+      delete returnUser.student;
       await this.sendEmailService.sendCreationRegister(returnUser,generatePassword,'teacher')
 
       return {
@@ -117,6 +152,7 @@ export class TeacherService {
       }
 
     } catch(error){
+      console.log(error)
       return this.printMessageError(error);
     }
   }
