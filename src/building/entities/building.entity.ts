@@ -1,14 +1,11 @@
 import { Classroom } from "src/classroom/entities/classroom.entity";
 import { RegionalCenter } from "src/regional-center/entities/regional-center.entity";
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryColumn } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity('Building')
 export class Building {
 
-    @PrimaryColumn('text',{
-        unique: true,
-        nullable: false
-      })
+    @PrimaryGeneratedColumn('uuid')
     id: string;
 
     @Column('text',{
@@ -31,7 +28,7 @@ export class Building {
         () => RegionalCenter, (regionalCenter) => regionalCenter.id
     )
     @JoinColumn({name:"idRegionalCenter"})
-    idRegionalCenter: string;
+    idRegionalCenter: RegionalCenter;
 
     // @OneToMany(
     //     () => Classroom, (classroom) => classroom.idBuilding

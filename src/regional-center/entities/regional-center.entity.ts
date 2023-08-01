@@ -5,7 +5,8 @@ import { Column, Entity, OneToMany, PrimaryColumn } from "typeorm";
 export class RegionalCenter {
 
     @PrimaryColumn('text',{
-        unique: true
+        unique: true,
+        nullable: false
       })
     id: string;
     
@@ -21,7 +22,7 @@ export class RegionalCenter {
     @OneToMany(
       () => Building, (building) => building.idRegionalCenter
     )
-    building: string;
+    building: Building;
 
     @Column('timestamptz',{
       default: () => "current_timestamp"
