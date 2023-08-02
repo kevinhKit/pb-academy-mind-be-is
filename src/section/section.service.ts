@@ -1,4 +1,9 @@
-import { ConflictException, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateSectionDto } from './dto/create-section.dto';
 import { UpdateSectionDto } from './dto/update-section.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -11,118 +16,121 @@ import { Class } from 'src/class/entities/class.entity';
 
 @Injectable()
 export class SectionService {
-
-
   private readonly logger = new Logger('sectionLogger');
 
-
   constructor(
-
     @InjectRepository(Teacher) private teacherRepository: Repository<Teacher>,
     @InjectRepository(Section) private sectionRepository: Repository<Section>,
-    @InjectRepository(Classroom) private classroomRepository: Repository<Classroom>,
+    @InjectRepository(Classroom)
+    private classroomRepository: Repository<Classroom>,
     @InjectRepository(Period) private periodRepository: Repository<Period>,
     @InjectRepository(Class) private classRepository: Repository<Class>,
   ) {}
 
-  async create({idClass, codeSection,idPeriod, idTeacher, space, days, idClassroom, hour}: CreateSectionDto) {
+  async create({
+    idClass,
+    codeSection,
+    idPeriod,
+    idTeacher,
+    space,
+    days,
+    idClassroom,
+    hour,
+  }: CreateSectionDto) {
     try {
-      
       const sectionExist = await this.sectionRepository.findOne({
-        where:{
+        where: {
           idPeriod: {
-            id: +idPeriod
+            id: +idPeriod,
           },
           codeSection: codeSection,
           idClass: {
-            id: +idClass
+            id: +idClass,
           },
-          idTeacher:{
-            employeeNumber: idTeacher
+          idTeacher: {
+            employeeNumber: idTeacher,
           },
           space: space,
           idClassroom: {
-            id: idClassroom
+            id: idClassroom,
           },
           hour: hour,
-          days: days.join('')
-        }
+          days: days.join(''),
+        },
       });
 
-      if(sectionExist){
+      if (sectionExist) {
         throw new ConflictException('La sección ya existe actualmente');
       }
 
       const classExist = await this.classRepository.findOne({
-        where:{
-          id: +idClass
-        }
+        where: {
+          id: +idClass,
+        },
       });
 
-      if(!classExist){
+      if (!classExist) {
         throw new NotFoundException('No se ha encontrado la clase');
       }
 
       const periodExist = await this.periodRepository.findOne({
-        where:{
-          id: +idPeriod
-        }
+        where: {
+          id: +idPeriod,
+        },
       });
 
-      if(!periodExist){
+      if (!periodExist) {
         throw new NotFoundException('EL periodo enviado no existe');
       }
 
       const classroomExist = await this.classRepository.findOne({
-        where:{
-          id: +idClassroom
-        }
+        where: {
+          id: +idClassroom,
+        },
       });
 
-      if(!classroomExist){
+      if (!classroomExist) {
         throw new NotFoundException('El Aula enviada no existe');
       }
 
       const teacherExist = await this.teacherRepository.findOne({
-        where:{
-          employeeNumber: idTeacher
-        }
+        where: {
+          employeeNumber: idTeacher,
+        },
       });
 
-      if(!teacherExist){
+      if (!teacherExist) {
         throw new NotFoundException('No se ha encontrado al docente');
       }
 
       const newSection = await this.sectionRepository.create({
-          idPeriod: {
-            id: +idPeriod
-          },
-          codeSection: codeSection,
-          idClass: {
-            id: +idClass
-          },
-          idTeacher:{
-            employeeNumber: idTeacher
-          },
-          space: space,
-          idClassroom: {
-            id: idClassroom
-          },
-          hour: hour,
-          days: days.join('')
-      })
+        idPeriod: {
+          id: +idPeriod,
+        },
+        codeSection: codeSection,
+        idClass: {
+          id: +idClass,
+        },
+        idTeacher: {
+          employeeNumber: idTeacher,
+        },
+        space: space,
+        idClassroom: {
+          id: idClassroom,
+        },
+        hour: hour,
+        days: days.join(''),
+      });
 
       const saveSection = await this.sectionRepository.save(newSection);
-
 
       return {
         message: 'Se ha creado correctamente la sección',
         statusCode: 200,
         section: saveSection,
       };
-
     } catch (error) {
-      console.log(error)
+      console.log(error);
       return this.printMessageError(error);
     }
   }
@@ -162,7 +170,4 @@ export class SectionService {
     this.logger.error(message);
     return message;
   }
-
-
-
 }
