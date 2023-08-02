@@ -1,4 +1,11 @@
-import { BadRequestException, ConflictException, Injectable, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  Logger,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { CreateStudentDto } from './dto/create-student.dto';
 import { UpdateStudentDto } from './dto/update-student.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -16,8 +23,7 @@ import { CenterCareer } from 'src/center-career/entities/center-career.entity';
 import { StudentCareer } from 'src/student-career/entities/student-career.entity';
 
 @Injectable()
-  export class StudentService {
-
+export class StudentService {
   private readonly logger = new Logger('studentLogger');
 
   constructor(
@@ -29,94 +35,111 @@ import { StudentCareer } from 'src/student-career/entities/student-career.entity
 
     @InjectRepository(User) private userRepository: Repository<User>,
     @InjectRepository(Student) private studentRepository: Repository<Student>,
-    @InjectRepository(CenterCareer) private centerCareerRepository: Repository<CenterCareer>,
-    @InjectRepository(StudentCareer) private studentCareerRepository: Repository<StudentCareer>,
+    @InjectRepository(CenterCareer)
+    private centerCareerRepository: Repository<CenterCareer>,
+    @InjectRepository(StudentCareer)
+    private studentCareerRepository: Repository<StudentCareer>,
   ) {}
 
-  async create({dni, email, career, regionalCenter, ...others}: CreateStudentDto) {
+  async create({
+    dni,
+    email,
+    career,
+    regionalCenter,
+    ...others
+  }: CreateStudentDto) {
     try {
-
       const userExists = await this.userRepository.findOne({
-        where:{dni: dni.replaceAll('-','')},
-        relations:['teacher','student'],
+        where: { dni: dni.replaceAll('-', '') },
+        relations: ['teacher', 'student'],
       });
 
       const centerCareer = await this.centerCareerRepository.findOne({
-        where:{
-          career:{
-            id:career.toUpperCase()
+        where: {
+          career: {
+            id: career.toUpperCase(),
           },
-          regionalCenter:{
-            id:regionalCenter.toUpperCase()
+          regionalCenter: {
+            id: regionalCenter.toUpperCase(),
           },
-          status:true
+          status: true,
         },
-        relations:['career','regionalCenter']
+        relations: ['career', 'regionalCenter'],
       });
 
-      if(!centerCareer){
-        throw new NotFoundException('La carrera no existe en el centro regional enviado')
+      if (!centerCareer) {
+        throw new NotFoundException(
+          'La carrera no existe en el centro regional enviado',
+        );
       }
 
       let userStudent = new User();
-      if(!userExists){
-        userStudent = await this.userRepository.create(
-          {dni:dni.replaceAll('-',''),
-          ...others}
-        );
+      if (!userExists) {
+        userStudent = await this.userRepository.create({
+          dni: dni.replaceAll('-', ''),
+          ...others,
+        });
       } else {
         userStudent = userExists;
       }
 
-      if(Boolean(userStudent.student)){
-        throw new ConflictException('El usuario ya existe como Estudiante.')
+      if (Boolean(userStudent.student)) {
+        throw new ConflictException('El usuario ya existe como Estudiante.');
       }
 
       const EmailStudent = await this.studentRepository.findOne({
-        where:{
-          email:email.toLowerCase(),
-          user:{
-            dni:Not(dni.replaceAll('-',''))
-          }
-        }
+        where: {
+          email: email.toLowerCase(),
+          user: {
+            dni: Not(dni.replaceAll('-', '')),
+          },
+        },
       });
 
-      if(EmailStudent){
-        throw new ConflictException('El Correo electrónico ya está siendo usado por otro Estudiante.')
+      if (EmailStudent) {
+        throw new ConflictException(
+          'El Correo electrónico ya está siendo usado por otro Estudiante.',
+        );
       }
 
       const number = await this.studentRepository.find({
-        order:{
-          create_at: 'DESC'
-        }
-      })
+        order: {
+          create_at: 'DESC',
+        },
+      });
 
       let lastNumber = '0';
-      if(number.length > 0){
-        lastNumber  = number[0].accountNumber.slice(-5);
+      if (number.length > 0) {
+        lastNumber = number[0].accountNumber.slice(-5);
       }
 
-      const generatePassword = await this.encryptService.generatePassword()
-      const encripPassword = await this.encryptService.encodePassword(generatePassword)
-      const accountNumber = await this.accountNumberService.generate(lastNumber);
+      const generatePassword = await this.encryptService.generatePassword();
+      const encripPassword = await this.encryptService.encodePassword(
+        generatePassword,
+      );
+      const accountNumber = await this.accountNumberService.generate(
+        lastNumber,
+      );
 
       const newStudent = await this.studentRepository.create({
-        institutionalEmail : await this.generateEmailService.generate(
+        institutionalEmail: await this.generateEmailService.generate(
           others.firstName,
           others.secondName,
           others.firstLastName,
           others.secondLastName,
           this.studentRepository,
-          '@unah.hn'  
+          '@unah.hn',
         ),
         email: email.toLowerCase(),
         password: encripPassword,
         accountNumber: accountNumber,
-        incomeNote:Number(others.incomeNote)
+        incomeNote: Number(others.incomeNote),
       });
 
-      if(!newStudent){
-        throw new BadRequestException('No se ha podido crear el usuario de Estudiante');
+      if (!newStudent) {
+        throw new BadRequestException(
+          'No se ha podido crear el usuario de Estudiante',
+        );
       }
 
       await this.userRepository.save(userStudent);
@@ -127,100 +150,101 @@ import { StudentCareer } from 'src/student-career/entities/student-career.entity
 
       const studentCareer = await this.studentCareerRepository.create({
         student: {
-          accountNumber: newStudent.accountNumber
+          accountNumber: newStudent.accountNumber,
         },
-        centerCareer:{
-          idCenterCareer: centerCareer.idCenterCareer
-        }
-        })
+        centerCareer: {
+          idCenterCareer: centerCareer.idCenterCareer,
+        },
+      });
 
       await this.studentCareerRepository.save(studentCareer);
 
-
-
-      const returnUser = {...JSON.parse(JSON.stringify(newStudent.user))};
-      returnUser.student = {...JSON.parse(JSON.stringify(newStudent))};
+      const returnUser = { ...JSON.parse(JSON.stringify(newStudent.user)) };
+      returnUser.student = { ...JSON.parse(JSON.stringify(newStudent)) };
       delete returnUser.teacher;
       delete returnUser.student.user;
-      returnUser.student.centerCareer = JSON.parse(JSON.stringify(centerCareer.idCenterCareer));
-      returnUser.student.career = JSON.parse(JSON.stringify(centerCareer.career.name));
-      returnUser.student.regionalCenter = JSON.parse(JSON.stringify(centerCareer.regionalCenter.name));
+      returnUser.student.centerCareer = JSON.parse(
+        JSON.stringify(centerCareer.idCenterCareer),
+      );
+      returnUser.student.career = JSON.parse(
+        JSON.stringify(centerCareer.career.name),
+      );
+      returnUser.student.regionalCenter = JSON.parse(
+        JSON.stringify(centerCareer.regionalCenter.name),
+      );
       // returnUser.student.career = JSON.parse(JSON.stringify(centerCareer.idCenterCareer));
       // returnUser.student.regionalCenter = JSON.parse(JSON.stringify(centerCareer.idCenterCareer));
 
-
-      
-      await this.sendEmailService.sendCreationRegister(returnUser,generatePassword,'student')
+      await this.sendEmailService.sendCreationRegister(
+        returnUser,
+        generatePassword,
+        'student',
+      );
 
       return {
         statusCode: 200,
-        message: this.printMessageLog('El Estudiante se ha creado exitosamente'),
-        user: returnUser
-      }
-
-    } catch (error){
+        message: this.printMessageLog(
+          'El Estudiante se ha creado exitosamente',
+        ),
+        user: returnUser,
+      };
+    } catch (error) {
       return this.printMessageError(error);
     }
-   
   }
 
-
-  async login({accountNumber, email, password}: LoginStudentDto) {
+  async login({ accountNumber, email, password }: LoginStudentDto) {
     try {
       const user = await this.studentRepository.findOne({
         where: {
-          accountNumber
+          accountNumber,
         },
-        relations:['user']
+        relations: ['user'],
       });
 
       if (!user) {
         throw new BadRequestException('El Usuario no existe.');
       }
 
-      const ispassword = await this.encryptService.decodePassword(password, user.password)
-      if(!ispassword){
+      const ispassword = await this.encryptService.decodePassword(
+        password,
+        user.password,
+      );
+      if (!ispassword) {
         throw new UnauthorizedException('Contraseña invalida.');
       }
 
-      let returnUser = {...JSON.parse(JSON.stringify(user.user))};
+      let returnUser = { ...JSON.parse(JSON.stringify(user.user)) };
       returnUser.student = JSON.parse(JSON.stringify(user));
       delete returnUser.student.user;
       delete returnUser.student.password;
       delete returnUser.password;
-      
+
       return {
         authenticated: true,
-        user:returnUser,
-        statusCode: 200
+        user: returnUser,
+        statusCode: 200,
       };
     } catch (error) {
-      return this.printMessageError(error)
+      return this.printMessageError(error);
     }
   }
 
-
-
-
   async createMultiple(createStudentDto: CreateStudentDto[]) {
-
-    const response = []
+    const response = [];
 
     for (const [, createStudent] of createStudentDto.entries()) {
-
       let student = await this.create(createStudent);
 
       response.push({
-        message:student.message,
-        student:createStudent.dni,
-        success:(student.statusCode == 200) ? true : false
+        message: student.message,
+        student: createStudent.dni,
+        success: student.statusCode == 200 ? true : false,
       });
-
     }
 
     return response;
-    
-  
+
     // const newUsers = [];
     // const newStudents = [];
     // const newMails = [];
@@ -311,38 +335,51 @@ import { StudentCareer } from 'src/student-career/entities/student-career.entity
 
   findAll() {
     const allStudents = this.studentRepository.find({ relations: ['user'] });
-    return allStudents;
+    return {
+      statusCode: 200,
+      message: 'Los estudiantes han sido devueltos exitosamente.',
+      students: allStudents,
+    };
   }
 
   findOne(id: number) {
     return `Está acción devuelve al estudiante con el id  #${id}`;
   }
 
-  async update(id: string, {email, photoOne, photoTwo, photoThree,description, ...others}: UpdateStudentDto) {
+  async update(
+    id: string,
+    {
+      email,
+      photoOne,
+      photoTwo,
+      photoThree,
+      description,
+      ...others
+    }: UpdateStudentDto,
+  ) {
     try {
       const student = await this.studentRepository.findOne({
         where: {
           user: {
-            dni: id.replaceAll('-','')
+            dni: id.replaceAll('-', ''),
           },
         },
         relations: ['user'],
       });
 
-      if(!student){
-       throw new NotFoundException('El Estudiante no se ha encontrado.');
+      if (!student) {
+        throw new NotFoundException('El Estudiante no se ha encontrado.');
       }
 
-
       const user = await this.userRepository.preload({
-        dni: id.replaceAll('-',''),
+        dni: id.replaceAll('-', ''),
         ...others,
       });
 
-      email = (email) ? email.toLowerCase() : email;
+      email = email ? email.toLowerCase() : email;
 
       const updateChangeStudent = await this.studentRepository.preload({
-        accountNumber:student.accountNumber,
+        accountNumber: student.accountNumber,
         photoOne,
         photoTwo,
         photoThree,
@@ -361,10 +398,10 @@ import { StudentCareer } from 'src/student-career/entities/student-career.entity
       return {
         message: 'Se ha actualizado correctamente el estudiante',
         statusCode: 200,
-        user:returnStudent,
+        user: returnStudent,
       };
     } catch (error) {
-      return this.printMessageError(error)
+      return this.printMessageError(error);
     }
   }
 
@@ -372,41 +409,50 @@ import { StudentCareer } from 'src/student-career/entities/student-career.entity
     return `Está acción elimina al estudiante con el id #${id}`;
   }
 
-  async changePassword(id: string,{password, newPassword}: ChangePasswordStudentDto){
-    try{
+  async changePassword(
+    id: string,
+    { password, newPassword }: ChangePasswordStudentDto,
+  ) {
+    try {
       const user = await this.studentRepository.findOne({
-        where:{
-          user:{
-            dni:id.replaceAll('-','')
-          }
-        }
-      })
+        where: {
+          user: {
+            dni: id.replaceAll('-', ''),
+          },
+        },
+      });
 
-      if(!user){
+      if (!user) {
         throw new NotFoundException('El Estudiante no se ha encontrado.');
       }
 
-      const ispassword = await this.encryptService.decodePassword(password, user.password)
-      if(!ispassword){
+      const ispassword = await this.encryptService.decodePassword(
+        password,
+        user.password,
+      );
+      if (!ispassword) {
         throw new UnauthorizedException('Contraseña invalida.');
       }
-      
-      const encripPassword = await this.encryptService.encodePassword(newPassword);
-      
+
+      const encripPassword = await this.encryptService.encodePassword(
+        newPassword,
+      );
+
       const studentChange = await this.studentRepository.preload({
-        accountNumber:user.accountNumber,
-        password:encripPassword
-      })
+        accountNumber: user.accountNumber,
+        password: encripPassword,
+      });
 
       await this.studentRepository.save(studentChange);
 
       return {
         statusCode: 200,
         // user,
-        message: this.printMessageLog("La contraseña se ha cambiado exitosamente")
-      }
-
-    } catch (error){
+        message: this.printMessageLog(
+          'La contraseña se ha cambiado exitosamente',
+        ),
+      };
+    } catch (error) {
       return this.printMessageError(error);
     }
   }
@@ -439,15 +485,14 @@ import { StudentCareer } from 'src/student-career/entities/student-career.entity
   //   return new HttpException('Contraseña reiniciada.', HttpStatus.OK);
   // }
 
-  printMessageLog(message){
+  printMessageLog(message) {
     this.logger.log(message);
     return message;
   }
 
-  printMessageError(message){
-    if(message.response){
-
-      if(message.response.message){
+  printMessageError(message) {
+    if (message.response) {
+      if (message.response.message) {
         this.logger.error(message.response.message);
         return message.response;
       }
@@ -460,44 +505,47 @@ import { StudentCareer } from 'src/student-career/entities/student-career.entity
     return message;
   }
 
-  async resetPassword( {dni}: ResetPasswordStudentDto){
-    try{
+  async resetPassword({ dni }: ResetPasswordStudentDto) {
+    try {
       const user = await this.studentRepository.findOne({
-        where:{
-          user:{
-            dni:dni.replaceAll('-','')
-          }
+        where: {
+          user: {
+            dni: dni.replaceAll('-', ''),
+          },
         },
-        relations:['user']
-      })
+        relations: ['user'],
+      });
 
-      
-      if(!user){
+      if (!user) {
         throw new NotFoundException('El Usuario no se ha encontrado.');
       }
-      
+
       const generatePassword = await this.encryptService.generatePassword();
-      const encripPassword = await this.encryptService.encodePassword(generatePassword);
-      
+      const encripPassword = await this.encryptService.encodePassword(
+        generatePassword,
+      );
+
       const studentChange = await this.studentRepository.preload({
-        accountNumber:user.accountNumber,
-        password:encripPassword
-      })
-      studentChange.user = user.user
-      
+        accountNumber: user.accountNumber,
+        password: encripPassword,
+      });
+      studentChange.user = user.user;
+
       await this.studentRepository.save(studentChange);
-      await this.sendEmailService.sendNewPassword(studentChange,generatePassword,'student');
+      await this.sendEmailService.sendNewPassword(
+        studentChange,
+        generatePassword,
+        'student',
+      );
 
       return {
         statusCode: 200,
-        message: this.printMessageLog("La contraseña se ha cambiado exitosamente")
-      }
-
-    } catch (error){
+        message: this.printMessageLog(
+          'La contraseña se ha cambiado exitosamente',
+        ),
+      };
+    } catch (error) {
       return this.printMessageError(error);
     }
   }
-
-
-
 }

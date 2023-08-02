@@ -6,6 +6,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Class } from './entities/class.entity';
 import { RequirementClass } from 'src/requirement-class/entities/requirement-class.entity';
+import { Career } from 'src/career/entities/career.entity';
+import { CareerClass } from 'src/career-class/entities/career-class.entity';
 
 @Injectable()
 export class ClassService {
@@ -15,10 +17,22 @@ export class ClassService {
     @InjectRepository(Class) private classRepository: Repository<Class>,
     @InjectRepository(RequirementClass)
     private requirementClassRepository: Repository<RequirementClass>,
+    @InjectRepository(Career) private careerRepository: Repository<Career>,
+    @InjectRepository(CareerClass)
+    private careerClassRepository: Repository<CareerClass>,
   ) {}
 
   async create(createClassDto: CreateClassDto) {
     try {
+      const validCareer = await this.careerRepository.findOne({
+        where: { id: `${createClassDto.careerId}` },
+      });
+
+      if (!validCareer) {
+        console.log('la carrera no existe');
+        throw new NotFoundException('La carrera no existe');
+      }
+
       const validClass = await this.validateRequisites(
         createClassDto.requisites,
       );
@@ -52,6 +66,13 @@ export class ClassService {
           relations: ['classCurrent', 'classCurrent.idRequirement'],
         });
       }
+
+      const careerClass = await this.careerClassRepository.create({
+        idClass: newClass.id,
+        idCareer: createClassDto.careerId,
+      });
+
+      await this.careerClassRepository.save(careerClass);
 
       return {
         statusCode: 200,
