@@ -14,7 +14,6 @@ export class Classroom {
   id: string;
 
   @Column('text', {
-    unique: true,
     nullable: false,
     // default: null
   })

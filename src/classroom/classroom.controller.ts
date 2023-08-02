@@ -1,7 +1,17 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { ClassroomService } from './classroom.service';
 import { CreateClassroomDto } from './dto/create-classroom.dto';
 import { UpdateClassroomDto } from './dto/update-classroom.dto';
+import { RegionalCenter } from 'src/regional-center/entities/regional-center.entity';
+import { Building } from 'src/building/entities/building.entity';
 
 @Controller('classroom')
 export class ClassroomController {
@@ -17,13 +27,21 @@ export class ClassroomController {
     return this.classroomService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.classroomService.findOne(+id);
+  @Get(':regionalCenterId/:buildingId')
+  findOne(
+    @Param('regionalCenterId')
+    regionalCenterId: RegionalCenter,
+    @Param('buildingId')
+    buildingId: Building,
+  ) {
+    return this.classroomService.findOne(regionalCenterId, buildingId);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateClassroomDto: UpdateClassroomDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateClassroomDto: UpdateClassroomDto,
+  ) {
     return this.classroomService.update(+id, updateClassroomDto);
   }
 

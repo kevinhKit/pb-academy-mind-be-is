@@ -130,7 +130,6 @@ export class SectionService {
         section: saveSection,
       };
     } catch (error) {
-      console.log(error);
       return this.printMessageError(error);
     }
   }

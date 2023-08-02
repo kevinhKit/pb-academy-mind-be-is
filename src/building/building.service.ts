@@ -33,9 +33,6 @@ export class BuildingService {
         },
       });
 
-      console.log(regionalCenter.toUpperCase());
-      console.log(building);
-
       const regionalCenterExist = await this.regionalCenterRepository.findOne({
         where: {
           id: regionalCenter.toUpperCase(),
@@ -96,14 +93,11 @@ export class BuildingService {
       if (!validRegionalCenter) {
         throw new NotFoundException('El centro regional no existe');
       }
-      console.log('antes');
 
       const centerBuildings = await this.buildingRepository.find({
         where: { idRegionalCenter: { id: regionalCenterId } },
         relations: ['idRegionalCenter'],
       });
-
-      console.log('despues');
 
       return {
         statusCode: 200,
