@@ -170,7 +170,6 @@ export class TeacherService {
       returnUser.centerCareer = {
         ...JSON.parse(JSON.stringify(teacherCareer)),
       };
-      console.log(returnUser.centerCareer.idTeachingCareer);
       returnUser.teachingCareer = returnUser.centerCareer.idTeachingCareer;
       returnUser.centerCareer =
         returnUser.centerCareer.centerCareer.idCenterCareer;
@@ -188,7 +187,6 @@ export class TeacherService {
         user: returnUser,
       };
     } catch (error) {
-      console.log(error);
       return this.printMessageError(error);
     }
   }

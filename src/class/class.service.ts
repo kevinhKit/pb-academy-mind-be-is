@@ -29,7 +29,6 @@ export class ClassService {
       });
 
       if (!validCareer) {
-        console.log('la carrera no existe');
         throw new NotFoundException('La carrera no existe');
       }
 

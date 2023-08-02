@@ -10,6 +10,7 @@ import { Classroom } from './entities/classroom.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Building } from 'src/building/entities/building.entity';
+import { RegionalCenter } from 'src/regional-center/entities/regional-center.entity';
 
 @Injectable()
 export class ClassroomService {
@@ -22,35 +23,49 @@ export class ClassroomService {
     private buildingRepository: Repository<Building>,
   ) {}
 
-  async create({ codeClass, building }: CreateClassroomDto) {
+  async create({
+    codeClass,
+    building,
+    regionalCenterId: id,
+  }: CreateClassroomDto) {
     try {
-      const classroomExits = await this.classrommRepository.findOne({
+      let regionalCenterId = `${id}`;
+      regionalCenterId = regionalCenterId.toUpperCase();
+
+      let buildingId = `${building}`;
+      buildingId = buildingId.toUpperCase();
+
+      const classRoomExits = await this.classrommRepository.findOne({
         where: {
-          code: codeClass.toUpperCase(),
+          code: codeClass,
           idBuilding: {
-            id: building,
+            name: buildingId,
+            idRegionalCenter: { id: regionalCenterId },
           },
         },
+        relations: ['idBuilding'],
       });
+
+      if (classRoomExits) {
+        throw new NotFoundException('La aula ya existe');
+      }
 
       const buildingExits = await this.buildingRepository.findOne({
         where: {
-          id: building,
+          name: buildingId,
+          idRegionalCenter: { id: regionalCenterId },
         },
+        relations: ['idRegionalCenter'],
       });
 
       if (!buildingExits) {
         throw new NotFoundException('El edificio proporcionado no existe');
       }
 
-      if (classroomExits) {
-        throw new ConflictException('El aula ya existe en este edificio.');
-      }
-
       const newClassroom = await this.classrommRepository.create({
         code: codeClass.toUpperCase(),
         idBuilding: {
-          id: building,
+          id: buildingExits.id,
         },
       });
 
@@ -62,23 +77,47 @@ export class ClassroomService {
         message: this.printMessageLog('El aula se ha creado exitosamente'),
       };
     } catch (error) {
-      console.log(error);
       return this.printMessageError(error);
     }
   }
 
   async findAll() {
-    const classRooms = await this.classrommRepository.find();
+    const classRooms = await this.classrommRepository.find({
+      relations: ['idBuilding', 'idBuilding.idRegionalCenter'],
+    });
     return {
       statusCode: 200,
-      message: this.printMessageLog('Las aulas se ha creado exitosamente'),
+      message: this.printMessageLog('Las aulas se han devuelto exitosamente'),
       classRooms,
     };
-    return `This action returns all classroom`;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} classroom`;
+  async findOne(regionalCenterId: RegionalCenter, buildingId: Building) {
+    try {
+      let buildingName = `${buildingId}`;
+      buildingName = buildingName.toUpperCase();
+
+      let regionalCenter = `${regionalCenterId}`;
+      regionalCenter = regionalCenter.toUpperCase();
+
+      const classRooms = await this.classrommRepository.find({
+        where: {
+          idBuilding: {
+            name: buildingName,
+            idRegionalCenter: { id: regionalCenter },
+          },
+        },
+        relations: ['idBuilding', 'idBuilding.idRegionalCenter'],
+      });
+
+      return {
+        statusCode: 200,
+        message: this.printMessageLog('Las aulas se han devuelto exitosamente'),
+        classRooms,
+      };
+    } catch (error) {
+      return this.printMessageError(error);
+    }
   }
 
   update(id: number, updateClassroomDto: UpdateClassroomDto) {
