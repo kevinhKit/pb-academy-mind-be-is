@@ -49,8 +49,17 @@ export class RegionalCenterService {
     }
   }
 
-  findAll() {
-    return `This action returns all regionalCenter`;
+  async findAll() {
+    try {
+      const allCareer = await this.regionalCenterRepository.find();
+      return {
+        statusCode: 200,
+        message: this.printMessageLog('Todas los centros regionales han sido obtenidas exitosamente'),
+        careers: allCareer
+      }
+    } catch (error) {
+      return this.printMessageError(error);
+    }
   }
 
   findOne(id: number) {

@@ -49,8 +49,17 @@ export class CareerService {
     }
   }
 
-  findAll() {
-    return `This action returns all career`;
+  async findAll() {
+    try {
+      const allCareer = await this.careerRepository.find();
+      return {
+        statusCode: 200,
+        message: this.printMessageLog('Todas las carreras han sido obtenidas exitosamente'),
+        careers: allCareer
+      }
+    } catch (error) {
+      return this.printMessageError(error);
+    }
   }
 
   findOne(id: number) {
