@@ -24,9 +24,7 @@ export class ClassService {
 
   async create(createClassDto: CreateClassDto) {
     try {
-      const validCareer = await this.careerRepository.findOne({
-        where: { id: `${createClassDto.careerId}` },
-      });
+      const validCareer = await this.validateCareers(createClassDto.careerId);
 
       if (!validCareer) {
         throw new NotFoundException('La carrera no existe');
@@ -66,12 +64,14 @@ export class ClassService {
         });
       }
 
-      const careerClass = await this.careerClassRepository.create({
-        idClass: newClass.id,
-        idCareer: createClassDto.careerId,
-      });
+      const careerClass = createClassDto.careerId.map((career) =>
+        this.careerClassRepository.create({
+          idClass: newClass.id,
+          idCareer: career,
+        }),
+      );
 
-      await this.careerClassRepository.save(careerClass);
+      await this.careerClassRepository.insert(careerClass);
 
       return {
         statusCode: 200,
@@ -144,6 +144,18 @@ export class ClassService {
     );
 
     return validClassIds.every(Boolean);
+  }
+
+  async validateCareers(careers: Career[]) {
+    const validCareerIds = await Promise.all(
+      careers.map(async (id) => {
+        const career = await this.careerRepository.findOne({
+          where: { id: `${id}` },
+        });
+        return career;
+      }),
+    );
+    return validCareerIds.every(Boolean);
   }
 
   printMessageLog(message) {

@@ -3,8 +3,11 @@ import { Class } from '../entities/class.entity';
 import { Career } from 'src/career/entities/career.entity';
 
 export class CreateClassDto {
-  @IsString({ message: 'El codigo de la carrera debe ser de tipo texto' })
-  careerId: Career;
+  @IsString({
+    each: true,
+    message: 'El codigo de la carrera debe ser de tipo texto',
+  })
+  careerId: Career[];
 
   @IsString({ message: 'El codigo de la clase debe ser de tipo texto' })
   code: string;
