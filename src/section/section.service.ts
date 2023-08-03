@@ -80,7 +80,7 @@ export class SectionService {
 
       const existingSection = await this.sectionRepository.findOne({
         where: {
-          idPeriod: idPeriod,
+          idPeriod: { id: +idPeriod },
           hour: hour,
           idTeacher: { employeeNumber: `${idTeacher}` },
         },
@@ -187,6 +187,72 @@ export class SectionService {
         message: 'Se ha devuelto la seccion exitosamente',
         statusCode: 200,
         section,
+      };
+    } catch (error) {
+      return this.printMessageError(error);
+    }
+  }
+
+  async findTeacher(id: Teacher, periodId: Period) {
+    try {
+      let periodExist = null;
+      let teacherSections;
+
+      const teacherExist = await this.teacherRepository.findOne({
+        where: {
+          employeeNumber: `${id}`,
+        },
+      });
+
+      if (!teacherExist) {
+        throw new NotFoundException('No se ha encontrado al docente');
+      }
+
+      if (periodId) {
+        periodExist = await this.periodRepository.findOne({
+          where: {
+            id: +periodId,
+          },
+        });
+
+        if (!periodExist) {
+          throw new NotFoundException('EL periodo enviado no existe');
+        }
+      }
+
+      if (periodExist === null) {
+        teacherSections = await this.sectionRepository.find({
+          where: { idTeacher: { employeeNumber: `${id}` } },
+          relations: [
+            'idPeriod',
+            'idPeriod.idStatePeriod',
+            'idClass',
+            'idTeacher',
+            'idClassroom',
+            'idClassroom.idBuilding.idRegionalCenter',
+          ],
+        });
+      } else {
+        teacherSections = await this.sectionRepository.find({
+          where: {
+            idTeacher: { employeeNumber: `${id}` },
+            idPeriod: { id: +periodId },
+          },
+          relations: [
+            'idPeriod',
+            'idPeriod.idStatePeriod',
+            'idClass',
+            'idTeacher',
+            'idClassroom',
+            'idClassroom.idBuilding.idRegionalCenter',
+          ],
+        });
+      }
+
+      return {
+        message: `Se han devuelto las secciones del docente ${id}`,
+        statusCode: 200,
+        section: teacherSections,
       };
     } catch (error) {
       return this.printMessageError(error);
