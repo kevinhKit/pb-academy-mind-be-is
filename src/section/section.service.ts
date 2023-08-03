@@ -178,6 +178,11 @@ export class SectionService {
           'idClassroom.idBuilding.idRegionalCenter',
         ],
       });
+
+      if (!section) {
+        throw new NotFoundException('La seccion no existe.');
+      }
+
       return {
         message: 'Se ha devuelto la seccion exitosamente',
         statusCode: 200,
@@ -192,8 +197,21 @@ export class SectionService {
     return `This action updates a #${id} section`;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} section`;
+  async remove(id: string) {
+    const validateSection = await this.sectionRepository.findOne({
+      where: { id: id },
+    });
+
+    if (!validateSection) {
+      throw new NotFoundException('La seccion no existe.');
+    }
+
+    await this.sectionRepository.delete(id);
+
+    return {
+      message: 'Se ha eliminado la seccion exitosamente',
+      statusCode: 200,
+    };
   }
 
   printMessageLog(message) {
