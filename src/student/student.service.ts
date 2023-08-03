@@ -333,8 +333,8 @@ export class StudentService {
     // };
   }
 
-  findAll() {
-    const allStudents = this.studentRepository.find({ relations: ['user'] });
+  async findAll() {
+    const allStudents = await this.studentRepository.find({ relations: ['user'] });
     return {
       statusCode: 200,
       message: 'Los estudiantes han sido devueltos exitosamente.',
@@ -342,7 +342,7 @@ export class StudentService {
     };
   }
 
-  findOne(id: number) {
+  async findOne(id: number) {
     return `Está acción devuelve al estudiante con el id  #${id}`;
   }
 

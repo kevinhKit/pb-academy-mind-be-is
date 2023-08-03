@@ -228,8 +228,8 @@ export class TeacherService {
     }
   }
 
-  findAll() {
-    const allTeachers = this.teacherRepository.find({ relations: ['user'] });
+  async findAll() {
+    const allTeachers = await this.teacherRepository.find({ relations: ['user'] });
     return {
       statusCode: 200,
       message: 'Los docentes han sido devueltos exitosamente.',
@@ -237,7 +237,7 @@ export class TeacherService {
     };
   }
 
-  findOne(id: number) {
+  async findOne(id: number) {
     return `This action returns a #${id} teacher`;
   }
 
