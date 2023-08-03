@@ -1,5 +1,6 @@
 import {
   Controller,
+  Query,
   Get,
   Post,
   Body,
@@ -10,6 +11,8 @@ import {
 import { SectionService } from './section.service';
 import { CreateSectionDto } from './dto/create-section.dto';
 import { UpdateSectionDto } from './dto/update-section.dto';
+import { Teacher } from 'src/teacher/entities/teacher.entity';
+import { Period } from 'src/period/entities/period.entity';
 
 @Controller('section')
 export class SectionController {
@@ -28,6 +31,11 @@ export class SectionController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.sectionService.findOne(id);
+  }
+
+  @Get('teacher/:id')
+  findTeacher(@Param('id') id: Teacher, @Query('periodId') periodId?: Period) {
+    return this.sectionService.findTeacher(id, periodId);
   }
 
   @Patch(':id')
