@@ -197,7 +197,7 @@ export class TeacherService {
         where: {
           employeeNumber,
         },
-        relations: ['user'],
+        relations: ['user','teachingCareer','teachingCareer.centerCareer','teachingCareer.centerCareer.career','teachingCareer.centerCareer.regionalCenter'],
       });
 
       if (!user) {

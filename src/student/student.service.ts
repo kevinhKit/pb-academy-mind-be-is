@@ -199,7 +199,7 @@ export class StudentService {
         where: {
           accountNumber,
         },
-        relations: ['user'],
+        relations: ['user','studentCareer','studentCareer.centerCareer','studentCareer.centerCareer.career','studentCareer.centerCareer.regionalCenter'],
       });
 
       if (!user) {
