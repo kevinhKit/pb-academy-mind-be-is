@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { SectionService } from './section.service';
 import { CreateSectionDto } from './dto/create-section.dto';
 import { UpdateSectionDto } from './dto/update-section.dto';
@@ -19,7 +27,7 @@ export class SectionController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.sectionService.findOne(+id);
+    return this.sectionService.findOne(id);
   }
 
   @Patch(':id')
