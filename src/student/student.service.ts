@@ -334,7 +334,7 @@ export class StudentService {
   }
 
   async findAll() {
-    const allStudents = await this.studentRepository.find({ relations: ['user'] });
+    const allStudents = await this.studentRepository.find({ relations: ['user','studentCareer','studentCareer.centerCareer','studentCareer.centerCareer.career','studentCareer.centerCareer.regionalCenter'] });
     return {
       statusCode: 200,
       message: 'Los estudiantes han sido devueltos exitosamente.',

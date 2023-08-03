@@ -179,8 +179,13 @@ export class UserService {
 
 
   
-  findAll() {
-    return `Esta opción retorna todos los usuarios`;
+  async findAll() {
+    const alladmins = await this.userRepository.find({ relations: ['user'] });
+    return {
+      statusCode: 200,
+      message: 'Los administradores han sido devueltos exitosamente.',
+      students: alladmins,
+    };
   }
 
 
