@@ -78,8 +78,6 @@ export class SectionService {
         throw new NotFoundException('No se ha encontrado al docente');
       }
 
-      console.log('antes');
-
       const existingSection = await this.sectionRepository.findOne({
         where: {
           idPeriod: idPeriod,
@@ -93,8 +91,6 @@ export class SectionService {
           'Ya existe una seccion a esa hora con ese docente.',
         );
       }
-      console.log('despues');
-
       let sectionExist;
       let sectionIterator = 0;
       let finalSectionCode = '';

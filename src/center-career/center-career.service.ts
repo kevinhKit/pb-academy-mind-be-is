@@ -61,37 +61,79 @@ export class CenterCareerService {
 
   async findAll() {
     try {
-      const allCenterCareers = await this.centerCareerRepository.find({ relations: ['career', 'regionalCenter'] });
+      const allCenterCareers = await this.centerCareerRepository.find({
+        relations: ['career', 'regionalCenter'],
+      });
 
-      const centerCareersByRegionalCenter = allCenterCareers.reduce((result, centerCareer) => {
-        const { regionalCenter, career } = centerCareer;
-        const regionalCenterId = regionalCenter.id;
-  
-        if (!result[regionalCenterId]) {
-          result[regionalCenterId] = {
-            ...regionalCenter,
-            careers: []
-          };
-        }
-  
-        result[regionalCenterId].careers.push(career);
-        return result;
-      }, {});
-  
+      const centerCareersByRegionalCenter = allCenterCareers.reduce(
+        (result, centerCareer) => {
+          const { regionalCenter, career } = centerCareer;
+          const regionalCenterId = regionalCenter.id;
+
+          if (!result[regionalCenterId]) {
+            result[regionalCenterId] = {
+              ...regionalCenter,
+              careers: [],
+            };
+          }
+
+          result[regionalCenterId].careers.push(career);
+          return result;
+        },
+        {},
+      );
+
       const response = Object.values(centerCareersByRegionalCenter);
-  
+
       return {
         statusCode: 200,
-        message: this.printMessageLog('Todas los centros regionales han sido obtenidas con sus respectivas carreras exitosamente'),
-        centerCareers: response
+        message: this.printMessageLog(
+          'Todas los centros regionales han sido obtenidas con sus respectivas carreras exitosamente',
+        ),
+        centerCareers: response,
       };
     } catch (error) {
       return this.printMessageError(error);
     }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} centerCareer`;
+  async findOne(id: RegionalCenter) {
+    let regionalCenterId = `${id}`;
+    regionalCenterId = regionalCenterId.toUpperCase();
+    try {
+      const careersCenter = await this.centerCareerRepository.find({
+        where: { regionalCenter: { id: regionalCenterId } },
+        relations: ['regionalCenter', 'career'],
+      });
+
+      const centerCareersByRegionalCenter = careersCenter.reduce(
+        (result, centerCareer) => {
+          const { regionalCenter, career } = centerCareer;
+          const regionalCenterId = regionalCenter.id;
+
+          if (!result[regionalCenterId]) {
+            result[regionalCenterId] = {
+              ...regionalCenter,
+              careers: [],
+            };
+          }
+
+          result[regionalCenterId].careers.push(career);
+          return result;
+        },
+        {},
+      );
+
+      return {
+        statusCode: 200,
+        message: this.printMessageLog(
+          'Todas las carreras del centro regional han sido devueltas exitosamente',
+        ),
+        careersCenter: centerCareersByRegionalCenter,
+      };
+    } catch (error) {
+      return this.printMessageError(error);
+    }
   }
 
   update(id: number, updateCenterCareerDto: UpdateCenterCareerDto) {
