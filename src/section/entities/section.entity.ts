@@ -23,7 +23,6 @@ export class Section {
   idPeriod: Period;
 
   @Column('text', {
-    unique: true,
     nullable: false,
   })
   codeSection: string;
@@ -46,7 +45,7 @@ export class Section {
   space: string;
 
   @Column('text')
-  days: string; //esto deberia ser un enum
+  days: string;
 
   // @Column('text')
   @ManyToOne(() => Classroom, (clssroom) => clssroom.id)
@@ -60,10 +59,19 @@ export class Section {
   })
   hour: string;
 
-  @Column('text')
-  state: string;
+  @Column('text', {
+    nullable: false,
+  })
+  finalHour: string;
 
-  @Column('text')
+  @Column('text', {
+    default: true,
+  })
+  state: boolean;
+
+  @Column('text', {
+    nullable: true,
+  })
   deletionJustification: string;
 
   @Column('timestamptz', {

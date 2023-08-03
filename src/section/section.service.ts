@@ -29,40 +29,15 @@ export class SectionService {
 
   async create({
     idClass,
-    codeSection,
     idPeriod,
     idTeacher,
     space,
     days,
     idClassroom,
     hour,
+    finalHour,
   }: CreateSectionDto) {
     try {
-      const sectionExist = await this.sectionRepository.findOne({
-        where: {
-          idPeriod: {
-            id: +idPeriod,
-          },
-          codeSection: codeSection,
-          idClass: {
-            id: +idClass,
-          },
-          idTeacher: {
-            employeeNumber: idTeacher,
-          },
-          space: space,
-          idClassroom: {
-            id: idClassroom,
-          },
-          hour: hour,
-          days: days.join(''),
-        },
-      });
-
-      if (sectionExist) {
-        throw new ConflictException('La sección ya existe actualmente');
-      }
-
       const classExist = await this.classRepository.findOne({
         where: {
           id: +idClass,
@@ -83,9 +58,9 @@ export class SectionService {
         throw new NotFoundException('EL periodo enviado no existe');
       }
 
-      const classroomExist = await this.classRepository.findOne({
+      const classroomExist = await this.classroomRepository.findOne({
         where: {
-          id: +idClassroom,
+          id: `${idClassroom}`,
         },
       });
 
@@ -95,7 +70,7 @@ export class SectionService {
 
       const teacherExist = await this.teacherRepository.findOne({
         where: {
-          employeeNumber: idTeacher,
+          employeeNumber: `${idTeacher}`,
         },
       });
 
@@ -103,43 +78,118 @@ export class SectionService {
         throw new NotFoundException('No se ha encontrado al docente');
       }
 
+      console.log('antes');
+
+      const existingSection = await this.sectionRepository.findOne({
+        where: {
+          idPeriod: idPeriod,
+          hour: hour,
+          idTeacher: { employeeNumber: `${idTeacher}` },
+        },
+      });
+
+      if (existingSection) {
+        throw new NotFoundException(
+          'Ya existe una seccion a esa hora con ese docente.',
+        );
+      }
+      console.log('despues');
+
+      let sectionExist;
+      let sectionIterator = 0;
+      let finalSectionCode = '';
+      do {
+        const sectionCode = hour.slice(0, -1) + sectionIterator;
+        sectionExist = await this.sectionRepository.findOne({
+          where: {
+            idPeriod: idPeriod,
+            idClass: idClass,
+            codeSection: sectionCode,
+          },
+        });
+        sectionIterator++;
+        finalSectionCode = sectionCode;
+      } while (sectionExist);
+
       const newSection = await this.sectionRepository.create({
-        idPeriod: {
-          id: +idPeriod,
-        },
-        codeSection: codeSection,
-        idClass: {
-          id: +idClass,
-        },
-        idTeacher: {
-          employeeNumber: idTeacher,
-        },
+        idPeriod: idPeriod,
+        codeSection: finalSectionCode,
+        idClass: idClass,
+        idTeacher: idTeacher,
         space: space,
-        idClassroom: {
-          id: idClassroom,
-        },
+        days: days,
+        idClassroom: idClassroom,
         hour: hour,
-        days: days.join(''),
+        finalHour: finalHour,
       });
 
       const saveSection = await this.sectionRepository.save(newSection);
 
+      const savedSectionWithRelations = await this.sectionRepository.findOne({
+        where: { id: saveSection.id },
+        relations: [
+          'idPeriod',
+          'idPeriod.idStatePeriod',
+          'idClass',
+          'idTeacher',
+          'idClassroom',
+          'idClassroom.idBuilding.idRegionalCenter',
+        ],
+      });
+
       return {
         message: 'Se ha creado correctamente la sección',
         statusCode: 200,
-        section: saveSection,
+        section: savedSectionWithRelations,
       };
     } catch (error) {
       return this.printMessageError(error);
     }
   }
 
-  findAll() {
-    return `This action returns all section`;
+  async findAll() {
+    try {
+      const sections = await this.sectionRepository.find({
+        relations: [
+          'idPeriod',
+          'idPeriod.idStatePeriod',
+          'idClass',
+          'idTeacher',
+          'idClassroom',
+          'idClassroom.idBuilding.idRegionalCenter',
+        ],
+      });
+      return {
+        message: 'Se han devuelto las secciones exitosamente',
+        statusCode: 200,
+        sections,
+      };
+    } catch (error) {
+      return this.printMessageError(error);
+    }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} section`;
+  async findOne(id: string) {
+    try {
+      const section = await this.sectionRepository.findOne({
+        where: { id: id },
+        relations: [
+          'idPeriod',
+          'idPeriod.idStatePeriod',
+          'idClass',
+          'idTeacher',
+          'idClassroom',
+          'idClassroom.idBuilding.idRegionalCenter',
+        ],
+      });
+      return {
+        message: 'Se ha devuelto la seccion exitosamente',
+        statusCode: 200,
+        section,
+      };
+    } catch (error) {
+      return this.printMessageError(error);
+    }
   }
 
   update(id: number, updateSectionDto: UpdateSectionDto) {
