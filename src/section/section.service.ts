@@ -193,8 +193,110 @@ export class SectionService {
     }
   }
 
-  update(id: number, updateSectionDto: UpdateSectionDto) {
-    return `This action updates a #${id} section`;
+  async update(id: string, updateSectionDto: UpdateSectionDto) {
+    try {
+      let teacher;
+      let classRoom;
+
+      const section = await this.sectionRepository.findOne({
+        where: { id: id },
+      });
+
+      if (!section) {
+        throw new NotFoundException('La seccion no existe.');
+      }
+
+      if (updateSectionDto.idTeacher) {
+        teacher = await this.teacherRepository.findOne({
+          where: {
+            employeeNumber: `${updateSectionDto.idTeacher}`,
+          },
+        });
+
+        if (!teacher) {
+          throw new NotFoundException('El docente no existe.');
+        }
+      }
+
+      if (updateSectionDto.idClassroom) {
+        classRoom = await this.classroomRepository.findOne({
+          where: {
+            id: `${updateSectionDto.idClassroom}`,
+          },
+        });
+
+        if (!classRoom) {
+          throw new NotFoundException('El Aula enviada no existe');
+        }
+      }
+
+      if (updateSectionDto.hour) {
+        let sectionExist;
+        let sectionIterator = 0;
+        let finalSectionCode = '';
+        do {
+          const sectionCode =
+            updateSectionDto.hour.slice(0, -1) + sectionIterator;
+          sectionExist = await this.sectionRepository.findOne({
+            where: {
+              idPeriod: section.idPeriod,
+              idClass: section.idClass,
+              codeSection: sectionCode,
+            },
+          });
+          sectionIterator++;
+          finalSectionCode = sectionCode;
+        } while (sectionExist);
+
+        section.codeSection = finalSectionCode;
+      }
+
+      if (updateSectionDto.idTeacher) {
+        section.idTeacher = updateSectionDto.idTeacher;
+      }
+
+      if (updateSectionDto.space) {
+        section.space = updateSectionDto.space;
+      }
+
+      if (updateSectionDto.hour) {
+        section.hour = updateSectionDto.hour;
+      }
+
+      if (updateSectionDto.finalHour) {
+        section.finalHour = updateSectionDto.finalHour;
+      }
+
+      if (updateSectionDto.idClassroom) {
+        section.idClassroom = updateSectionDto.idClassroom;
+      }
+
+      if (updateSectionDto.days) {
+        section.days = updateSectionDto.days;
+      }
+
+      const savedSection = await this.sectionRepository.save(section);
+
+      const updatedSection = await this.sectionRepository.findOne({
+        where: { id: savedSection.id },
+        relations: [
+          'idPeriod',
+          'idPeriod.idStatePeriod',
+          'idClass',
+          'idTeacher',
+          'idClassroom',
+          'idClassroom.idBuilding.idRegionalCenter',
+        ],
+      });
+
+      return {
+        message: 'Se ha actualizado la seccion exitosamente',
+        statusCode: 200,
+        section: updatedSection,
+      };
+    } catch (error) {
+      return this.printMessageError(error);
+    }
   }
 
   async remove(id: string) {
