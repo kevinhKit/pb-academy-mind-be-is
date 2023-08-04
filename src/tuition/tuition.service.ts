@@ -262,11 +262,25 @@ export class TuitionService {
         },
         relations: ['student', 'student.user'],
       });
-
+      const distinctRegistrations = registrations.reduce(
+        (uniqueRegistrations, currentRegistration) => {
+          if (
+            !uniqueRegistrations.some(
+              (reg) =>
+                reg.student.accountNumber ===
+                currentRegistration.student.accountNumber,
+            )
+          ) {
+            uniqueRegistrations.push(currentRegistration);
+          }
+          return uniqueRegistrations;
+        },
+        [],
+      );
       return {
         message: `Mandando las matriculas de todos los estudiantes del periodo ${id}`,
         statusCode: 200,
-        registrations,
+        registrations: distinctRegistrations,
       };
     } catch (error) {
       return this.printMessageError(error);
