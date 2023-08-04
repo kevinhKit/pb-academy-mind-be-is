@@ -13,6 +13,7 @@ import { Section } from './entities/section.entity';
 import { Classroom } from 'src/classroom/entities/classroom.entity';
 import { Period } from 'src/period/entities/period.entity';
 import { Class } from 'src/class/entities/class.entity';
+import { Tuition } from 'src/tuition/entities/tuition.entity';
 
 @Injectable()
 export class SectionService {
@@ -25,6 +26,7 @@ export class SectionService {
     private classroomRepository: Repository<Classroom>,
     @InjectRepository(Period) private periodRepository: Repository<Period>,
     @InjectRepository(Class) private classRepository: Repository<Class>,
+    @InjectRepository(Tuition) private tuitionRepository: Repository<Tuition>,
   ) {}
 
   async create({
@@ -343,6 +345,12 @@ export class SectionService {
         }
       }
 
+      if (updateSectionDto.space < section.space) {
+        throw new NotFoundException(
+          'No se pueden reducir la cantidad de cupos de la seccion',
+        );
+      }
+
       if (updateSectionDto.hour) {
         let sectionExist;
         let sectionIterator = 0;
@@ -369,7 +377,26 @@ export class SectionService {
       }
 
       if (updateSectionDto.space) {
+        const newSpaces = +updateSectionDto.space - +section.space;
         section.space = updateSectionDto.space;
+        const registrationOnWaiting = await this.tuitionRepository.find({
+          where: {
+            section: { id: section.id },
+            waitingList: true,
+          },
+          order: {
+            create_at: 'ASC',
+          },
+        });
+
+        const newTuitions = registrationOnWaiting.slice(0, newSpaces);
+        newTuitions.forEach(async (tuition: Tuition) => {
+          const newTuition = await this.tuitionRepository.findOne({
+            where: { id: tuition.id },
+          });
+          newTuition.waitingList = false;
+          await this.tuitionRepository.save(newTuition);
+        });
       }
 
       if (updateSectionDto.hour) {
