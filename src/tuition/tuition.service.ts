@@ -244,6 +244,35 @@ export class TuitionService {
     }
   }
 
+  async findStudentsPeriod(id: Period) {
+    try {
+      const periodExist = await this.periodRepository.findOne({
+        where: {
+          id: +id,
+        },
+      });
+
+      if (!periodExist) {
+        throw new NotFoundException('EL periodo enviado no existe');
+      }
+
+      const registrations = await this.tuitionRepository.find({
+        where: {
+          section: { idPeriod: { id: +id } },
+        },
+        relations: ['student', 'student.user'],
+      });
+
+      return {
+        message: `Mandando las matriculas de todos los estudiantes del periodo ${id}`,
+        statusCode: 200,
+        registrations,
+      };
+    } catch (error) {
+      return this.printMessageError(error);
+    }
+  }
+
   update(id: number, updateTuitionDto: UpdateTuitionDto) {
     return `This action updates a #${id} tuition`;
   }
