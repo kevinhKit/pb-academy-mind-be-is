@@ -195,7 +195,7 @@ export class TuitionService {
         where: {
           student: { accountNumber: `${id}` },
         },
-        relations: ['section', 'section.idClass'],
+        relations: ['section', 'section.idClass', 'section.idClassroom','section.idClassroom.idBuilding'],
       });
 
       return {
