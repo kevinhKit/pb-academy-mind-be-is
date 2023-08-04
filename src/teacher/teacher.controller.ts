@@ -6,6 +6,7 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { TeacherService } from './teacher.service';
 import { CreateTeacherDto } from './dto/create-teacher.dto';
@@ -38,16 +39,25 @@ export class TeacherController {
     return this.teacherService.changePassword(id, resetPasswordTeacherDto);
   }
 
-  @Get()
-  findAll() {
-    return this.teacherService.findAll();
+  
+  @Get('career/:id')
+  findOneCareer(@Param('id') career: string,
+    @Query('center') center: string
+    ) {
+    return this.teacherService.findCareer(career, center);
   }
-
+  
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.teacherService.findOne(+id);
   }
 
+  @Get()
+  findAll() {
+    return this.teacherService.findAll();
+  }
+
+  
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateTeacherDto: UpdateTeacherDto) {
     return this.teacherService.update(id, updateTeacherDto);

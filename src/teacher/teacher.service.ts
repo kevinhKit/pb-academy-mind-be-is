@@ -367,6 +367,41 @@ export class TeacherService {
     }
   }
 
+
+
+  async findCareer(career: string, center: string) {
+    try {
+      const careerExist = await this.teacherCareerRepository.find({
+        where:{
+          centerCareer: {
+            career:{
+              id: career.toUpperCase()
+            },
+            regionalCenter:{
+              id: center.toUpperCase()
+            }
+          }
+        },
+        relations:['teacher','teacher.user']
+      })
+
+      if (careerExist) {
+        throw new NotFoundException('La carrera no existe en este centro regional')
+      }
+
+      return {
+        statusCode: 200,
+        message: this.printMessageLog(
+          'Docentes obtenidos exitosamente',
+        ),
+        teachers: careerExist
+      };
+    } catch (error) {
+      console.log(error)
+      return this.printMessageError(error);
+    }
+  }
+
   async resetPassword({ dni }: ResetPasswordTeacherDto) {
     try {
       const user = await this.teacherRepository.findOne({
@@ -410,4 +445,5 @@ export class TeacherService {
       return this.printMessageError(error);
     }
   }
+
 }
