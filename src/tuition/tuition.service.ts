@@ -6,6 +6,7 @@ import { Section } from 'src/section/entities/section.entity';
 import { Tuition } from './entities/tuition.entity';
 import { Repository } from 'typeorm';
 import { Student } from 'src/student/entities/student.entity';
+import { Period } from 'src/period/entities/period.entity';
 
 @Injectable()
 export class TuitionService {
@@ -15,6 +16,7 @@ export class TuitionService {
     @InjectRepository(Section) private sectionRepository: Repository<Section>,
     @InjectRepository(Tuition) private tuitionRepository: Repository<Tuition>,
     @InjectRepository(Student) private studentRepository: Repository<Student>,
+    @InjectRepository(Period) private periodRepository: Repository<Period>,
   ) {}
 
   async create(createTuitionDto: CreateTuitionDto) {
@@ -179,8 +181,10 @@ export class TuitionService {
     }
   }
 
-  async findStudent(id: Student) {
+  async findStudent(id: Student, periodId: Period) {
     try {
+      let periodExist = null;
+      let registrations;
       const studentExist = await this.studentRepository.findOne({
         where: {
           accountNumber: `${id}`,
@@ -191,12 +195,44 @@ export class TuitionService {
         throw new NotFoundException('No se ha encontrado al docente');
       }
 
-      const registrations = await this.tuitionRepository.find({
-        where: {
-          student: { accountNumber: `${id}` },
-        },
-        relations: ['section', 'section.idClass', 'section.idClassroom','section.idClassroom.idBuilding'],
-      });
+      if (periodId) {
+        periodExist = await this.periodRepository.findOne({
+          where: {
+            id: +periodId,
+          },
+        });
+
+        if (!periodExist) {
+          throw new NotFoundException('EL periodo enviado no existe');
+        }
+      }
+
+      if (periodExist === null) {
+        registrations = await this.tuitionRepository.find({
+          where: {
+            student: { accountNumber: `${id}` },
+          },
+          relations: [
+            'section',
+            'section.idClass',
+            'section.idClassroom',
+            'section.idClassroom.idBuilding',
+          ],
+        });
+      } else {
+        registrations = await this.tuitionRepository.find({
+          where: {
+            student: { accountNumber: `${id}` },
+            section: { idPeriod: { id: +periodId } },
+          },
+          relations: [
+            'section',
+            'section.idClass',
+            'section.idClassroom',
+            'section.idClassroom.idBuilding',
+          ],
+        });
+      }
 
       return {
         message: `Mandando las matriculas del estudiante ${id}`,
