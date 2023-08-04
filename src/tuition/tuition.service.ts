@@ -145,6 +145,62 @@ export class TuitionService {
     }
   }
 
+  async findSection(id: Section) {
+    try {
+      const validSection = await this.sectionRepository.findOne({
+        where: { id: `${id}` },
+      });
+
+      if (!validSection) {
+        throw new NotFoundException('La seccion enviada no existe');
+      }
+
+      const registration = await this.tuitionRepository.find({
+        where: {
+          section: { id: `${id}` },
+        },
+        relations: ['student'],
+      });
+
+      return {
+        message: `Mandando las matriculas de la seccion ${id}`,
+        statusCode: 200,
+        registration,
+      };
+    } catch (error) {
+      return this.printMessageError(error);
+    }
+  }
+
+  async findStudent(id: Student) {
+    try {
+      const studentExist = await this.studentRepository.findOne({
+        where: {
+          accountNumber: `${id}`,
+        },
+      });
+
+      if (!studentExist) {
+        throw new NotFoundException('No se ha encontrado al docente');
+      }
+
+      const registrations = await this.tuitionRepository.find({
+        where: {
+          student: { accountNumber: `${id}` },
+        },
+        relations: ['section', 'section.idClass'],
+      });
+
+      return {
+        message: `Mandando las matriculas del estudiante ${id}`,
+        statusCode: 200,
+        registrations,
+      };
+    } catch (error) {
+      return this.printMessageError(error);
+    }
+  }
+
   update(id: number, updateTuitionDto: UpdateTuitionDto) {
     return `This action updates a #${id} tuition`;
   }

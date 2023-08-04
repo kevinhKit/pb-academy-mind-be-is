@@ -10,6 +10,8 @@ import {
 import { TuitionService } from './tuition.service';
 import { CreateTuitionDto } from './dto/create-tuition.dto';
 import { UpdateTuitionDto } from './dto/update-tuition.dto';
+import { Section } from 'src/section/entities/section.entity';
+import { Student } from 'src/student/entities/student.entity';
 
 @Controller('tuition')
 export class TuitionController {
@@ -28,6 +30,16 @@ export class TuitionController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.tuitionService.findOne(id);
+  }
+
+  @Get('section/:id')
+  findClasses(@Param('id') id: Section) {
+    return this.tuitionService.findSection(id);
+  }
+
+  @Get('student/:id')
+  findStudent(@Param('id') id: Student) {
+    return this.tuitionService.findStudent(id);
   }
 
   @Patch(':id')
