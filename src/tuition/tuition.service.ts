@@ -217,6 +217,7 @@ export class TuitionService {
             'section.idClass',
             'section.idClassroom',
             'section.idClassroom.idBuilding',
+            'section.idTeacher.user',
           ],
         });
       } else {
@@ -230,6 +231,7 @@ export class TuitionService {
             'section.idClass',
             'section.idClassroom',
             'section.idClassroom.idBuilding',
+            'section.idTeacher.user',
           ],
         });
       }
