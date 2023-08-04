@@ -49,6 +49,11 @@ export class Section {
   @Column('text')
   days: string;
 
+  @Column('text', {
+    default: false,
+  })
+  waitingList: boolean;
+
   // @Column('text')
   @ManyToOne(() => Classroom, (clssroom) => clssroom.id)
   @JoinColumn({

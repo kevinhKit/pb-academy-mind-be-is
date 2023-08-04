@@ -397,7 +397,6 @@ export class TeacherService {
         teachers: careerExist
       };
     } catch (error) {
-      console.log(error)
       return this.printMessageError(error);
     }
   }
