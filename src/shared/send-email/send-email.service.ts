@@ -49,7 +49,7 @@ export class SendEmailService {
         \nNombre: ${user.firstName} ${user.secondName || ''} ${user.firstLastName} ${user.secondLastName}
         \nCorreo electrónico: ${(role == "admin") ? `${user.email}`:`${role=="teacher" ? `${user.teacher.institutionalEmail}` : `${user.student.institutionalEmail}`}`}
         \nContraseña: ${pass}
-        ${(role == "admin") ? `\n Url de inicio de Sesión: ${process.env.FE_API_URL}/admin/inicio-sesion ` : ``}
+        ${(role == "admin") ? `\n Url de inicio de Sesión: http://localhost:3000/admin/inicio-sesion` : ``}
         \n\n¡IMPORTANTE!\nPara acceder a nuestro sistema debera ingresar su número de ${(role == "admin" || role == "teacher") ? `Empleado` : `Cuenta`} y contraseña, se recomienda cambiar la contraseña generada por el sistema a una que pueda ser recordada por el usuario.
         \nNOTA:\n"No debe compartir sus credenciales a ningún tercero para evitar problemas de seguridad."
         `
