@@ -168,7 +168,7 @@ export class TuitionService {
         where: {
           section: { id: `${id}` },
         },
-        relations: ['student'],
+        relations: ['student', 'student.user'],
       });
 
       return {
