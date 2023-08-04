@@ -50,9 +50,19 @@ export class TuitionService {
         throw new NotFoundException('No se ha encontrado al docente');
       }
 
+      const studentsRegistrated = await this.tuitionRepository.find({
+        where: {
+          section: { id: `${createTuitionDto.idSection}` },
+        },
+      });
+
+      const spaceOccupied = studentsRegistrated.length;
+      const waitingList = spaceOccupied >= +validSection.space;
+
       const createdTuition = await this.tuitionRepository.create({
         student: createTuitionDto.idStudent,
         section: createTuitionDto.idSection,
+        waitingList: waitingList,
       });
 
       const savedTuition = await this.tuitionRepository.save(createdTuition);
