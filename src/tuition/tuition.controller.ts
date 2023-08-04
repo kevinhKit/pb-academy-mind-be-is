@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { TuitionService } from './tuition.service';
 import { CreateTuitionDto } from './dto/create-tuition.dto';
 import { UpdateTuitionDto } from './dto/update-tuition.dto';
@@ -19,7 +27,7 @@ export class TuitionController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.tuitionService.findOne(+id);
+    return this.tuitionService.findOne(id);
   }
 
   @Patch(':id')
@@ -29,6 +37,6 @@ export class TuitionController {
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.tuitionService.remove(+id);
+    return this.tuitionService.remove(id);
   }
 }
