@@ -44,6 +44,11 @@ export class TuitionController {
     return this.tuitionService.findStudent(id, periodId);
   }
 
+  @Get('period-students/:id')
+  findStudents(@Param('id') id: Period) {
+    return this.tuitionService.findStudentsPeriod(id);
+  }
+
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateTuitionDto: UpdateTuitionDto) {
     return this.tuitionService.update(+id, updateTuitionDto);
