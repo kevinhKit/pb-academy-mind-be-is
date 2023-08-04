@@ -259,6 +259,53 @@ export class SectionService {
     }
   }
 
+  async findClasses(classId: Class, periodId: Period) {
+    try {
+      const classExist = await this.classRepository.findOne({
+        where: {
+          id: +classId,
+        },
+      });
+
+      if (!classExist) {
+        throw new NotFoundException('No se ha encontrado la clase');
+      }
+
+      const periodExist = await this.periodRepository.findOne({
+        where: {
+          id: +periodId,
+        },
+      });
+
+      if (!periodExist) {
+        throw new NotFoundException('EL periodo enviado no existe');
+      }
+
+      const classesSections = await this.sectionRepository.find({
+        where: {
+          idPeriod: { id: +periodId },
+          idClass: { id: +classId },
+        },
+        relations: [
+          'idPeriod',
+          'idPeriod.idStatePeriod',
+          'idClass',
+          'idTeacher',
+          'idClassroom',
+          'idClassroom.idBuilding.idRegionalCenter',
+        ],
+      });
+
+      return {
+        message: `Se han devuelto las secciones de la clase ${classId} en el periodo ${periodId}`,
+        statusCode: 200,
+        sections: classesSections,
+      };
+    } catch (error) {
+      return this.printMessageError(error);
+    }
+  }
+
   async update(id: string, updateSectionDto: UpdateSectionDto) {
     try {
       let teacher;
