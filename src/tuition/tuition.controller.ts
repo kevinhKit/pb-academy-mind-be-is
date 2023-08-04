@@ -6,12 +6,14 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { TuitionService } from './tuition.service';
 import { CreateTuitionDto } from './dto/create-tuition.dto';
 import { UpdateTuitionDto } from './dto/update-tuition.dto';
 import { Section } from 'src/section/entities/section.entity';
 import { Student } from 'src/student/entities/student.entity';
+import { Period } from 'src/period/entities/period.entity';
 
 @Controller('tuition')
 export class TuitionController {
@@ -38,8 +40,8 @@ export class TuitionController {
   }
 
   @Get('student/:id')
-  findStudent(@Param('id') id: Student) {
-    return this.tuitionService.findStudent(id);
+  findStudent(@Param('id') id: Student, @Query('periodId') periodId?: Period) {
+    return this.tuitionService.findStudent(id, periodId);
   }
 
   @Patch(':id')
