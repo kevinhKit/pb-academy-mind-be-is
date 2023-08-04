@@ -389,14 +389,22 @@ export class SectionService {
           },
         });
 
-        const newTuitions = registrationOnWaiting.slice(0, newSpaces);
-        newTuitions.forEach(async (tuition: Tuition) => {
-          const newTuition = await this.tuitionRepository.findOne({
-            where: { id: tuition.id },
+        if (registrationOnWaiting.length > 0) {
+          const newTuitions = registrationOnWaiting.slice(0, newSpaces);
+          newTuitions.forEach(async (tuition: Tuition) => {
+            const newTuition = await this.tuitionRepository.findOne({
+              where: { id: tuition.id },
+            });
+            newTuition.waitingList = false;
+            await this.tuitionRepository.save(newTuition);
           });
-          newTuition.waitingList = false;
-          await this.tuitionRepository.save(newTuition);
-        });
+        }
+        if (registrationOnWaiting.length > newSpaces) {
+          section.waitingList = true;
+        }
+        if (registrationOnWaiting.length < newSpaces) {
+          section.waitingList = false;
+        }
       }
 
       if (updateSectionDto.hour) {

@@ -58,12 +58,19 @@ export class TuitionService {
 
       const spaceOccupied = studentsRegistrated.length;
       const waitingList = spaceOccupied >= +validSection.space;
+      const sectionSpaceOccupied = studentsRegistrated.length + 1;
+      const sectionWaitingList = sectionSpaceOccupied >= +validSection.space;
 
       const createdTuition = await this.tuitionRepository.create({
         student: createTuitionDto.idStudent,
         section: createTuitionDto.idSection,
         waitingList: waitingList,
       });
+
+      if (sectionWaitingList) {
+        validSection.waitingList = sectionWaitingList;
+        await this.sectionRepository.save(validSection);
+      }
 
       const savedTuition = await this.tuitionRepository.save(createdTuition);
 
@@ -209,13 +216,44 @@ export class TuitionService {
     try {
       const validateTuition = await this.tuitionRepository.findOne({
         where: { id: id },
+        relations: ['section'],
       });
 
       if (!validateTuition) {
         throw new NotFoundException('La matricula no existe.');
       }
 
+      const section = await this.sectionRepository.findOne({
+        where: { id: `${validateTuition.section.id}`, waitingList: true },
+      });
+
       await this.tuitionRepository.delete(id);
+      if (section) {
+        const newSpaces = 1;
+        const registrationOnWaiting = await this.tuitionRepository.find({
+          where: {
+            section: { id: section.id },
+            waitingList: true,
+          },
+          order: {
+            create_at: 'ASC',
+          },
+        });
+
+        if (registrationOnWaiting.length > 0) {
+          const newTuitions = registrationOnWaiting.slice(0, newSpaces);
+          newTuitions.forEach(async (tuition: Tuition) => {
+            const newTuition = await this.tuitionRepository.findOne({
+              where: { id: tuition.id },
+            });
+            newTuition.waitingList = false;
+            await this.tuitionRepository.save(newTuition);
+          });
+        } else {
+          section.waitingList = false;
+          await this.sectionRepository.save(section);
+        }
+      }
 
       return {
         message: 'Se ha eliminado la seccion exitosamente',
