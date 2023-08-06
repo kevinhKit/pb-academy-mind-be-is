@@ -10,6 +10,7 @@ import {
 import { PeriodService } from './period.service';
 import { CreatePeriodDto } from './dto/create-period.dto';
 import { UpdatePeriodDto } from './dto/update-period.dto';
+import { UpdatePeriodCancelationDto } from './dto/update-period-cancelation.dt';
 
 @Controller('period')
 export class PeriodController {
@@ -33,6 +34,17 @@ export class PeriodController {
   @Patch(':id')
   update(@Param('id') id: string, @Body() updatePeriodDto: UpdatePeriodDto) {
     return this.periodService.update(+id, updatePeriodDto);
+  }
+
+  @Patch('cancelations/:id')
+  updateCancelations(
+    @Param('id') id: string,
+    @Body() updatePeriodCancelationDto: UpdatePeriodCancelationDto,
+  ) {
+    return this.periodService.updateCancelations(
+      +id,
+      updatePeriodCancelationDto,
+    );
   }
 
   @Delete(':id')

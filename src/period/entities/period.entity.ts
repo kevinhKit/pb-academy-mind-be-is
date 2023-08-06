@@ -43,6 +43,19 @@ export class Period {
   })
   exceptionalCancellationDate: boolean;
 
+  @Column('timestamptz', {
+    nullable: true,
+  })
+  exceptionalCancelationStarts: Date;
+
+  @Column('timestamptz', {
+    nullable: true,
+  })
+  exceptionalCancelationEnds: Date;
+
+  // FORMAT
+  // "exceptionalCancellationDate": "2023-08-06T01:13:00.127Z"
+
   // @Column('smallint')
   // status: number;
 
