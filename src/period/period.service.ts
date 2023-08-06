@@ -8,6 +8,7 @@ import {
   Rol,
   StatePeriod,
 } from 'src/state-period/entities/state-period.entity';
+import { UpdatePeriodCancelationDto } from './dto/update-period-cancelation.dt';
 
 @Injectable()
 export class PeriodService {
@@ -412,6 +413,59 @@ export class PeriodService {
       return {
         statusCode: 200,
         message: 'Periodo actualizado exitosamente',
+        updatedPeriod: periodWithState,
+      };
+    } catch (error) {
+      return this.printMessageError(error);
+    }
+  }
+
+  async updateCancelations(
+    id: number,
+    updatePeriodDto: UpdatePeriodCancelationDto,
+  ) {
+    try {
+      const period = await this.periodRepository.findOne({
+        where: { id: id },
+        relations: ['idStatePeriod'],
+      });
+      if (!period) {
+        throw new NotFoundException('Periodo no encontrado');
+      }
+
+      const ongoingState = await this.statePeriodRepository.findOne({
+        where: { name: Rol.ONGOING },
+      });
+
+      if (period.idStatePeriod.id != ongoingState.id) {
+        throw new NotFoundException(
+          'El periodo debe estar en estado de En curso',
+        );
+      }
+
+      const startDate = new Date(updatePeriodDto.exceptionalCancelationStarts);
+
+      const endDate = new Date(updatePeriodDto.exceptionalCancelationEnds);
+
+      if (startDate >= endDate) {
+        throw new NotFoundException(
+          'La fecha de inicio no puede ser mayor a la fecha final',
+        );
+      }
+
+      period.exceptionalCancelationStarts = startDate;
+      period.exceptionalCancelationEnds = endDate;
+
+      const updatedPeriod = await this.periodRepository.save(period);
+
+      const periodWithState = await this.periodRepository.findOne({
+        where: { id: updatedPeriod.id },
+        relations: ['idStatePeriod'],
+      });
+
+      return {
+        statusCode: 200,
+        message: 'Periodo actualizado exitosamente devolviendo fechas',
         updatedPeriod: periodWithState,
       };
     } catch (error) {
