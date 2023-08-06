@@ -53,6 +53,31 @@ export class Period {
   })
   exceptionalCancelationEnds: Date;
 
+  @Column('timestamptz', {
+    nullable: true,
+  })
+  dayOne: Date;
+
+  @Column('timestamptz', {
+    nullable: true,
+  })
+  dayTwo: Date;
+
+  @Column('timestamptz', {
+    nullable: true,
+  })
+  dayThree: Date;
+
+  @Column('timestamptz', {
+    nullable: true,
+  })
+  dayFour: Date;
+
+  @Column('timestamptz', {
+    nullable: true,
+  })
+  dayFive: Date;
+
   // FORMAT
   // "exceptionalCancellationDate": "2023-08-06T01:13:00.127Z"
 
