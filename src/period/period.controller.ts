@@ -31,6 +31,11 @@ export class PeriodController {
     return this.periodService.findOne(+id);
   }
 
+  @Get('year/:id')
+  findByYear(@Param('id') id: string) {
+    return this.periodService.findByYear(+id);
+  }
+
   @Patch(':id')
   update(@Param('id') id: string, @Body() updatePeriodDto: UpdatePeriodDto) {
     return this.periodService.update(+id, updatePeriodDto);
