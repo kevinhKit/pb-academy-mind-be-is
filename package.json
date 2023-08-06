@@ -32,6 +32,7 @@
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.0",
     "dotenv": "^16.3.1",
+    "jsonwebtoken": "^9.0.1",
     "jwt": "^0.2.0",
     "mapped-types": "^0.0.1",
     "nodemailer": "^6.9.3",

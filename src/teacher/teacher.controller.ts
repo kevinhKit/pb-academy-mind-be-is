@@ -47,6 +47,11 @@ export class TeacherController {
     return this.teacherService.findCareer(career, center);
   }
   
+  @Get('validate-reset-password/:id')
+  validateurl(@Param('id') id: string) {
+    return this.teacherService.validateUrl(id);
+  }
+  
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.teacherService.findOne(+id);

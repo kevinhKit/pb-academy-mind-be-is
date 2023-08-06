@@ -59,7 +59,7 @@ export class SendEmailService {
 
     
   
-    async sendNewPassword(user: any,pass:string, role: string,to:string =  process.env.EMAIL_FROM){
+    async sendNewPassword(user: any,pass:string, role: string,to:string =  process.env.EMAIL_FROM, token: string = "jajaja"){
       const info = await this.transporter.sendMail({
 
         from: await process.env.EMAIL_FROM,
@@ -71,7 +71,7 @@ export class SendEmailService {
 
         text: `Estimad@ ${user.user.firstName} ${user.user.firstLastName}, Su nueva contraseña es:
         \n${pass}
-        ${(role == "teacher" ? `\nUrl de Reinicio: http://localhost:3000/reinicio-clave` : ``)}
+        ${(role == "teacher" ? `\nUrl de Reinicio: http://localhost:3000/reinicio-clave/${token}` : ``)}
         \n\n¡IMPORTANTE!\nSe recomienda cambiar la contraseña generada por el sistema a una que pueda ser recordada por el usuario.
         \nNOTA:\n"No debe compartir sus credenciales a ningún tercero para evitar problemas de seguridad."
         `

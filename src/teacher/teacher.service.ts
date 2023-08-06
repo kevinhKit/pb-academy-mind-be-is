@@ -21,6 +21,7 @@ import { ResetPasswordTeacherDto } from './dto/reset-password-teacher.dto';
 import { ChangePasswordTeacherDto } from './dto/change-password-teacher.dto';
 import { CenterCareer } from 'src/center-career/entities/center-career.entity';
 import { TeachingCareer } from 'src/teaching-career/entities/teaching-career.entity';
+import * as jwt from 'jsonwebtoken';
 
 @Injectable()
 export class TeacherService {
@@ -427,22 +428,58 @@ export class TeacherService {
       });
       teacherChange.user = user.user;
 
+      const secretKey = 'miClaveSecreta';
+      let currentDate = Math.floor(Date.now() / 1000)
+      const dateExp = (currentDate) + (2*60);
+      const token = jwt.sign({exp:dateExp}, secretKey);
+      // console.log(fechaExpiracion - fechaActual)
+
       await this.teacherRepository.save(teacherChange);
       await this.sendEmailService.sendNewPassword(
         teacherChange,
         generatePassword,
         'teacher',
+        '',
+        token
       );
-
+      
       return {
         statusCode: 200,
         message: this.printMessageLog(
           'La contraseña se ha cambiado exitosamente',
         ),
+        // token:token
       };
     } catch (error) {
       return this.printMessageError(error);
     }
+  }
+
+  validateUrl(tokenURl: string){
+    const secretKey = 'miClaveSecreta';
+      try {
+        const decoded = jwt.verify(tokenURl, secretKey);
+        // const decoded = jwt.verify(tokenURl, secretKey,{ ignoreExpiration: true });
+        const currentDate = Math.floor(Date.now() / 1000);
+        const dateExp = JSON.parse(JSON.stringify(decoded)).exp;
+
+        if(currentDate<dateExp){
+          return {
+            success:true,
+            message: "La url está actualmente vigente",
+            // time: `Tiempo restante: ${dateExp- currentDate}`
+          };
+        } 
+        return {
+          success: false,
+          message: "La url ha expirado o es invalida"
+        };
+      } catch (error) {
+        return {
+          success: false,
+          message: "La url ha expirado o es invalida"
+        };
+      }
   }
 
 }
