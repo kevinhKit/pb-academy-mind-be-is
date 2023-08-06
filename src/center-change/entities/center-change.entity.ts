@@ -1,7 +1,7 @@
 import { CenterCareer } from 'src/center-career/entities/center-career.entity';
 import { RegionalCenter } from 'src/regional-center/entities/regional-center.entity';
 import { Student } from 'src/student/entities/student.entity';
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn, PrimaryGeneratedColumn } from 'typeorm';
 
 export enum applicationStatus {
   PROGRESS = 'En progreso',
@@ -13,15 +13,20 @@ export enum applicationStatus {
 export class CenterChange {
 
 
-  @PrimaryColumn('uuid')
+  @PrimaryGeneratedColumn('uuid')
   idCenterChange: string;
 
 
   @Column('text',{
     nullable: false,
-    unique: true
+    // unique: true
   })
   accountNumber: string;
+
+  @Column('text',{
+    nullable: false
+  })
+  idCenter: string;
 
   @ManyToOne(() => Student, (student) => student.accountNumber)
   @JoinColumn({ name: 'accountNumber' })
@@ -48,12 +53,6 @@ export class CenterChange {
 
   @Column('text', { nullable: true })
   justificationPdf: string;
-
-  @Column({
-    type: 'boolean',
-    default: true
-  })
-  status: boolean;
 
   @Column('timestamptz',{
     default: () => "current_timestamp",

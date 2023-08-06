@@ -45,8 +45,6 @@ export class CareerChangeService {
         // relations:['studentCareer','studentCareer.centerCareer','studentCareer.centerCareer.career']
       })))
 
-      // console.log(studentExist);
-
       if(!studentExist){
         throw new NotFoundException('El estudiante enviado no existe')
       }
@@ -67,7 +65,7 @@ export class CareerChangeService {
         }
       });
       if(!careerCenterExist){
-        throw new NotFoundException('La carrera enviada no existe');
+        throw new NotFoundException('La carrera enviada no existe en su centro regional actualmente');
       }
 
       const careerChange = await this.careerChangeRepository.create({
