@@ -26,6 +26,21 @@ export class PeriodController {
     return this.periodService.findAll();
   }
 
+  @Get('registration-planification')
+  findPlanificationRegistrationByYear() {
+    return this.periodService.findPlanificationRegistrationByYear();
+  }
+
+  @Get('ongoing')
+  findOnGoing() {
+    return this.periodService.findOnGoing();
+  }
+
+  @Get('grades')
+  findGrades() {
+    return this.periodService.findGrades();
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.periodService.findOne(+id);

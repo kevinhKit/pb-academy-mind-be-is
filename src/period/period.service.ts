@@ -187,6 +187,76 @@ export class PeriodService {
     }
   }
 
+  async findPlanificationRegistrationByYear() {
+    try {
+      const planificationState = await this.statePeriodRepository.findOne({
+        where: { name: Rol.PLANIFICATION },
+      });
+
+      const registrationState = await this.statePeriodRepository.findOne({
+        where: { name: Rol.REGISTRATION },
+      });
+      const periods = await this.periodRepository.find({
+        where: {
+          idStatePeriod: In([planificationState.id, registrationState.id]),
+        },
+        relations: ['idStatePeriod'],
+      });
+
+      return {
+        statusCode: 200,
+        message: `Periodos que esten en planificacion o matricula devueltos exitosamente.`,
+        periods,
+      };
+    } catch (error) {
+      return this.printMessageError(error);
+    }
+  }
+
+  async findOnGoing() {
+    try {
+      const ongoingState = await this.statePeriodRepository.findOne({
+        where: { name: Rol.ONGOING },
+      });
+      const periods = await this.periodRepository.find({
+        where: {
+          idStatePeriod: In([ongoingState.id]),
+        },
+        relations: ['idStatePeriod'],
+      });
+
+      return {
+        statusCode: 200,
+        message: `Periodo En curso devuelto exitosamente.`,
+        periods,
+      };
+    } catch (error) {
+      return this.printMessageError(error);
+    }
+  }
+
+  async findGrades() {
+    try {
+      const gradesState = await this.statePeriodRepository.findOne({
+        where: { name: Rol.GRADES },
+      });
+      const periods = await this.periodRepository.find({
+        where: {
+          idStatePeriod: In([gradesState.id]),
+        },
+        relations: ['idStatePeriod'],
+      });
+
+      return {
+        statusCode: 200,
+        message: `Periodo en Ingreso de notas devuelto exitosamente.`,
+        periods,
+      };
+    } catch (error) {
+      return this.printMessageError(error);
+    }
+  }
+
   async update(id: number, updatePeriodDto: UpdatePeriodDto) {
     try {
       const period = await this.periodRepository.findOne({
