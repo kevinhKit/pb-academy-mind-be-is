@@ -29,6 +29,11 @@ export class TuitionController {
     return this.tuitionService.findAll();
   }
 
+  @Get('tuition-validation/:id')
+  tuitionValidation(@Param('id') id: Student) {
+    return this.tuitionService.tuitionValidation(id);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.tuitionService.findOne(id);
