@@ -170,6 +170,23 @@ export class PeriodService {
     }
   }
 
+  async findByYear(id: number) {
+    try {
+      const periods = await this.periodRepository.find({
+        where: { year: id },
+        relations: ['idStatePeriod'],
+      });
+
+      return {
+        statusCode: 200,
+        message: `Periodos del ${id} devueltos exitosamente.`,
+        periods,
+      };
+    } catch (error) {
+      return this.printMessageError(error);
+    }
+  }
+
   async update(id: number, updatePeriodDto: UpdatePeriodDto) {
     try {
       const period = await this.periodRepository.findOne({
