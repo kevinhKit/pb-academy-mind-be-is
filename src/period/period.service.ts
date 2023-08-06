@@ -172,10 +172,70 @@ export class PeriodService {
 
   async findByYear(id: number) {
     try {
-      const periods = await this.periodRepository.find({
-        where: { year: id },
+      const definningState = await this.statePeriodRepository.findOne({
+        where: { name: Rol.DEFINNING },
+      });
+
+      const planificationState = await this.statePeriodRepository.findOne({
+        where: { name: Rol.PLANIFICATION },
+      });
+
+      const registrationState = await this.statePeriodRepository.findOne({
+        where: { name: Rol.REGISTRATION },
+      });
+
+      const ongoingState = await this.statePeriodRepository.findOne({
+        where: { name: Rol.ONGOING },
+      });
+
+      const gradesState = await this.statePeriodRepository.findOne({
+        where: { name: Rol.GRADES },
+      });
+
+      const finishedState = await this.statePeriodRepository.findOne({
+        where: { name: Rol.FINISHED },
+      });
+
+      const periodOnGoing = await this.periodRepository.findOne({
+        where: { year: id, idStatePeriod: { id: ongoingState.id } },
         relations: ['idStatePeriod'],
       });
+
+      const periodOnGrades = await this.periodRepository.findOne({
+        where: { year: id, idStatePeriod: { id: gradesState.id } },
+        relations: ['idStatePeriod'],
+      });
+
+      const periodOnRegistration = await this.periodRepository.findOne({
+        where: { year: id, idStatePeriod: { id: registrationState.id } },
+        relations: ['idStatePeriod'],
+      });
+
+      const periodOnPlanification = await this.periodRepository.findOne({
+        where: { year: id, idStatePeriod: { id: planificationState.id } },
+        relations: ['idStatePeriod'],
+      });
+
+      const periodOnDefinning = await this.periodRepository.find({
+        where: { year: id, idStatePeriod: { id: definningState.id } },
+        order: { id: 'ASC' },
+        relations: ['idStatePeriod'],
+      });
+
+      const periodOnFinished = await this.periodRepository.find({
+        where: { year: id, idStatePeriod: { id: finishedState.id } },
+        order: { id: 'ASC' },
+        relations: ['idStatePeriod'],
+      });
+
+      const periods = [];
+
+      if (periodOnGoing) periods.push(periodOnGoing);
+      if (periodOnGrades) periods.push(periodOnGrades);
+      if (periodOnRegistration) periods.push(periodOnRegistration);
+      if (periodOnPlanification) periods.push(periodOnPlanification);
+      if (periodOnDefinning.length > 0) periods.push(...periodOnDefinning);
+      if (periodOnFinished.length > 0) periods.push(...periodOnFinished);
 
       return {
         statusCode: 200,
