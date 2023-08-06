@@ -10,6 +10,7 @@ import {
 import { PeriodService } from './period.service';
 import { CreatePeriodDto } from './dto/create-period.dto';
 import { UpdatePeriodDto } from './dto/update-period.dto';
+import { UpdatePeriodCancelationDto } from './dto/update-period-cancelation.dt';
 
 @Controller('period')
 export class PeriodController {
@@ -25,14 +26,45 @@ export class PeriodController {
     return this.periodService.findAll();
   }
 
+  @Get('registration-planification')
+  findPlanificationRegistrationByYear() {
+    return this.periodService.findPlanificationRegistrationByYear();
+  }
+
+  @Get('ongoing')
+  findOnGoing() {
+    return this.periodService.findOnGoing();
+  }
+
+  @Get('grades')
+  findGrades() {
+    return this.periodService.findGrades();
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.periodService.findOne(+id);
   }
 
+  @Get('year/:id')
+  findByYear(@Param('id') id: string) {
+    return this.periodService.findByYear(+id);
+  }
+
   @Patch(':id')
   update(@Param('id') id: string, @Body() updatePeriodDto: UpdatePeriodDto) {
     return this.periodService.update(+id, updatePeriodDto);
+  }
+
+  @Patch('cancelations/:id')
+  updateCancelations(
+    @Param('id') id: string,
+    @Body() updatePeriodCancelationDto: UpdatePeriodCancelationDto,
+  ) {
+    return this.periodService.updateCancelations(
+      +id,
+      updatePeriodCancelationDto,
+    );
   }
 
   @Delete(':id')

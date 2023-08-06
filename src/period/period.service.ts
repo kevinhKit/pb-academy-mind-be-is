@@ -8,6 +8,7 @@ import {
   Rol,
   StatePeriod,
 } from 'src/state-period/entities/state-period.entity';
+import { UpdatePeriodCancelationDto } from './dto/update-period-cancelation.dt';
 
 @Injectable()
 export class PeriodService {
@@ -163,6 +164,153 @@ export class PeriodService {
         statusCode: 200,
         message: 'Periodo devuelto exitosamente.',
         period,
+      };
+    } catch (error) {
+      return this.printMessageError(error);
+    }
+  }
+
+  async findByYear(id: number) {
+    try {
+      const definningState = await this.statePeriodRepository.findOne({
+        where: { name: Rol.DEFINNING },
+      });
+
+      const planificationState = await this.statePeriodRepository.findOne({
+        where: { name: Rol.PLANIFICATION },
+      });
+
+      const registrationState = await this.statePeriodRepository.findOne({
+        where: { name: Rol.REGISTRATION },
+      });
+
+      const ongoingState = await this.statePeriodRepository.findOne({
+        where: { name: Rol.ONGOING },
+      });
+
+      const gradesState = await this.statePeriodRepository.findOne({
+        where: { name: Rol.GRADES },
+      });
+
+      const finishedState = await this.statePeriodRepository.findOne({
+        where: { name: Rol.FINISHED },
+      });
+
+      const periodOnGoing = await this.periodRepository.findOne({
+        where: { year: id, idStatePeriod: { id: ongoingState.id } },
+        relations: ['idStatePeriod'],
+      });
+
+      const periodOnGrades = await this.periodRepository.findOne({
+        where: { year: id, idStatePeriod: { id: gradesState.id } },
+        relations: ['idStatePeriod'],
+      });
+
+      const periodOnRegistration = await this.periodRepository.findOne({
+        where: { year: id, idStatePeriod: { id: registrationState.id } },
+        relations: ['idStatePeriod'],
+      });
+
+      const periodOnPlanification = await this.periodRepository.findOne({
+        where: { year: id, idStatePeriod: { id: planificationState.id } },
+        relations: ['idStatePeriod'],
+      });
+
+      const periodOnDefinning = await this.periodRepository.find({
+        where: { year: id, idStatePeriod: { id: definningState.id } },
+        order: { id: 'ASC' },
+        relations: ['idStatePeriod'],
+      });
+
+      const periodOnFinished = await this.periodRepository.find({
+        where: { year: id, idStatePeriod: { id: finishedState.id } },
+        order: { id: 'ASC' },
+        relations: ['idStatePeriod'],
+      });
+
+      const periods = [];
+
+      if (periodOnGoing) periods.push(periodOnGoing);
+      if (periodOnGrades) periods.push(periodOnGrades);
+      if (periodOnRegistration) periods.push(periodOnRegistration);
+      if (periodOnPlanification) periods.push(periodOnPlanification);
+      if (periodOnDefinning.length > 0) periods.push(...periodOnDefinning);
+      if (periodOnFinished.length > 0) periods.push(...periodOnFinished);
+
+      return {
+        statusCode: 200,
+        message: `Periodos del ${id} devueltos exitosamente.`,
+        periods,
+      };
+    } catch (error) {
+      return this.printMessageError(error);
+    }
+  }
+
+  async findPlanificationRegistrationByYear() {
+    try {
+      const planificationState = await this.statePeriodRepository.findOne({
+        where: { name: Rol.PLANIFICATION },
+      });
+
+      const registrationState = await this.statePeriodRepository.findOne({
+        where: { name: Rol.REGISTRATION },
+      });
+      const periods = await this.periodRepository.find({
+        where: {
+          idStatePeriod: In([planificationState.id, registrationState.id]),
+        },
+        relations: ['idStatePeriod'],
+      });
+
+      return {
+        statusCode: 200,
+        message: `Periodos que esten en planificacion o matricula devueltos exitosamente.`,
+        periods,
+      };
+    } catch (error) {
+      return this.printMessageError(error);
+    }
+  }
+
+  async findOnGoing() {
+    try {
+      const ongoingState = await this.statePeriodRepository.findOne({
+        where: { name: Rol.ONGOING },
+      });
+      const periods = await this.periodRepository.find({
+        where: {
+          idStatePeriod: In([ongoingState.id]),
+        },
+        relations: ['idStatePeriod'],
+      });
+
+      return {
+        statusCode: 200,
+        message: `Periodo En curso devuelto exitosamente.`,
+        periods,
+      };
+    } catch (error) {
+      return this.printMessageError(error);
+    }
+  }
+
+  async findGrades() {
+    try {
+      const gradesState = await this.statePeriodRepository.findOne({
+        where: { name: Rol.GRADES },
+      });
+      const periods = await this.periodRepository.find({
+        where: {
+          idStatePeriod: In([gradesState.id]),
+        },
+        relations: ['idStatePeriod'],
+      });
+
+      return {
+        statusCode: 200,
+        message: `Periodo en Ingreso de notas devuelto exitosamente.`,
+        periods,
       };
     } catch (error) {
       return this.printMessageError(error);
@@ -412,6 +560,59 @@ export class PeriodService {
       return {
         statusCode: 200,
         message: 'Periodo actualizado exitosamente',
+        updatedPeriod: periodWithState,
+      };
+    } catch (error) {
+      return this.printMessageError(error);
+    }
+  }
+
+  async updateCancelations(
+    id: number,
+    updatePeriodDto: UpdatePeriodCancelationDto,
+  ) {
+    try {
+      const period = await this.periodRepository.findOne({
+        where: { id: id },
+        relations: ['idStatePeriod'],
+      });
+      if (!period) {
+        throw new NotFoundException('Periodo no encontrado');
+      }
+
+      const ongoingState = await this.statePeriodRepository.findOne({
+        where: { name: Rol.ONGOING },
+      });
+
+      if (period.idStatePeriod.id != ongoingState.id) {
+        throw new NotFoundException(
+          'El periodo debe estar en estado de En curso',
+        );
+      }
+
+      const startDate = new Date(updatePeriodDto.exceptionalCancelationStarts);
+
+      const endDate = new Date(updatePeriodDto.exceptionalCancelationEnds);
+
+      if (startDate >= endDate) {
+        throw new NotFoundException(
+          'La fecha de inicio no puede ser mayor a la fecha final',
+        );
+      }
+
+      period.exceptionalCancelationStarts = startDate;
+      period.exceptionalCancelationEnds = endDate;
+
+      const updatedPeriod = await this.periodRepository.save(period);
+
+      const periodWithState = await this.periodRepository.findOne({
+        where: { id: updatedPeriod.id },
+        relations: ['idStatePeriod'],
+      });
+
+      return {
+        statusCode: 200,
+        message: 'Periodo actualizado exitosamente devolviendo fechas',
         updatedPeriod: periodWithState,
       };
     } catch (error) {
