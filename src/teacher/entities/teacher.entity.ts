@@ -75,5 +75,5 @@ export class Teacher {
 
 
   @OneToMany(() => TeachingCareer, (teachingCareer) => teachingCareer.teacher)
-  teachingCareer: string;
+  teachingCareer: TeachingCareer;
 }

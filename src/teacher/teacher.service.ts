@@ -89,6 +89,50 @@ export class TeacherService {
         throw new ConflictException('El usuario ya existe como docente.');
       }
 
+      if(isBoss){
+        const teacherBossExits = await this.teacherRepository.findOne({
+          where: {
+            isBoss: isBoss,
+            teachingCareer:{
+              centerCareer:{
+                career:{
+                  id: career
+                },
+                regionalCenter:{
+                  id:regionalCenter
+                }
+              }
+            }
+          },
+        });
+
+        if(teacherBossExits){
+          throw new ConflictException('Ya existe un jefe de departamento para está carrera')
+        }
+      }
+
+      if(isCoordinator){
+        const teacherCoordinatorExits = await this.teacherRepository.findOne({
+          where: {
+            isCoordinator: isCoordinator,
+            teachingCareer:{
+              centerCareer:{
+                career:{
+                  id: career
+                },
+                regionalCenter:{
+                  id: regionalCenter
+                }
+              }
+            }
+          },
+        });
+
+        if(teacherCoordinatorExits){
+          throw new ConflictException('Ya existe un coordinador academico para está carrera')
+        }
+      }
+
       const Emailteacher = await this.teacherRepository.findOne({
         where: {
           email: email.toLowerCase(),
