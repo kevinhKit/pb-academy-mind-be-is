@@ -7,6 +7,10 @@ import { Tuition } from './entities/tuition.entity';
 import { Repository } from 'typeorm';
 import { Student } from 'src/student/entities/student.entity';
 import { Period } from 'src/period/entities/period.entity';
+import {
+  Rol,
+  StatePeriod,
+} from 'src/state-period/entities/state-period.entity';
 
 @Injectable()
 export class TuitionService {
@@ -17,6 +21,8 @@ export class TuitionService {
     @InjectRepository(Tuition) private tuitionRepository: Repository<Tuition>,
     @InjectRepository(Student) private studentRepository: Repository<Student>,
     @InjectRepository(Period) private periodRepository: Repository<Period>,
+    @InjectRepository(StatePeriod)
+    private statePeriodRepository: Repository<StatePeriod>,
   ) {}
 
   async create(createTuitionDto: CreateTuitionDto) {
@@ -192,7 +198,7 @@ export class TuitionService {
       });
 
       if (!studentExist) {
-        throw new NotFoundException('No se ha encontrado al docente');
+        throw new NotFoundException('No se ha encontrado al estudiante');
       }
 
       if (periodId) {
@@ -289,6 +295,120 @@ export class TuitionService {
     }
   }
 
+  async tuitionValidation(id: Student) {
+    try {
+      const studentExist = await this.studentRepository.findOne({
+        where: {
+          accountNumber: `${id}`,
+        },
+      });
+
+      if (!studentExist) {
+        throw new NotFoundException('No se ha encontrado al estudiante');
+      }
+
+      const registrationState = await this.statePeriodRepository.findOne({
+        where: { name: Rol.REGISTRATION },
+      });
+
+      const period = await this.periodRepository.findOne({
+        where: { idStatePeriod: { id: registrationState.id } },
+        relations: ['idStatePeriod'],
+      });
+
+      if (!period) {
+        throw new NotFoundException('No hay ningun periodo en matricula');
+      }
+
+      const today = this.formatDate(new Date());
+
+      const dayOne = this.formatDate(period.dayOne);
+      const dayTwo = this.formatDate(period.dayTwo);
+      const dayThree = this.formatDate(period.dayThree);
+      const dayFour = this.formatDate(period.dayFour);
+      const dayFive = this.formatDate(period.dayFive);
+
+      if (today < dayOne || today > dayFive) {
+        throw new NotFoundException('El periodo de matricula ha terminado');
+      }
+
+      if (today == dayOne) {
+        if (
+          studentExist.overallIndex == 0 ||
+          studentExist.periodIndex === 0 ||
+          studentExist.overallIndex >= 84 ||
+          studentExist.periodIndex >= 84
+        ) {
+          console.log('matriculo el primer dia');
+        } else {
+          throw new NotFoundException(
+            'No cumple con el indice para matricular el primer dia',
+          );
+        }
+      }
+
+      if (today == dayTwo) {
+        if (
+          (studentExist.overallIndex >= 80 && studentExist.overallIndex < 84) ||
+          (studentExist.periodIndex >= 80 && studentExist.periodIndex < 84)
+        ) {
+          console.log('matriculo el segundo dia');
+        } else {
+          throw new NotFoundException(
+            'No cumple con el indice para matricular el segundo dia',
+          );
+        }
+      }
+
+      if (today == dayThree) {
+        if (
+          (studentExist.overallIndex >= 73 && studentExist.overallIndex < 80) ||
+          (studentExist.periodIndex >= 73 && studentExist.periodIndex < 80)
+        ) {
+          console.log('matriculo el tercer dia');
+        } else {
+          throw new NotFoundException(
+            'No cumple con el indice para matricular el tercer dia',
+          );
+        }
+      }
+
+      if (today == dayFour) {
+        if (
+          (studentExist.overallIndex >= 65 && studentExist.overallIndex < 73) ||
+          (studentExist.periodIndex >= 65 && studentExist.periodIndex < 73)
+        ) {
+          console.log('matriculo el cuarto dia');
+        } else {
+          throw new NotFoundException(
+            'No cumple con el indice para matricular el cuarto dia',
+          );
+        }
+      }
+
+      if (today == dayFive) {
+        if (
+          (studentExist.overallIndex >= 1 && studentExist.overallIndex < 65) ||
+          (studentExist.periodIndex >= 1 && studentExist.periodIndex < 65)
+        ) {
+          console.log('matriculo el quinto dia');
+        } else {
+          throw new NotFoundException(
+            'No cumple con el indice para matricular el quinto dia',
+          );
+        }
+      }
+
+      return {
+        message: `El estudiante ${id} puede matricular`,
+        statusCode: 200,
+        period,
+      };
+    } catch (error) {
+      return this.printMessageError(error);
+    }
+  }
+
   update(id: number, updateTuitionDto: UpdateTuitionDto) {
     return `This action updates a #${id} tuition`;
   }
@@ -343,6 +463,17 @@ export class TuitionService {
     } catch (error) {
       return this.printMessageError(error);
     }
+  }
+
+  formatDate(date: Date) {
+    const day = date.getDate();
+    const month = date.getMonth() + 1;
+    const year = date.getFullYear();
+
+    const dayFormated = day < 10 ? `0${day}` : day;
+    const monthFormated = month < 10 ? `0${month}` : month;
+
+    return `${year}-${monthFormated}-${dayFormated}`;
   }
 
   printMessageLog(message) {

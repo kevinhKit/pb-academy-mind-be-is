@@ -6,10 +6,13 @@ import { Tuition } from './entities/tuition.entity';
 import { Section } from 'src/section/entities/section.entity';
 import { Student } from 'src/student/entities/student.entity';
 import { Period } from 'src/period/entities/period.entity';
+import { StatePeriod } from 'src/state-period/entities/state-period.entity';
 
 @Module({
   controllers: [TuitionController],
   providers: [TuitionService],
-  imports: [TypeOrmModule.forFeature([Tuition, Section, Student, Period])],
+  imports: [
+    TypeOrmModule.forFeature([Tuition, Section, Student, Period, StatePeriod]),
+  ],
 })
 export class TuitionModule {}
