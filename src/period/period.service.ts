@@ -481,6 +481,25 @@ export class PeriodService {
             'Todos los periodos deben de estar en finalizados o por definir',
           );
         }
+
+        const date = new Date();
+        const days = 5;
+        const restDays = [];
+        for (let i = 0; i < days; i++) {
+          const day = date.getDate() + i;
+          const month = date.getMonth() + 1;
+          const year = date.getFullYear();
+          const dayFormated = day < 10 ? `0${day}` : day;
+          const monthFormated = month < 10 ? `0${month}` : month;
+
+          restDays.push(`${year}-${monthFormated}-${dayFormated}`);
+        }
+        period.dayOne = restDays[0];
+        period.dayTwo = restDays[1];
+        period.dayThree = restDays[2];
+        period.dayFour = restDays[3];
+        period.dayFive = restDays[4];
+        console.log(restDays);
       }
 
       if (+updatePeriodDto.idStatePeriod == ongoingState.id) {
