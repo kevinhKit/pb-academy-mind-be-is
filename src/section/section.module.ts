@@ -8,6 +8,7 @@ import { Classroom } from 'src/classroom/entities/classroom.entity';
 import { Period } from 'src/period/entities/period.entity';
 import { Class } from 'src/class/entities/class.entity';
 import { Tuition } from 'src/tuition/entities/tuition.entity';
+import { StatePeriod } from 'src/state-period/entities/state-period.entity';
 
 @Module({
   controllers: [SectionController],
@@ -20,6 +21,7 @@ import { Tuition } from 'src/tuition/entities/tuition.entity';
       Period,
       Class,
       Tuition,
+      StatePeriod,
     ]),
   ],
 })

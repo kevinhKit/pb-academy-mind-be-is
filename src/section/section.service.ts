@@ -8,12 +8,16 @@ import { CreateSectionDto } from './dto/create-section.dto';
 import { UpdateSectionDto } from './dto/update-section.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Teacher } from 'src/teacher/entities/teacher.entity';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { Section } from './entities/section.entity';
 import { Classroom } from 'src/classroom/entities/classroom.entity';
 import { Period } from 'src/period/entities/period.entity';
 import { Class } from 'src/class/entities/class.entity';
 import { Tuition } from 'src/tuition/entities/tuition.entity';
+import {
+  Rol,
+  StatePeriod,
+} from 'src/state-period/entities/state-period.entity';
 
 @Injectable()
 export class SectionService {
@@ -27,6 +31,8 @@ export class SectionService {
     @InjectRepository(Period) private periodRepository: Repository<Period>,
     @InjectRepository(Class) private classRepository: Repository<Class>,
     @InjectRepository(Tuition) private tuitionRepository: Repository<Tuition>,
+    @InjectRepository(StatePeriod)
+    private statePeriodRepository: Repository<StatePeriod>,
   ) {}
 
   async create({
@@ -50,14 +56,25 @@ export class SectionService {
         throw new NotFoundException('No se ha encontrado la clase');
       }
 
+      const planificationState = await this.statePeriodRepository.findOne({
+        where: { name: Rol.PLANIFICATION },
+      });
+
+      const registrationState = await this.statePeriodRepository.findOne({
+        where: { name: Rol.REGISTRATION },
+      });
+
       const periodExist = await this.periodRepository.findOne({
         where: {
           id: +idPeriod,
+          idStatePeriod: In([planificationState.id, registrationState.id]),
         },
       });
 
       if (!periodExist) {
-        throw new NotFoundException('EL periodo enviado no existe');
+        throw new NotFoundException(
+          'EL periodo enviado no existe o no se encuentra en planificacion o matricula',
+        );
       }
 
       const classroomExist = await this.classroomRepository.findOne({
@@ -93,6 +110,21 @@ export class SectionService {
           'Ya existe una seccion a esa hora con ese docente.',
         );
       }
+
+      const classRoomOccupied = await this.sectionRepository.findOne({
+        where: {
+          idPeriod: { id: +idPeriod },
+          hour: hour,
+          idClassroom: { id: `${idClassroom}` },
+        },
+      });
+
+      if (classRoomOccupied) {
+        throw new NotFoundException(
+          'Ya existe una seccion a esa hora en esa aula.',
+        );
+      }
+
       let sectionExist;
       let sectionIterator = 0;
       let finalSectionCode = '';
