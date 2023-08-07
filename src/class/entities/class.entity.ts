@@ -1,10 +1,14 @@
 import { CareerClass } from 'src/career-class/entities/career-class.entity';
+import { Career } from 'src/career/entities/career.entity';
 import { RequirementClass } from 'src/requirement-class/entities/requirement-class.entity';
 import { Section } from 'src/section/entities/section.entity';
 import {
   Column,
   Entity,
+  JoinColumn,
+  ManyToOne,
   OneToMany,
+  OneToOne,
   PrimaryColumn,
   PrimaryGeneratedColumn,
 } from 'typeorm';
@@ -28,6 +32,9 @@ export class Class {
   })
   valueUnits: string;
 
+  @Column('text')
+  departmentId: string;
+
   @OneToMany(
     () => RequirementClass,
     (requirementClass) => requirementClass.idRequirement,
@@ -45,4 +52,8 @@ export class Class {
 
   @OneToMany(() => Section, (section) => section.idClass)
   section: Section;
+
+  @ManyToOne(() => Career, (career) => career.class)
+  @JoinColumn({ name: 'departmentId' })
+  career: Career;
 }

@@ -37,10 +37,19 @@ export class ClassService {
         throw new NotFoundException('La clase requisito no existe');
       }
 
+      const validDepartment = await this.careerRepository.findOne({
+        where: { id: `${createClassDto.departmentId}` },
+      });
+
+      if (!validDepartment) {
+        throw new NotFoundException('El departamento no existe');
+      }
+
       const createClass = await this.classRepository.create({
         name: createClassDto.name,
         code: createClassDto.code,
         valueUnits: createClassDto.valueUnits,
+        departmentId: `${createClassDto.departmentId}`,
       });
 
       let newClass = JSON.parse(

@@ -72,6 +72,32 @@ export class CareerClassService {
     }
   }
 
+  async findClassDepartment(id: Career) {
+    try {
+      let careerId = `${id}`;
+      careerId = careerId.toUpperCase();
+      const validCareer = await this.careerRepository.findOne({
+        where: { id: `${careerId}` },
+      });
+
+      if (!validCareer) {
+        throw new NotFoundException('La carrera no existe');
+      }
+
+      const departmentClasses = await this.classRepository.find({
+        where: { departmentId: careerId },
+      });
+
+      return {
+        statusCode: 200,
+        message: `Todas las clases del departamento ${id} han sido devueltas exitosamente`,
+        departmentClasses,
+      };
+    } catch (error) {
+      return this.printMessageError(error);
+    }
+  }
+
   update(id: number, updateCareerClassDto: UpdateCareerClassDto) {
     return `This action updates a #${id} careerClass`;
   }

@@ -18,6 +18,9 @@ export class CreateClassDto {
   @IsString({ message: 'Las unidades valorativas deben ser de tipo texto' })
   valueUnits: string;
 
+  @IsString({ message: 'El departamento debe ser de tipo texto' })
+  departmentId: Career;
+
   @IsOptional()
   @IsNumber(
     {},

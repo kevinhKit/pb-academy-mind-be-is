@@ -1,5 +1,13 @@
 import { CareerClass } from 'src/career-class/entities/career-class.entity';
-import { Column, Entity, ManyToOne, OneToMany, PrimaryColumn } from 'typeorm';
+import { Class } from 'src/class/entities/class.entity';
+import {
+  Column,
+  Entity,
+  ManyToOne,
+  OneToMany,
+  OneToOne,
+  PrimaryColumn,
+} from 'typeorm';
 
 @Entity('Career')
 export class Career {
@@ -35,4 +43,7 @@ export class Career {
     default: () => 'current_timestamp',
   })
   create_at: Date;
+
+  @OneToMany(() => Class, (classs) => classs.career)
+  class: Class;
 }

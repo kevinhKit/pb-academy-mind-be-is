@@ -339,7 +339,6 @@ export class TuitionService {
           studentExist.overallIndex >= 84 ||
           studentExist.periodIndex >= 84
         ) {
-          console.log('matriculo el primer dia');
         } else {
           throw new NotFoundException(
             'No cumple con el indice para matricular el primer dia',
@@ -352,7 +351,6 @@ export class TuitionService {
           (studentExist.overallIndex >= 80 && studentExist.overallIndex < 84) ||
           (studentExist.periodIndex >= 80 && studentExist.periodIndex < 84)
         ) {
-          console.log('matriculo el segundo dia');
         } else {
           throw new NotFoundException(
             'No cumple con el indice para matricular el segundo dia',
@@ -365,7 +363,6 @@ export class TuitionService {
           (studentExist.overallIndex >= 73 && studentExist.overallIndex < 80) ||
           (studentExist.periodIndex >= 73 && studentExist.periodIndex < 80)
         ) {
-          console.log('matriculo el tercer dia');
         } else {
           throw new NotFoundException(
             'No cumple con el indice para matricular el tercer dia',
@@ -378,7 +375,6 @@ export class TuitionService {
           (studentExist.overallIndex >= 65 && studentExist.overallIndex < 73) ||
           (studentExist.periodIndex >= 65 && studentExist.periodIndex < 73)
         ) {
-          console.log('matriculo el cuarto dia');
         } else {
           throw new NotFoundException(
             'No cumple con el indice para matricular el cuarto dia',
@@ -391,7 +387,6 @@ export class TuitionService {
           (studentExist.overallIndex >= 1 && studentExist.overallIndex < 65) ||
           (studentExist.periodIndex >= 1 && studentExist.periodIndex < 65)
         ) {
-          console.log('matriculo el quinto dia');
         } else {
           throw new NotFoundException(
             'No cumple con el indice para matricular el quinto dia',
