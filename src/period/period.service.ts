@@ -499,7 +499,6 @@ export class PeriodService {
         period.dayThree = restDays[2];
         period.dayFour = restDays[3];
         period.dayFive = restDays[4];
-        console.log(restDays);
       }
 
       if (+updatePeriodDto.idStatePeriod == ongoingState.id) {

@@ -26,6 +26,11 @@ export class CareerClassController {
     return this.careerClassService.findAll();
   }
 
+  @Get('department/:id')
+  findClassDepartment(@Param('id') id: Career) {
+    return this.careerClassService.findClassDepartment(id);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: Career) {
     return this.careerClassService.findOne(id);
