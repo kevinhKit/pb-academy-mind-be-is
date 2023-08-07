@@ -21,6 +21,10 @@ export class CreateSectionDto {
   @IsNotEmpty({ message: 'No envió o dejo vacio el campo número de cupos' })
   space: string;
 
+  @IsString({ message: 'El Numero de cupos debe ser de tipo texto.' })
+  @IsNotEmpty({ message: 'No envió o dejo vacio el campo número de cupos' })
+  waitingSpace: string;
+
   @IsString({ message: 'Los dias de la clase deben ser de tipo texto' })
   @IsNotEmpty({ message: 'Los dias de la seccion no pueden ir vacios' })
   days: string;

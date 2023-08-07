@@ -46,6 +46,11 @@ export class Section {
   })
   space: string;
 
+  @Column('text', {
+    nullable: false,
+  })
+  waitingSpace: string;
+
   @Column('text')
   days: string;
 

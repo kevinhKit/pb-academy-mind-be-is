@@ -64,10 +64,23 @@ export class TuitionService {
         },
       });
 
+      const studentsRegistratedWaiting = await this.tuitionRepository.find({
+        where: {
+          section: { id: `${createTuitionDto.idSection}` },
+          waitingList: true,
+        },
+      });
+
       const spaceOccupied = studentsRegistrated.length;
       const waitingList = spaceOccupied >= +validSection.space;
       const sectionSpaceOccupied = studentsRegistrated.length + 1;
       const sectionWaitingList = sectionSpaceOccupied >= +validSection.space;
+
+      const waitingSpaceOccupied = studentsRegistratedWaiting.length;
+      const canRegistrate = waitingSpaceOccupied === +validSection.waitingSpace;
+      if (canRegistrate) {
+        throw new NotFoundException('La seccion ya no tiene mas cupos.');
+      }
 
       const createdTuition = await this.tuitionRepository.create({
         student: createTuitionDto.idStudent,
@@ -423,8 +436,12 @@ export class TuitionService {
         where: { id: `${validateTuition.section.id}`, waitingList: true },
       });
 
+      const tuitionOnWaiting = JSON.parse(
+        validateTuition.waitingList.toString().toLowerCase(),
+      );
+
       await this.tuitionRepository.delete(id);
-      if (section) {
+      if (section && !tuitionOnWaiting) {
         const newSpaces = 1;
         const registrationOnWaiting = await this.tuitionRepository.find({
           where: {

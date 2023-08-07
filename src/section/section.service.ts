@@ -40,6 +40,7 @@ export class SectionService {
     idPeriod,
     idTeacher,
     space,
+    waitingSpace,
     days,
     idClassroom,
     hour,
@@ -147,6 +148,7 @@ export class SectionService {
         idClass: idClass,
         idTeacher: idTeacher,
         space: space,
+        waitingSpace: waitingSpace,
         days: days,
         idClassroom: idClassroom,
         hour: hour,
@@ -329,6 +331,41 @@ export class SectionService {
           'idClassroom.idBuilding.idRegionalCenter',
         ],
       });
+
+      for (const section of classesSections) {
+        const sectionRegistrations = await this.tuitionRepository.find({
+          where: {
+            section: { id: section.id },
+            waitingList: false,
+          },
+        });
+
+        const sectionRegistrationsWaiting = await this.tuitionRepository.find({
+          where: {
+            section: { id: section.id },
+            waitingList: true,
+          },
+        });
+
+        let spaces;
+        let waitingSpaces;
+        if (sectionRegistrations.length == 0) {
+          spaces = section.space;
+        } else {
+          spaces = +section.space - sectionRegistrations.length;
+        }
+        if (sectionRegistrationsWaiting.length == 0) {
+          waitingSpaces = section.waitingSpace;
+        } else {
+          waitingSpaces =
+            +section.waitingSpace - sectionRegistrationsWaiting.length;
+        }
+
+        section['availableSpaces'] = spaces;
+        if (JSON.parse(section.waitingList.toString().toLowerCase())) {
+          section['waitingAvailableSpaces'] = waitingSpaces;
+        }
+      }
 
       return {
         message: `Se han devuelto las secciones de la clase ${classId} en el periodo ${periodId}`,
