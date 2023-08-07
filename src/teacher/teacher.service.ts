@@ -429,9 +429,24 @@ export class TeacherService {
         },
         relations:['teacher','teacher.user']
       })
+      const careerCenterExist = await this.centerCareerRepository.find({
+        where:{
+          career:{
+            id: career.toUpperCase()
+          },
+          regionalCenter:{
+            id: center.toUpperCase()
+          }
+        },
+        // relations:['career']
+      })
 
-      if (careerExist) {
+      if (!careerCenterExist) {
         throw new NotFoundException('La carrera no existe en este centro regional')
+      }
+
+      if (!careerExist) {
+        throw new NotFoundException('No se han encontrado docentes')
       }
 
       return {
