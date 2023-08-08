@@ -18,6 +18,7 @@ import {
   Rol,
   StatePeriod,
 } from 'src/state-period/entities/state-period.entity';
+import { Career } from 'src/career/entities/career.entity';
 
 @Injectable()
 export class SectionService {
@@ -33,6 +34,7 @@ export class SectionService {
     @InjectRepository(Tuition) private tuitionRepository: Repository<Tuition>,
     @InjectRepository(StatePeriod)
     private statePeriodRepository: Repository<StatePeriod>,
+    @InjectRepository(Career) private careerRepository: Repository<Career>,
   ) {}
 
   async create({
@@ -371,6 +373,59 @@ export class SectionService {
         message: `Se han devuelto las secciones de la clase ${classId} en el periodo ${periodId}`,
         statusCode: 200,
         sections: classesSections,
+      };
+    } catch (error) {
+      return this.printMessageError(error);
+    }
+  }
+
+  async findWaitingListSections(id: Career) {
+    try {
+      const newId = `${id}`;
+      const idCareer = newId.toUpperCase();
+      const existingCareer = await this.careerRepository.findOne({
+        where: { id: idCareer },
+      });
+
+      if (!existingCareer) {
+        throw new NotFoundException('La carrera no existe.');
+      }
+
+      const registrationState = await this.statePeriodRepository.findOne({
+        where: { name: Rol.REGISTRATION },
+      });
+
+      const period = await this.periodRepository.findOne({
+        where: {
+          idStatePeriod: In([registrationState.id]),
+        },
+        relations: ['idStatePeriod'],
+      });
+
+      if (!period) {
+        throw new NotFoundException('No existe ningun periodo en matricula.');
+      }
+
+      const waitingListSections = await this.sectionRepository.find({
+        where: {
+          idPeriod: { id: period.id },
+          waitingList: true,
+          idClass: { departmentId: idCareer },
+        },
+        relations: [
+          'idPeriod',
+          'idPeriod.idStatePeriod',
+          'idClass',
+          'idTeacher',
+          'idClassroom',
+          'idClassroom.idBuilding.idRegionalCenter',
+        ],
+      });
+
+      return {
+        message: `Todas las secciones en lista de espera ed un departamento`,
+        statusCode: 200,
+        waitingListSections,
       };
     } catch (error) {
       return this.printMessageError(error);
