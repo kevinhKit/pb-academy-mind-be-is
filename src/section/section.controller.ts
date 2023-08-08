@@ -50,6 +50,11 @@ export class SectionController {
     return this.sectionService.findWaitingListSections(id);
   }
 
+  @Get('department/:id')
+  findSectionsByDepartment(@Param('id') id: Career) {
+    return this.sectionService.findSectionsByDepartment(id);
+  }
+
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateSectionDto: UpdateSectionDto) {
     return this.sectionService.update(id, updateSectionDto);
