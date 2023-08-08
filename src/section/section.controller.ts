@@ -14,6 +14,7 @@ import { UpdateSectionDto } from './dto/update-section.dto';
 import { Teacher } from 'src/teacher/entities/teacher.entity';
 import { Period } from 'src/period/entities/period.entity';
 import { Class } from 'src/class/entities/class.entity';
+import { Career } from 'src/career/entities/career.entity';
 
 @Controller('section')
 export class SectionController {
@@ -42,6 +43,11 @@ export class SectionController {
   @Get('class-period/:id')
   findClasses(@Param('id') id: Class, @Query('period') periodId?: Period) {
     return this.sectionService.findClasses(id, periodId);
+  }
+
+  @Get('waiting-list-sections/:id')
+  findWaitingListSections(@Param('id') id: Career) {
+    return this.sectionService.findWaitingListSections(id);
   }
 
   @Patch(':id')
