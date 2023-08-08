@@ -203,6 +203,96 @@ export class SectionService {
     }
   }
 
+  async findSectionsByDepartment(id: Career) {
+    try {
+      const newId = `${id}`;
+      const idCareer = newId.toUpperCase();
+      const existingCareer = await this.careerRepository.findOne({
+        where: { id: idCareer },
+      });
+
+      if (!existingCareer) {
+        throw new NotFoundException('La carrera no existe.');
+      }
+
+      const planificationState = await this.statePeriodRepository.findOne({
+        where: { name: Rol.PLANIFICATION },
+      });
+
+      const registrationState = await this.statePeriodRepository.findOne({
+        where: { name: Rol.REGISTRATION },
+      });
+
+      const periodExist = await this.periodRepository.findOne({
+        where: {
+          idStatePeriod: In([planificationState.id, registrationState.id]),
+        },
+      });
+
+      if (!periodExist) {
+        throw new NotFoundException(
+          'No existe un periodo en matricula o planificacion',
+        );
+      }
+
+      const sections = await this.sectionRepository.find({
+        where: { idClass: { departmentId: idCareer } },
+        relations: [
+          'idPeriod',
+          'idPeriod.idStatePeriod',
+          'idClass',
+          'idTeacher',
+          'idClassroom',
+          'idClassroom.idBuilding.idRegionalCenter',
+        ],
+        order: { waitingList: 'ASC' },
+      });
+
+      for (const section of sections) {
+        const sectionRegistrations = await this.tuitionRepository.find({
+          where: {
+            section: { id: section.id },
+            waitingList: false,
+          },
+        });
+
+        const sectionRegistrationsWaiting = await this.tuitionRepository.find({
+          where: {
+            section: { id: section.id },
+            waitingList: true,
+          },
+        });
+
+        let spaces;
+        let waitingSpaces;
+        if (sectionRegistrations.length == 0) {
+          spaces = section.space;
+        } else {
+          spaces = +section.space - sectionRegistrations.length;
+        }
+        if (sectionRegistrationsWaiting.length == 0) {
+          waitingSpaces = section.waitingSpace;
+        } else {
+          waitingSpaces =
+            +section.waitingSpace - sectionRegistrationsWaiting.length;
+        }
+
+        section['availableSpaces'] = spaces;
+        if (JSON.parse(section.waitingList.toString().toLowerCase())) {
+          section['waitingAvailableSpaces'] = waitingSpaces;
+        }
+      }
+
+      return {
+        message: 'Se han devuelto las secciones exitosamente',
+        statusCode: 200,
+        sections,
+      };
+    } catch (error) {
+      return this.printMessageError(error);
+    }
+  }
+
   async findOne(id: string) {
     try {
       const section = await this.sectionRepository.findOne({
