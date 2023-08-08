@@ -44,6 +44,11 @@ export class TuitionController {
     return this.tuitionService.findSection(id);
   }
 
+  @Get('waiting-section/:id')
+  findWaitingSection(@Param('id') id: Section) {
+    return this.tuitionService.findWaitingSection(id);
+  }
+
   @Get('student/:id')
   findStudent(@Param('id') id: Student, @Query('periodId') periodId?: Period) {
     return this.tuitionService.findStudent(id, periodId);

@@ -186,12 +186,41 @@ export class TuitionService {
       const registration = await this.tuitionRepository.find({
         where: {
           section: { id: `${id}` },
+          waitingList: false,
         },
         relations: ['student', 'student.user'],
       });
 
       return {
         message: `Mandando las matriculas de la seccion ${id}`,
+        statusCode: 200,
+        registration,
+      };
+    } catch (error) {
+      return this.printMessageError(error);
+    }
+  }
+
+  async findWaitingSection(id: Section) {
+    try {
+      const validSection = await this.sectionRepository.findOne({
+        where: { id: `${id}` },
+      });
+
+      if (!validSection) {
+        throw new NotFoundException('La seccion enviada no existe');
+      }
+
+      const registration = await this.tuitionRepository.find({
+        where: {
+          section: { id: `${id}` },
+          waitingList: true,
+        },
+        relations: ['student', 'student.user'],
+      });
+
+      return {
+        message: `Mandando las matriculas en lista de espera de la seccion ${id}`,
         statusCode: 200,
         registration,
       };
