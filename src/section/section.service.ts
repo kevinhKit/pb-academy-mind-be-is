@@ -414,7 +414,7 @@ export class SectionService {
         }
       }
 
-      if (updateSectionDto.space < section.space) {
+      if (+updateSectionDto.space < +section.space) {
         throw new NotFoundException(
           'No se pueden reducir la cantidad de cupos de la seccion',
         );
