@@ -133,7 +133,7 @@ export class StudentService {
         email: email.toLowerCase(),
         password: encripPassword,
         accountNumber: accountNumber,
-        incomeNote: Number(others.incomeNote),
+        // incomeNote: Number(others.incomeNote),
       });
 
       if (!newStudent) {

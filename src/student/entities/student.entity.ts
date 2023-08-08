@@ -58,11 +58,11 @@ export class Student {
   })
   status: boolean;
 
-  @Column({
-    type: 'smallint',
-    default: 0
-  })
-  incomeNote: number;
+  // @Column({
+  //   type: 'smallint',
+  //   default: 0
+  // })
+  // incomeNote: number;
 
   @Column({
     type: 'smallint',
