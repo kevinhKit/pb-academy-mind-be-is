@@ -104,8 +104,20 @@ export class CenterChangeService {
     }
   }
 
-  findAll() {
-    return `This action returns all centerChange`;
+  async findAll() {
+    try {
+      const allRequestStundents = await this.centerChangeRepository.find({
+        relations:['student']
+      });
+
+      return {
+        statusCode: 200,
+        message: this.printMessageLog("Las solicitudes se obtuvieron exitosamente."),
+        allRequest: allRequestStundents
+      }
+    } catch (error) {
+      return this.printMessageError(error);
+    }
   }
 
   findOne(id: number) {
