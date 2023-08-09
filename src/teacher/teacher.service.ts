@@ -287,6 +287,10 @@ export class TeacherService {
         throw new NotFoundException('El docente no se ha encontrado.')
       }
 
+      if(Boolean(teacherExits.status) == false){
+        throw new ConflictException('El docente no esta activo actualmente.')
+      }
+
       if(teacherExits.isBoss){
         throw new ConflictException('El docente ya es jefe de la carrera enviada actualmente.')
       }
@@ -317,10 +321,11 @@ export class TeacherService {
 
       const teacherCreate = await this.teacherRepository.preload({
         employeeNumber: employeeNumber,
-        isBoss: true
+        isBoss: true,
+        // photoOne: "jajajajaja"
       });
 
-      const saveChangeTeacher = await this.teacherCareerRepository.save(teacherCreate);
+      const saveChangeTeacher = await this.teacherRepository.save(teacherCreate);
 
       return {
         message: "Jefe de departamento cambiado exitosamente",
