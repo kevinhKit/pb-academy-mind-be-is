@@ -54,6 +54,11 @@ export class TuitionController {
     return this.tuitionService.findStudent(id, periodId);
   }
 
+  @Get('registration/:id')
+  registration(@Param('id') id: Student) {
+    return this.tuitionService.registration(id);
+  }
+
   @Get('period-students/:id')
   findStudents(@Param('id') id: Period) {
     return this.tuitionService.findStudentsPeriod(id);
