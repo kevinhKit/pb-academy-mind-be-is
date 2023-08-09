@@ -11,6 +11,7 @@ import {
   Rol,
   StatePeriod,
 } from 'src/state-period/entities/state-period.entity';
+import { Career } from 'src/career/entities/career.entity';
 
 @Injectable()
 export class TuitionService {
@@ -23,6 +24,7 @@ export class TuitionService {
     @InjectRepository(Period) private periodRepository: Repository<Period>,
     @InjectRepository(StatePeriod)
     private statePeriodRepository: Repository<StatePeriod>,
+    @InjectRepository(Career) private careerRepository: Repository<Career>,
   ) {}
 
   async create(createTuitionDto: CreateTuitionDto) {
@@ -350,8 +352,11 @@ export class TuitionService {
     }
   }
 
-  async findStudentsPeriod(id: Period) {
+  async findStudentsPeriod(id: Period, deparmentId: Career) {
     try {
+      let careerId = `${deparmentId}`;
+      careerId = careerId.toUpperCase();
+
       const periodExist = await this.periodRepository.findOne({
         where: {
           id: +id,
@@ -362,9 +367,20 @@ export class TuitionService {
         throw new NotFoundException('EL periodo enviado no existe');
       }
 
+      const careerExist = await this.careerRepository.findOne({
+        where: { id: careerId },
+      });
+
+      if (!careerExist) {
+        throw new NotFoundException('La carrera enviada no existe');
+      }
+
       const registrations = await this.tuitionRepository.find({
         where: {
-          section: { idPeriod: { id: +id } },
+          section: {
+            idPeriod: { id: +id },
+            idClass: { departmentId: careerId },
+          },
         },
         relations: ['student', 'student.user'],
       });
