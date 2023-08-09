@@ -189,6 +189,7 @@ export class StudentService {
         user: returnUser,
       };
     } catch (error) {
+      console.log(error)
       return this.printMessageError(error);
     }
   }
@@ -231,106 +232,24 @@ export class StudentService {
   }
 
   async createMultiple(createStudentDto: CreateStudentDto[]) {
-    const response = [];
+    try{
+      const response = [];
 
-    for (const [, createStudent] of createStudentDto.entries()) {
-      let student = await this.create(createStudent);
-
-      response.push({
-        message: student.message,
-        student: createStudent.dni,
-        success: student.statusCode == 200 ? true : false,
-      });
+      for (const [, createStudent] of createStudentDto.entries()) {
+        let student = await this.create(createStudent);
+  
+        response.push({
+          message: student.message,
+          student: createStudent.dni,
+          success: student.statusCode == 200 ? true : false,
+        });
+      }
+  
+      return response;
+    } catch(error){
+      console.log(error)
+      return this.printMessageError(error);
     }
-
-    return response;
-
-    // const newUsers = [];
-    // const newStudents = [];
-    // const newMails = [];
-    // for (const [index, createStudent] of createStudentDto.entries()) {
-    //   const {
-    //     dni,
-    //     firstLastName,
-    //     firstName,
-    //     secondLastName,
-    //     secondName,
-    //     email,
-    //     address,
-    //     career,
-    //   } = createStudent;
-
-    //   const newPassword = Math.random().toString(36).substring(7);
-    //   const salt = await bcrypt.genSalt(10);
-    //   const password = await bcrypt.hash(newPassword, salt);
-
-    //   const user = this.userRepository.create({
-    //     dni: dni,
-    //     firstName: firstName,
-    //     secondName: secondName,
-    //     firstLastName: firstLastName,
-    //     secondLastName: secondLastName,
-    //     email: email,
-    //     password: password,
-    //     address: address,
-    //   });
-
-    //   const count = await this.studentRepository.count();
-    //   let newAccountNumber = '';
-    //   if (count <= 9) {
-    //     newAccountNumber = `000${count + index}`;
-    //   } else if (count <= 99) {
-    //     newAccountNumber = `00${count + index}`;
-    //   } else if (count <= 999) {
-    //     newAccountNumber = `0${count + index}`;
-    //   } else {
-    //     newAccountNumber = `${count + index}`;
-    //   }
-
-    //   let newEmail = `${firstName.trim().toLowerCase()}.${firstLastName
-    //     .trim()
-    //     .toLowerCase()}@unah.hn`;
-    //   let emailExists = await this.studentRepository.findOne({
-    //     where: { institutionalEmail: newEmail },
-    //   });
-    //   while (emailExists) {
-    //     const randomString = Math.floor(Math.random() * 99) + 1; // Generar una cadena aleatoria
-    //     newEmail = `${firstName.trim().toLowerCase()}.${firstLastName
-    //       .trim()
-    //       .toLowerCase()}.${randomString}@unah.hn`;
-    //     emailExists = await this.studentRepository.findOne({
-    //       where: { institutionalEmail: newEmail },
-    //     });
-    //   }
-
-    //   const newStudent = new Student();
-    //   newStudent.accountNumber = newAccountNumber;
-    //   newStudent.institutionalEmail = newEmail;
-    //   newStudent.career = career;
-
-    //   newStudent.user = user;
-    //   newUsers.push(user);
-    //   newStudents.push(newStudent);
-    //   newMails.push({
-    //     from: '"¡Inicia sesión!" <eralejo2003@gmail.com>', // sender address
-    //     to: user.email as string, // list of receivers
-    //     subject: '¡Bienvenido a registro UNAH!', // Subject line
-    //     text: `Nombre: ${user.firstName} ${user.secondName} ${user.firstLastName} ${user.secondLastName}
-    //         \Número de cuenta: ${newStudent.accountNumber}\nContraseña ${newPassword}\nCorreo institucional: ${newStudent.institutionalEmail}`, // plain text body
-    //   });
-    // }
-    // const savedUsers = await this.userRepository.save(newUsers);
-    // if (savedUsers) {
-    //   const savedStudent = await this.studentRepository.save(newStudents);
-    //   if (savedStudent) {
-    //     newMails.forEach(async (mail) => {
-    //       const info = await transporter.sendMail(mail);
-    //     });
-    //   }
-    // }
-    // return {
-    //   student: newStudents,
-    // };
   }
 
   async findAll() {
