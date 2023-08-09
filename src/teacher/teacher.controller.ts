@@ -14,6 +14,7 @@ import { UpdateTeacherDto } from './dto/update-teacher.dto';
 import { LoginTeacherDto } from './dto/login-teacher.dto';
 import { ResetPasswordTeacherDto } from './dto/reset-password-teacher.dto';
 import { ChangePasswordTeacherDto } from './dto/change-password-teacher.dto';
+import { ChangeRolTeacherDto } from './dto/change-rol-teacher.dto';
 
 @Controller('teacher')
 export class TeacherController {
@@ -63,6 +64,11 @@ export class TeacherController {
   }
 
   
+  @Patch('change-boss')
+  changeBoss(@Body() changeRolTeacherDto: ChangeRolTeacherDto) {
+    return this.teacherService.changeBoss(changeRolTeacherDto);
+  }
+
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateTeacherDto: UpdateTeacherDto) {
     return this.teacherService.update(id, updateTeacherDto);

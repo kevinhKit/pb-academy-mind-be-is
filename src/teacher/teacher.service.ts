@@ -22,6 +22,7 @@ import { ChangePasswordTeacherDto } from './dto/change-password-teacher.dto';
 import { CenterCareer } from 'src/center-career/entities/center-career.entity';
 import { TeachingCareer } from 'src/teaching-career/entities/teaching-career.entity';
 import * as jwt from 'jsonwebtoken';
+import { ChangeRolTeacherDto } from './dto/change-rol-teacher.dto';
 
 @Injectable()
 export class TeacherService {
@@ -273,17 +274,111 @@ export class TeacherService {
     }
   }
 
-  async findAll() {
-    const allTeachers = await this.teacherRepository.find({ relations: ['user','teachingCareer','teachingCareer.centerCareer','teachingCareer.centerCareer.career','teachingCareer.centerCareer.regionalCenter'] });
-    return {
-      statusCode: 200,
-      message: 'Los docentes han sido devueltos exitosamente.',
-      teachers: allTeachers,
-    };
+  async changeBoss({employeeNumber}: ChangeRolTeacherDto){
+    try {
+      const teacherExits = await this.teacherRepository.findOne({
+        where: {
+          employeeNumber: employeeNumber
+        },
+        relations: ['teachingCareer','teachingCareer.centerCareer','teachingCareer.centerCareer.career','teachingCareer.centerCareer.regionalCenter']
+      });
+
+      if(!teacherExits){
+        throw new NotFoundException('El docente no se ha encontrado.')
+      }
+
+      if(teacherExits.isBoss){
+        throw new ConflictException('El docente ya es jefe de la carrera enviada actualmente.')
+      }
+
+      if(teacherExits.isCoordinator){
+        throw new ConflictException('El docente es actualmente cordinador de la carrera enviada.')
+      }
+
+      const teacherIsBossExits = await this.teacherRepository.findOne({
+        where: {
+          isBoss: true,
+          teachingCareer: {
+            centerCareer:{
+              career:{
+                id: JSON.parse(JSON.stringify(teacherExits.teachingCareer[0].centerCareer)).career.id
+              },
+              regionalCenter:{
+                id: JSON.parse(JSON.stringify(teacherExits.teachingCareer[0].centerCareer)).regionalCenter.id
+              }
+            }
+          },
+        }
+      });
+
+      if(teacherIsBossExits){
+        throw new ConflictException('Para este departamento ya existe un jefe.')
+      }
+
+      const teacherCreate = await this.teacherRepository.preload({
+        employeeNumber: employeeNumber,
+        isBoss: true
+      });
+
+      const saveChangeTeacher = await this.teacherCareerRepository.save(teacherCreate);
+
+      return {
+        message: "Jefe de departamento cambiado exitosamente",
+        teacher: saveChangeTeacher,
+        statusCode: 200,
+      };
+
+    } catch (error) {
+      return this.printMessageError(error);
+    }
   }
 
-  async findOne(id: number) {
-    return `This action returns a #${id} teacher`;
+  async changePassword(
+    id: string,
+    { password, newPassword }: ChangePasswordTeacherDto,
+  ) {
+    try {
+      const user = await this.teacherRepository.findOne({
+        where: {
+          user: {
+            dni: id.replaceAll('-', ''),
+          },
+        },
+      });
+
+      if (!user) {
+        throw new NotFoundException('El Docente no se ha encontrado.');
+      }
+
+      const ispassword = await this.encryptService.decodePassword(
+        password,
+        user.password,
+      );
+      if (!ispassword) {
+        throw new UnauthorizedException('Contraseña invalida.');
+      }
+
+      const encripPassword = await this.encryptService.encodePassword(
+        newPassword,
+      );
+
+      const teacherChange = await this.teacherRepository.preload({
+        employeeNumber: user.employeeNumber,
+        password: encripPassword,
+      });
+
+      await this.teacherRepository.save(teacherChange);
+
+      return {
+        statusCode: 200,
+        // user,
+        message: this.printMessageLog(
+          'La contraseña se ha cambiado exitosamente',
+        ),
+      };
+    } catch (error) {
+      return this.printMessageError(error);
+    }
   }
 
   async update(
@@ -340,79 +435,18 @@ export class TeacherService {
     }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} teacher`;
+  async findAll() {
+    const allTeachers = await this.teacherRepository.find({ relations: ['user','teachingCareer','teachingCareer.centerCareer','teachingCareer.centerCareer.career','teachingCareer.centerCareer.regionalCenter'] });
+    return {
+      statusCode: 200,
+      message: 'Los docentes han sido devueltos exitosamente.',
+      teachers: allTeachers,
+    };
   }
 
-  printMessageLog(message) {
-    this.logger.log(message);
-    return message;
+  async findOne(id: number) {
+    return `This action returns a #${id} teacher`;
   }
-
-  printMessageError(message) {
-    if (message.response) {
-      if (message.response.message) {
-        this.logger.error(message.response.message);
-        return message.response;
-      }
-
-      this.logger.error(message.response);
-      return message.response;
-    }
-
-    this.logger.error(message);
-    return message;
-  }
-
-  async changePassword(
-    id: string,
-    { password, newPassword }: ChangePasswordTeacherDto,
-  ) {
-    try {
-      const user = await this.teacherRepository.findOne({
-        where: {
-          user: {
-            dni: id.replaceAll('-', ''),
-          },
-        },
-      });
-
-      if (!user) {
-        throw new NotFoundException('El Docente no se ha encontrado.');
-      }
-
-      const ispassword = await this.encryptService.decodePassword(
-        password,
-        user.password,
-      );
-      if (!ispassword) {
-        throw new UnauthorizedException('Contraseña invalida.');
-      }
-
-      const encripPassword = await this.encryptService.encodePassword(
-        newPassword,
-      );
-
-      const teacherChange = await this.teacherRepository.preload({
-        employeeNumber: user.employeeNumber,
-        password: encripPassword,
-      });
-
-      await this.teacherRepository.save(teacherChange);
-
-      return {
-        statusCode: 200,
-        // user,
-        message: this.printMessageLog(
-          'La contraseña se ha cambiado exitosamente',
-        ),
-      };
-    } catch (error) {
-      return this.printMessageError(error);
-    }
-  }
-
-
 
   async findCareer(career: string, center: string) {
     try {
@@ -514,6 +548,10 @@ export class TeacherService {
     }
   }
 
+  remove(id: number) {
+    return `This action removes a #${id} teacher`;
+  }
+
   validateUrl(tokenURl: string){
     const secretKey = 'miClaveSecreta';
       try {
@@ -539,6 +577,26 @@ export class TeacherService {
           message: "La url ha expirado o es invalida"
         };
       }
+  }
+
+  printMessageLog(message) {
+    this.logger.log(message);
+    return message;
+  }
+
+  printMessageError(message) {
+    if (message.response) {
+      if (message.response.message) {
+        this.logger.error(message.response.message);
+        return message.response;
+      }
+
+      this.logger.error(message.response);
+      return message.response;
+    }
+
+    this.logger.error(message);
+    return message;
   }
 
 }
