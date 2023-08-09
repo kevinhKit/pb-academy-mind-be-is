@@ -7,6 +7,7 @@ import { StudentCareer } from 'src/student-career/entities/student-career.entity
 import { CenterCareer } from 'src/center-career/entities/center-career.entity';
 import { Repository } from 'typeorm';
 import { CenterChange, applicationStatus } from './entities/center-change.entity';
+import { CareerChange } from 'src/career-change/entities/career-change.entity';
 
 @Injectable()
 export class CenterChangeService {
@@ -15,6 +16,7 @@ export class CenterChangeService {
 
   constructor(
     @InjectRepository(CenterChange) private centerChangeRepository: Repository<CenterChange>,
+    @InjectRepository(CareerChange) private careerChangeRepository: Repository<CareerChange>,
     @InjectRepository(Student) private studentRepository: Repository<Student>,
     @InjectRepository(StudentCareer) private studentCareerRepository: Repository<StudentCareer>,
     @InjectRepository(CenterCareer) private centerCareerRepository: Repository<CenterCareer>,
@@ -48,6 +50,17 @@ export class CenterChangeService {
 
       if(!studentExist){
         throw new NotFoundException('El estudiante enviado no existe')
+      }
+
+      const requestExist = await this.careerChangeRepository.findOne({
+        where: {
+          accountNumber: accountNumber,
+          applicationStatus: applicationStatus.PROGRESS
+        }
+      });
+
+      if(requestExist){
+        throw new ConflictException('Usted tiene un proceso de cambio de carrera actualmente')
       }
 
       if(studentExist.studentCareer[0].centerCareer.regionalCenter.id == idCenter){
@@ -91,8 +104,20 @@ export class CenterChangeService {
     }
   }
 
-  findAll() {
-    return `This action returns all centerChange`;
+  async findAll() {
+    try {
+      const allRequestStundents = await this.centerChangeRepository.find({
+        relations:['student']
+      });
+
+      return {
+        statusCode: 200,
+        message: this.printMessageLog("Las solicitudes se obtuvieron exitosamente."),
+        allRequest: allRequestStundents
+      }
+    } catch (error) {
+      return this.printMessageError(error);
+    }
   }
 
   findOne(id: number) {

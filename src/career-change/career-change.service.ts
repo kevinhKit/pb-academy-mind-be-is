@@ -7,6 +7,7 @@ import { Repository } from 'typeorm';
 import { Student } from 'src/student/entities/student.entity';
 import { CenterCareer } from 'src/center-career/entities/center-career.entity';
 import { StudentCareer } from 'src/student-career/entities/student-career.entity';
+import { CenterChange } from 'src/center-change/entities/center-change.entity';
 
 @Injectable()
 export class CareerChangeService {
@@ -18,6 +19,7 @@ export class CareerChangeService {
     @InjectRepository(Student) private studentRepository: Repository<Student>,
     @InjectRepository(StudentCareer) private studentCareerRepository: Repository<StudentCareer>,
     @InjectRepository(CenterCareer) private centerCareerRepository: Repository<CenterCareer>,
+    @InjectRepository(CenterChange) private centerChangeRepository: Repository<CenterChange>,
   ){
   }
 
@@ -47,6 +49,17 @@ export class CareerChangeService {
 
       if(!studentExist){
         throw new NotFoundException('El estudiante enviado no existe')
+      }
+
+      const requestExist = await this.centerChangeRepository.findOne({
+        where: {
+          accountNumber: accountNumber,
+          applicationStatus: applicationStatus.PROGRESS
+        }
+      });
+
+      if(requestExist){
+        throw new ConflictException('Usted tiene un proceso de cambio de centro regional actualmente')
       }
 
       if(studentExist.studentCareer[0].centerCareer.career.id == idCareer){
@@ -89,8 +102,20 @@ export class CareerChangeService {
     }
   }
 
-  findAll() {
-    return `This action returns all careerChange`;
+  async findAll() {
+    try {
+      const allRequestStundents = await this.careerChangeRepository.find({
+        relations:['student']
+      });
+
+      return {
+        statusCode: 200,
+        message: this.printMessageLog("Las solicitudes se obtuvieron exitosamente."),
+        allRequest: allRequestStundents
+      }
+    } catch (error) {
+      return this.printMessageError(error);
+    }
   }
 
   findOne(id: number) {
