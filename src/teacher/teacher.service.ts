@@ -296,7 +296,7 @@ export class TeacherService {
       }
 
       if(teacherExits.isCoordinator){
-        throw new ConflictException('El docente es actualmente cordinador de la carrera enviada.')
+        throw new ConflictException('El docente es actualmente coordinador de la carrera enviada.')
       }
 
       const teacherIsBossExits = await this.teacherRepository.findOne({
@@ -329,6 +329,70 @@ export class TeacherService {
 
       return {
         message: "Jefe de departamento cambiado exitosamente",
+        teacher: saveChangeTeacher,
+        statusCode: 200,
+      };
+
+    } catch (error) {
+      return this.printMessageError(error);
+    }
+  }
+
+  async changeCoordinator({employeeNumber}: ChangeRolTeacherDto){
+    try {
+      const teacherExits = await this.teacherRepository.findOne({
+        where: {
+          employeeNumber: employeeNumber
+        },
+        relations: ['teachingCareer','teachingCareer.centerCareer','teachingCareer.centerCareer.career','teachingCareer.centerCareer.regionalCenter']
+      });
+
+      if(!teacherExits){
+        throw new NotFoundException('El docente no se ha encontrado.')
+      }
+
+      if(Boolean(teacherExits.status) == false){
+        throw new ConflictException('El docente no esta activo actualmente.')
+      }
+
+      if(teacherExits.isBoss){
+        throw new ConflictException('El docente ya tiene el cargo de jefe de la carrera enviada actualmente.')
+      }
+
+      if(teacherExits.isCoordinator){
+        throw new ConflictException('El docente es actualmente coordinador de la carrera enviada.')
+      }
+
+      const teacherIsCoordinatorExits = await this.teacherRepository.findOne({
+        where: {
+          isCoordinator: true,
+          teachingCareer: {
+            centerCareer:{
+              career:{
+                id: JSON.parse(JSON.stringify(teacherExits.teachingCareer[0].centerCareer)).career.id
+              },
+              regionalCenter:{
+                id: JSON.parse(JSON.stringify(teacherExits.teachingCareer[0].centerCareer)).regionalCenter.id
+              }
+            }
+          },
+        }
+      });
+
+      if(teacherIsCoordinatorExits){
+        throw new ConflictException('Para está carrera ya existe un coordinador academico.')
+      }
+
+      const teacherCreate = await this.teacherRepository.preload({
+        employeeNumber: employeeNumber,
+        isCoordinator: true,
+        // photoOne: "jajajajaja"
+      });
+
+      const saveChangeTeacher = await this.teacherRepository.save(teacherCreate);
+
+      return {
+        message: "Coordinador de Carrera cambiado Exitosamente",
         teacher: saveChangeTeacher,
         statusCode: 200,
       };

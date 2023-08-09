@@ -63,10 +63,14 @@ export class TeacherController {
     return this.teacherService.findAll();
   }
 
-  
   @Patch('change-boss')
   changeBoss(@Body() changeRolTeacherDto: ChangeRolTeacherDto) {
     return this.teacherService.changeBoss(changeRolTeacherDto);
+  }
+  
+  @Patch('change-coordinator')
+  changeCoordinator(@Body() changeRolTeacherDto: ChangeRolTeacherDto) {
+    return this.teacherService.changeCoordinator(changeRolTeacherDto);
   }
 
   @Patch(':id')
