@@ -102,8 +102,20 @@ export class CareerChangeService {
     }
   }
 
-  findAll() {
-    return `This action returns all careerChange`;
+  async findAll() {
+    try {
+      const allRequestStundents = await this.careerChangeRepository.find({
+        relations:['student']
+      });
+
+      return {
+        statusCode: 200,
+        message: this.printMessageLog("Las solicitudes se obtuvieron exitosamente."),
+        allRequest: allRequestStundents
+      }
+    } catch (error) {
+      return this.printMessageError(error);
+    }
   }
 
   findOne(id: number) {
