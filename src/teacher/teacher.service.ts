@@ -90,7 +90,7 @@ export class TeacherService {
         throw new ConflictException('El usuario ya existe como docente.');
       }
 
-      if(isBoss){
+      if(Boolean(isBoss) == true){
         const teacherBossExits = await this.teacherRepository.findOne({
           where: {
             isBoss: isBoss,
@@ -112,7 +112,7 @@ export class TeacherService {
         }
       }
 
-      if(isCoordinator){
+      if(Boolean(isCoordinator) == true){
         const teacherCoordinatorExits = await this.teacherRepository.findOne({
           where: {
             isCoordinator: isCoordinator,
