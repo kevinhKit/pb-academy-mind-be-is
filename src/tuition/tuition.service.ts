@@ -294,6 +294,62 @@ export class TuitionService {
     }
   }
 
+  async registration(id: Student) {
+    try {
+      const studentExist = await this.studentRepository.findOne({
+        where: {
+          accountNumber: `${id}`,
+        },
+      });
+
+      if (!studentExist) {
+        throw new NotFoundException('No se ha encontrado al estudiante');
+      }
+
+      const registrationState = await this.statePeriodRepository.findOne({
+        where: { name: Rol.REGISTRATION },
+      });
+
+      const period = await this.periodRepository.findOne({
+        where: { idStatePeriod: { id: registrationState.id } },
+        relations: ['idStatePeriod'],
+      });
+
+      if (!period) {
+        throw new NotFoundException('No hay ningun periodo en matricula');
+      }
+
+      const registrations = await this.tuitionRepository.find({
+        where: {
+          student: { accountNumber: `${id}` },
+          section: { idPeriod: { id: period.id } },
+        },
+        relations: [
+          'section',
+          'section.idClass',
+          'section.idClassroom',
+          'section.idClassroom.idBuilding',
+          'section.idTeacher.user',
+        ],
+      });
+
+      let valueUnits = 25;
+
+      for (const registration of registrations) {
+        valueUnits -= +registration.section.idClass.valueUnits;
+      }
+
+      return {
+        message: `Mandando las matriculas del estudiante ${id}`,
+        statusCode: 200,
+        valueUnits,
+        registrations,
+      };
+    } catch (error) {
+      return this.printMessageError(error);
+    }
+  }
+
   async findStudentsPeriod(id: Period) {
     try {
       const periodExist = await this.periodRepository.findOne({
