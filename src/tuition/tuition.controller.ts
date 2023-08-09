@@ -14,6 +14,7 @@ import { UpdateTuitionDto } from './dto/update-tuition.dto';
 import { Section } from 'src/section/entities/section.entity';
 import { Student } from 'src/student/entities/student.entity';
 import { Period } from 'src/period/entities/period.entity';
+import { Career } from 'src/career/entities/career.entity';
 
 @Controller('tuition')
 export class TuitionController {
@@ -60,8 +61,11 @@ export class TuitionController {
   }
 
   @Get('period-students/:id')
-  findStudents(@Param('id') id: Period) {
-    return this.tuitionService.findStudentsPeriod(id);
+  findStudents(
+    @Param('id') id: Period,
+    @Query('department') deparmentId: Career,
+  ) {
+    return this.tuitionService.findStudentsPeriod(id, deparmentId);
   }
 
   @Patch(':id')
