@@ -3,7 +3,7 @@ import { CreateTuitionDto } from './dto/create-tuition.dto';
 import { UpdateTuitionDto } from './dto/update-tuition.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Section } from 'src/section/entities/section.entity';
-import { Tuition } from './entities/tuition.entity';
+import { Tuition, classStatus } from './entities/tuition.entity';
 import { Repository } from 'typeorm';
 import { Student } from 'src/student/entities/student.entity';
 import { Period } from 'src/period/entities/period.entity';
@@ -315,6 +315,62 @@ export class TuitionService {
     }
   }
 
+  async findStudentGrades(id: Student) {
+    try {
+      const studentExist = await this.studentRepository.findOne({
+        where: {
+          accountNumber: `${id}`,
+        },
+      });
+
+      if (!studentExist) {
+        throw new NotFoundException('No se ha encontrado al estudiante');
+      }
+
+      const gradesState = await this.statePeriodRepository.findOne({
+        where: { name: Rol.GRADES },
+      });
+
+      const periodOnGrades = await this.periodRepository.findOne({
+        relations: ['idStatePeriod'],
+        where: {
+          idStatePeriod: { id: gradesState.id },
+        },
+      });
+
+      if (!periodOnGrades) {
+        throw new NotFoundException(
+          'El periodo de ingreso de calificaciones no esta activo',
+        );
+      }
+
+      const registrations = await this.tuitionRepository.find({
+        where: {
+          student: { accountNumber: `${id}` },
+          section: { idPeriod: { id: periodOnGrades.id } },
+        },
+        relations: [
+          'section',
+          'section.idClass',
+          'section.idClassroom',
+          'section.idClassroom.idBuilding',
+          'section.idTeacher.user',
+          'section.idPeriod.idStatePeriod',
+        ],
+      });
+
+      // VALIDAR EVALUACION DOCENTE teacherEvaluation
+
+      return {
+        message: `Mandando las matriculas del estudiante ${id}`,
+        statusCode: 200,
+        registrations,
+      };
+    } catch (error) {
+      return this.printMessageError(error);
+    }
+  }
+
   async registration(id: Student) {
     try {
       const studentExist = await this.studentRepository.findOne({
@@ -537,8 +593,55 @@ export class TuitionService {
     }
   }
 
-  update(id: number, updateTuitionDto: UpdateTuitionDto) {
-    return `This action updates a #${id} tuition`;
+  async update(id: string, updateTuitionDto: UpdateTuitionDto) {
+    try {
+      const validtuition = await this.tuitionRepository.findOne({
+        where: { id: id },
+        relations: ['section.idPeriod.idStatePeriod'],
+      });
+
+      if (!validtuition) {
+        throw new NotFoundException('No se encuentra la matricula');
+      }
+
+      const gradesState = await this.statePeriodRepository.findOne({
+        where: { name: Rol.GRADES },
+      });
+
+      if (validtuition.section.idPeriod.idStatePeriod.id != gradesState.id) {
+        throw new NotFoundException(
+          'La matricula no se encuentra en ingreso de notas',
+        );
+      }
+
+      const note = parseInt(updateTuitionDto.note);
+      let status;
+
+      if (note > parseInt('100') || note < parseInt('0')) {
+        throw new NotFoundException(
+          'La nota debe ser menor que 100 y mayor que 0',
+        );
+      }
+
+      if (note >= parseInt('65')) {
+        status = classStatus.APPROVED;
+      } else {
+        status = classStatus.FAILED;
+      }
+
+      validtuition.note = `${note}`;
+      validtuition.stateClass = status;
+
+      const updatedTuition = await this.tuitionRepository.save(validtuition);
+
+      return {
+        message: `Se ha ingresado la nota correctamente`,
+        statusCode: 200,
+        updatedTuition,
+      };
+    } catch (error) {
+      return this.printMessageError(error);
+    }
   }
 
   async remove(id: string) {

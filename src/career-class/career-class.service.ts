@@ -72,6 +72,50 @@ export class CareerClassService {
     }
   }
 
+  async findClassRequirements(id: Career) {
+    try {
+      let careerId = `${id}`;
+      careerId = careerId.toUpperCase();
+      const validCareer = await this.careerRepository.findOne({
+        where: { id: `${careerId}` },
+      });
+
+      if (!validCareer) {
+        throw new NotFoundException('La carrera no existe');
+      }
+
+      const classesWithId = await this.careerClassRepository.find({
+        where: { idCareer: { id: careerId } },
+        relations: [
+          'idClass',
+          'idClass.classCurrent',
+          'idClass.classCurrent.idRequirement',
+        ],
+      });
+
+      const classesWithoutId = classesWithId.map((careerClass) => {
+        const { id, ...classWithoutId } = careerClass;
+        return classWithoutId;
+      });
+
+      const classes = classesWithoutId.map((careerClass) => {
+        return {
+          ...careerClass.idClass,
+          idCareer: careerClass.idCareer,
+        };
+      });
+
+      return {
+        statusCode: 200,
+        message:
+          'Las clases que el estudiante puede llevar han sido devueltas exitosamente',
+        classes,
+      };
+    } catch (error) {
+      return this.printMessageError(error);
+    }
+  }
+
   async findClassDepartment(id: Career) {
     try {
       let careerId = `${id}`;

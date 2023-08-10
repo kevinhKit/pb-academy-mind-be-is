@@ -55,6 +55,11 @@ export class TuitionController {
     return this.tuitionService.findStudent(id, periodId);
   }
 
+  @Get('student-grades/:id')
+  findStudentGrades(@Param('id') id: Student) {
+    return this.tuitionService.findStudentGrades(id);
+  }
+
   @Get('registration/:id')
   registration(@Param('id') id: Student) {
     return this.tuitionService.registration(id);
@@ -70,7 +75,7 @@ export class TuitionController {
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateTuitionDto: UpdateTuitionDto) {
-    return this.tuitionService.update(+id, updateTuitionDto);
+    return this.tuitionService.update(id, updateTuitionDto);
   }
 
   @Delete(':id')
