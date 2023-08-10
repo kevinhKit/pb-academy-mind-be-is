@@ -31,6 +31,7 @@ export class TuitionService {
     try {
       const validSection = await this.sectionRepository.findOne({
         where: { id: `${createTuitionDto.idSection}` },
+        relations: ['idPeriod'],
       });
 
       if (!validSection) {
@@ -59,6 +60,24 @@ export class TuitionService {
       if (!studentExist) {
         throw new NotFoundException('No se ha encontrado al docente');
       }
+
+      // Validar si no tiene traslape de horas
+
+      const currentRegistrations = await this.tuitionRepository.find({
+        where: {
+          section: { idPeriod: { id: validSection.idPeriod.id } },
+          student: { accountNumber: `${createTuitionDto.idStudent}` },
+        },
+        relations: ['section'],
+      });
+
+      currentRegistrations.forEach((registration) => {
+        if (registration.section.hour === validSection.hour) {
+          throw new NotFoundException(
+            'Ya tiene una seccion matriculada a esa hora',
+          );
+        }
+      });
 
       const studentsRegistrated = await this.tuitionRepository.find({
         where: {
