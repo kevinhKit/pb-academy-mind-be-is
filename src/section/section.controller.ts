@@ -40,6 +40,11 @@ export class SectionController {
     return this.sectionService.findTeacher(id, periodId);
   }
 
+  @Get('teacher-grades/:id')
+  findTeacherGrades(@Param('id') id: Teacher) {
+    return this.sectionService.findTeacherGrades(id);
+  }
+
   @Get('class-period/:id')
   findClasses(@Param('id') id: Class, @Query('period') periodId?: Period) {
     return this.sectionService.findClasses(id, periodId);

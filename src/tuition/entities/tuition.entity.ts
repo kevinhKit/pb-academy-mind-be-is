@@ -10,6 +10,14 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
+export enum classStatus {
+  PROGRESS = 'En progreso',
+  APPROVED = 'APR',
+  FAILED = 'REPR',
+  CANCELED = 'CAN',
+  ABANDONED = 'ABN',
+}
+
 @Entity('Tuition')
 export class Tuition {
   @PrimaryGeneratedColumn('uuid')
@@ -34,10 +42,12 @@ export class Tuition {
   })
   note: string;
 
-  @Column('text', {
-    nullable: true,
+  @Column({
+    type: 'enum',
+    enum: classStatus,
+    default: classStatus.PROGRESS,
   })
-  stateClass: string;
+  stateClass: classStatus;
 
   @Column('text', {
     default: false,

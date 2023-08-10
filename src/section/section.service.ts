@@ -387,6 +387,57 @@ export class SectionService {
     }
   }
 
+  async findTeacherGrades(id: Teacher) {
+    try {
+      const teacherExist = await this.teacherRepository.findOne({
+        where: {
+          employeeNumber: `${id}`,
+        },
+      });
+
+      if (!teacherExist) {
+        throw new NotFoundException('No se ha encontrado al docente');
+      }
+
+      const gradesState = await this.statePeriodRepository.findOne({
+        where: { name: Rol.GRADES },
+      });
+
+      const periodOnGrades = await this.periodRepository.findOne({
+        where: { idStatePeriod: { id: gradesState.id } },
+      });
+
+      if (!periodOnGrades) {
+        throw new NotFoundException(
+          'No hay ningun periodo en ingreso de calificaciones',
+        );
+      }
+
+      const teacherSections = await this.sectionRepository.find({
+        where: {
+          idTeacher: { employeeNumber: `${id}` },
+          idPeriod: { id: periodOnGrades.id },
+        },
+        relations: [
+          'idPeriod',
+          'idPeriod.idStatePeriod',
+          'idClass',
+          'idTeacher',
+          'idClassroom',
+          'idClassroom.idBuilding.idRegionalCenter',
+        ],
+      });
+
+      return {
+        message: `Se han devuelto las secciones en ingreso de notas del docente ${id}`,
+        statusCode: 200,
+        section: teacherSections,
+      };
+    } catch (error) {
+      return this.printMessageError(error);
+    }
+  }
+
   async findClasses(classId: Class, periodId: Period) {
     try {
       const classExist = await this.classRepository.findOne({
