@@ -26,6 +26,8 @@ import { SectionModule } from './section/section.module';
 import { CenterChangeModule } from './center-change/center-change.module';
 import { TuitionModule } from './tuition/tuition.module';
 import { ExceptionalCancellationModule } from './exceptional-cancellation/exceptional-cancellation.module';
+import { TeacherEvaluationModule } from './teacher-evaluation/teacher-evaluation.module';
+import { QuestionModule } from './question/question.module';
 
 @Module({
   imports: [
@@ -69,6 +71,8 @@ import { ExceptionalCancellationModule } from './exceptional-cancellation/except
     CenterChangeModule,
     TuitionModule,
     ExceptionalCancellationModule,
+    TeacherEvaluationModule,
+    QuestionModule,
   ],
 
   controllers: [AppController],

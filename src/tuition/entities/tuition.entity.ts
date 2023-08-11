@@ -1,12 +1,14 @@
 import { ExceptionalCancellation } from 'src/exceptional-cancellation/entities/exceptional-cancellation.entity';
 import { Section } from 'src/section/entities/section.entity';
 import { Student } from 'src/student/entities/student.entity';
+import { TeacherEvaluation } from 'src/teacher-evaluation/entities/teacher-evaluation.entity';
 import {
   Collection,
   Column,
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
@@ -54,11 +56,6 @@ export class Tuition {
   })
   waitingList: boolean;
 
-  @Column('text', {
-    nullable: true,
-  })
-  teacherEvaluation: string;
-
   @Column('timestamptz', {
     default: () => 'current_timestamp',
   })
@@ -73,4 +70,16 @@ export class Tuition {
     name: 'idCancellation',
   })
   idCancellation: ExceptionalCancellation;
+
+  @Column('text', {
+    default: false,
+    nullable: true,
+  })
+  teacherEvaluationDone: boolean;
+
+  @OneToMany(
+    () => TeacherEvaluation,
+    (teacherEvaluation) => teacherEvaluation.tuition,
+  )
+  teacherEvaluations: TeacherEvaluation[];
 }
