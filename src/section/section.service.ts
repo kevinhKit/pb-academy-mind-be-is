@@ -143,7 +143,20 @@ export class SectionService {
         },
       });
 
-      if (classRoomOccupied) {
+      const classRoomSections = await this.sectionRepository.find({
+        where: {
+          idPeriod: { id: +idPeriod },
+          idClassroom: { id: `${idClassroom}` },
+        },
+      });
+
+      const classRoomAlreadyOccupied = await this.validateExistingSection(
+        classRoomSections,
+        hour,
+        finalHour,
+      );
+
+      if (classRoomOccupied || classRoomAlreadyOccupied) {
         throw new NotFoundException(
           'Ya existe una seccion a esa hora en esa aula.',
         );
