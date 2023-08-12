@@ -1,5 +1,6 @@
 import { Career } from 'src/career/entities/career.entity';
 import { CenterCareer } from 'src/center-career/entities/center-career.entity';
+import { Period } from 'src/period/entities/period.entity';
 import { Student } from 'src/student/entities/student.entity';
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn, PrimaryGeneratedColumn } from 'typeorm';
 
@@ -45,7 +46,7 @@ export class CareerChange {
     enum: applicationStatus,
     default: applicationStatus.PROGRESS,
   })
-  applicationStatus: applicationStatus;
+  applicationStatus: string;
 
   @Column('text', { nullable: true })
   justification: string;
@@ -57,4 +58,10 @@ export class CareerChange {
     default: () => "current_timestamp",
   })
   opinionDate: Date;
+
+  @ManyToOne(() => Period, (period) => period.id)
+  @JoinColumn({
+    name: 'idPeriod',
+  })
+  idPeriod?: Period;
 }

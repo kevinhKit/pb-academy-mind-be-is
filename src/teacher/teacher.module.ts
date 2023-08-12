@@ -11,10 +11,12 @@ import { SendEmailService } from 'src/shared/send-email/send-email.service';
 import { EncryptPasswordService } from 'src/shared/encrypt-password/encrypt-password.service';
 import { SharedModule } from 'src/shared/shared.module';
 import { CenterCareer } from 'src/center-career/entities/center-career.entity';
+import { CenterChange } from 'src/center-change/entities/center-change.entity';
+import { CareerChange } from 'src/career-change/entities/career-change.entity';
 
 @Module({
   controllers: [TeacherController],
   providers: [TeacherService],//,SendEmailService,EncryptPasswordService,GenerteEmployeeNumberService,GenerateEmailService
-  imports: [TypeOrmModule.forFeature([Teacher, User, TeachingCareer, CenterCareer]),SharedModule],
+  imports: [TypeOrmModule.forFeature([Teacher, User, TeachingCareer, CenterCareer, CenterChange, CareerChange]),SharedModule],
 })
 export class TeacherModule {}

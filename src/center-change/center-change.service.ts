@@ -8,6 +8,9 @@ import { CenterCareer } from 'src/center-career/entities/center-career.entity';
 import { Repository } from 'typeorm';
 import { CenterChange, applicationStatus } from './entities/center-change.entity';
 import { CareerChange } from 'src/career-change/entities/career-change.entity';
+import { Period } from 'src/period/entities/period.entity';
+import { ReviewCenterChangeDto, applicationStatusOption } from './dto/review-center-change.dto';
+import { ReviewCareerChangeDto } from 'src/career-change/dto/review-career-change.dto';
 
 @Injectable()
 export class CenterChangeService {
@@ -20,22 +23,37 @@ export class CenterChangeService {
     @InjectRepository(Student) private studentRepository: Repository<Student>,
     @InjectRepository(StudentCareer) private studentCareerRepository: Repository<StudentCareer>,
     @InjectRepository(CenterCareer) private centerCareerRepository: Repository<CenterCareer>,
+    @InjectRepository(Period) private periodRepository: Repository<Period>,
   ){
   }
 
   
-  async create({idCenter, justification, justificationPdf, accountNumber}: CreateCenterChangeDto) {
+  async create({idCenter, justification, justificationPdf, accountNumber, idPeriod}: CreateCenterChangeDto) {
     try {
+
+      const periodExist = await this.periodRepository.findOne({
+        where:{
+          id: +idPeriod
+        }
+      });
+
+      if(!periodExist){
+        throw new NotFoundException('El periodo proporcionado no existe')
+      }
 
       const centerChangeExist = await this.centerChangeRepository.findOne({
         where:{
           accountNumber: accountNumber,
-          applicationStatus: applicationStatus.PROGRESS
-        }
+          applicationStatus: applicationStatus.PROGRESS,
+          idPeriod: {
+            id: +idPeriod
+          },
+        },
+        relations: ['idPeriod']
       });
 
       if(centerChangeExist){
-        throw new ConflictException('Usted ya tiene una solicitud de cambio de centro regional actualmente.')
+        throw new ConflictException('Usted ya realizo una solicitud de cambio de centro regional para el periodo actual')
       }
 
 
@@ -55,7 +73,10 @@ export class CenterChangeService {
       const requestExist = await this.careerChangeRepository.findOne({
         where: {
           accountNumber: accountNumber,
-          applicationStatus: applicationStatus.PROGRESS
+          applicationStatus: applicationStatus.PROGRESS,
+          idPeriod: {
+            id: +idPeriod
+          }
         }
       });
 
@@ -87,7 +108,10 @@ export class CenterChangeService {
         idCenter: idCenter,
         justification: justification,
         justificationPdf: justificationPdf,
-        accountNumber: accountNumber
+        accountNumber: accountNumber,
+        idPeriod: {
+          id: +idPeriod
+        }
       });
 
       const savecenterChange = await this.centerChangeRepository.save(centerChange)
@@ -104,10 +128,44 @@ export class CenterChangeService {
     }
   }
 
+  async reviewRequest({aplicationStatus, idCenterChange}:ReviewCenterChangeDto){
+    try {
+      
+      const statusAplication = await this.centerChangeRepository.findOne({
+        where: {
+          idCenterChange: idCenterChange,
+          // applicationStatus: In([applicationStatusOption.ACCEPTED,applicationStatusOption.REJECTED])
+        }
+      });
+
+      if(!statusAplication){
+        throw new NotFoundException('Solicitud de cambio de centro regional no encontrada');
+      }
+      if(statusAplication.applicationStatus == applicationStatusOption.ACCEPTED || statusAplication.applicationStatus == applicationStatusOption.REJECTED ){
+        throw new ConflictException('La solicitud del estudiante ya fue revisada');
+      }
+
+      const createAplication = await this.centerChangeRepository.preload({
+        idCenterChange,
+        applicationStatus: aplicationStatus,
+        applicationDate: new Date().toISOString()
+      });
+
+      const saveAplication = await this.centerChangeRepository.save(createAplication);
+      return {
+        statusCode: 200,
+        message: this.printMessageLog("La solicitud del estudiante se actualizo con exito."),
+        aplicationRequest: saveAplication
+      }
+    } catch (error) {
+      return this.printMessageError(error);
+    }
+  }
+
   async findAll() {
     try {
       const allRequestStundents = await this.centerChangeRepository.find({
-        relations:['student']
+        relations:['student','idPeriod']
       });
 
       return {

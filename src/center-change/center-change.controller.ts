@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { CenterChangeService } from './center-change.service';
 import { CreateCenterChangeDto } from './dto/create-center-change.dto';
 import { UpdateCenterChangeDto } from './dto/update-center-change.dto';
+import { ReviewCenterChangeDto } from './dto/review-center-change.dto';
 
 @Controller('center-change')
 export class CenterChangeController {
@@ -10,6 +11,11 @@ export class CenterChangeController {
   @Post()
   create(@Body() createCenterChangeDto: CreateCenterChangeDto) {
     return this.centerChangeService.create(createCenterChangeDto);
+  }
+
+  @Post('review')
+  reviewCenterChange(@Body() reviewCenterChangeDto: ReviewCenterChangeDto) {
+    return this.centerChangeService.reviewRequest(reviewCenterChangeDto);
   }
 
   @Get()

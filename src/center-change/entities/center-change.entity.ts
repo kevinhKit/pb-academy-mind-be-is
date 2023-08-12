@@ -1,4 +1,5 @@
 import { CenterCareer } from 'src/center-career/entities/center-career.entity';
+import { Period } from 'src/period/entities/period.entity';
 import { RegionalCenter } from 'src/regional-center/entities/regional-center.entity';
 import { Student } from 'src/student/entities/student.entity';
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn, PrimaryGeneratedColumn } from 'typeorm';
@@ -46,7 +47,7 @@ export class CenterChange {
     enum: applicationStatus,
     default: applicationStatus.PROGRESS,
   })
-  applicationStatus: applicationStatus;
+  applicationStatus: string;
 
   @Column('text', { nullable: true })
   justification: string;
@@ -58,4 +59,10 @@ export class CenterChange {
     default: () => "current_timestamp",
   })
   opinionDate: Date;
+
+  @ManyToOne(() => Period, (period) => period.id)
+  @JoinColumn({
+    name: 'idPeriod',
+  })
+  idPeriod?: Period;
 }

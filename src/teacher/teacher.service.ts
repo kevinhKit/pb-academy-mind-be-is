@@ -23,6 +23,8 @@ import { CenterCareer } from 'src/center-career/entities/center-career.entity';
 import { TeachingCareer } from 'src/teaching-career/entities/teaching-career.entity';
 import * as jwt from 'jsonwebtoken';
 import { ChangeRolTeacherDto } from './dto/change-rol-teacher.dto';
+import { CareerChange } from 'src/career-change/entities/career-change.entity';
+import { CenterChange } from 'src/center-change/entities/center-change.entity';
 
 @Injectable()
 export class TeacherService {
@@ -36,6 +38,8 @@ export class TeacherService {
 
     @InjectRepository(User) private userRepository: Repository<User>,
     @InjectRepository(Teacher) private teacherRepository: Repository<Teacher>,
+    // @InjectRepository(CareerChange) private careerChangeRepository: Repository<CareerChange>,
+    // @InjectRepository(CenterChange) private centerChangeRepository: Repository<CenterChange>,
     @InjectRepository(CenterCareer)
     private centerCareerRepository: Repository<CenterCareer>,
     @InjectRepository(TeachingCareer)

@@ -7,10 +7,11 @@ import { Student } from 'src/student/entities/student.entity';
 import { CenterCareer } from 'src/center-career/entities/center-career.entity';
 import { StudentCareer } from 'src/student-career/entities/student-career.entity';
 import { CenterChange } from 'src/center-change/entities/center-change.entity';
+import { Period } from 'src/period/entities/period.entity';
 
 @Module({
   controllers: [CareerChangeController],
   providers: [CareerChangeService],
-  imports: [TypeOrmModule.forFeature([CareerChange,CenterChange,Student,CenterCareer,StudentCareer])],
+  imports: [TypeOrmModule.forFeature([CareerChange,CenterChange,Student,CenterCareer,StudentCareer,Period])],
 })
 export class CareerChangeModule {}

@@ -2,6 +2,8 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { CareerChangeService } from './career-change.service';
 import { CreateCareerChangeDto } from './dto/create-career-change.dto';
 import { UpdateCareerChangeDto } from './dto/update-career-change.dto';
+import { ReviewCareerChangeDto } from './dto/review-career-change.dto';
+import { ReviewCenterChangeDto } from 'src/center-change/dto/review-center-change.dto';
 
 @Controller('career-change')
 export class CareerChangeController {
@@ -10,6 +12,11 @@ export class CareerChangeController {
   @Post()
   create(@Body() createCareerChangeDto: CreateCareerChangeDto) {
     return this.careerChangeService.create(createCareerChangeDto);
+  }
+
+  @Post('review')
+  reviewCareerChangeDto(@Body() reviewCareerChangeDto: ReviewCareerChangeDto) {
+    return this.careerChangeService.reviewRequest(reviewCareerChangeDto);
   }
 
   @Get()
