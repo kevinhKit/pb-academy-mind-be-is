@@ -236,7 +236,10 @@ export class SectionService {
       }
 
       const sections = await this.sectionRepository.find({
-        where: { idClass: { departmentId: idCareer } },
+        where: {
+          idClass: { departmentId: idCareer },
+          idPeriod: { id: periodExist.id },
+        },
         relations: [
           'idPeriod',
           'idPeriod.idStatePeriod',
