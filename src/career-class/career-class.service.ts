@@ -7,6 +7,8 @@ import { Repository } from 'typeorm';
 import { Career } from 'src/career/entities/career.entity';
 import { CareerClass } from './entities/career-class.entity';
 import { RequirementClass } from 'src/requirement-class/entities/requirement-class.entity';
+import { Student } from 'src/student/entities/student.entity';
+import { Tuition, classStatus } from 'src/tuition/entities/tuition.entity';
 
 @Injectable()
 export class CareerClassService {
@@ -19,6 +21,8 @@ export class CareerClassService {
     private careerClassRepository: Repository<CareerClass>,
     @InjectRepository(RequirementClass)
     private requirementClassRepository: Repository<RequirementClass>,
+    @InjectRepository(Student) private studentRepository: Repository<Student>,
+    @InjectRepository(Tuition) private tuitionRepository: Repository<Tuition>,
   ) {}
 
   create(createCareerClassDto: CreateCareerClassDto) {
@@ -72,7 +76,7 @@ export class CareerClassService {
     }
   }
 
-  async findClassRequirements(id: Career) {
+  async findClassRequirements(id: Career, studentId: Student) {
     try {
       let careerId = `${id}`;
       careerId = careerId.toUpperCase();
@@ -83,6 +87,22 @@ export class CareerClassService {
       if (!validCareer) {
         throw new NotFoundException('La carrera no existe');
       }
+
+      const validStudent = await this.studentRepository.findOne({
+        where: { accountNumber: `${studentId}` },
+      });
+
+      if (!validStudent) {
+        throw new NotFoundException('El estudiante no existe');
+      }
+
+      const approbedClasses = await this.tuitionRepository.find({
+        where: {
+          student: { accountNumber: validStudent.accountNumber },
+          stateClass: classStatus.APPROVED,
+        },
+        relations: ['section.idClass.classCurrent.idRequirement'],
+      });
 
       const classesWithId = await this.careerClassRepository.find({
         where: { idCareer: { id: careerId } },
@@ -105,11 +125,24 @@ export class CareerClassService {
         };
       });
 
+      const classesToGo = [];
+
+      classes.forEach((classs) => {
+        approbedClasses.forEach((approbedClass) => {
+          if (
+            classs.id !== approbedClass.section.idClass.id &&
+            this.validateClassRequirements(classs.classCurrent, approbedClasses)
+          ) {
+            classesToGo.push(classs);
+          }
+        });
+      });
+
       return {
         statusCode: 200,
         message:
           'Las clases que el estudiante puede llevar han sido devueltas exitosamente',
-        classes,
+        classesToGo,
       };
     } catch (error) {
       return this.printMessageError(error);
@@ -148,6 +181,25 @@ export class CareerClassService {
 
   remove(id: number) {
     return `This action removes a #${id} careerClass`;
+  }
+
+  validateClassRequirements(
+    classCurrent: RequirementClass[],
+    approbedClasses: Tuition[],
+  ) {
+    if (classCurrent.length === 0) {
+      return true;
+    }
+
+    const idsApprobed = approbedClasses.map((obj) => obj.section.idClass.id);
+
+    for (let i = 0; i < classCurrent.length; i++) {
+      if (!idsApprobed.includes(classCurrent[i].idRequirement.id)) {
+        return false;
+      }
+    }
+
+    return true;
   }
 
   printMessageLog(message) {
