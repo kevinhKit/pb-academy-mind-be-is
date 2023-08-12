@@ -108,7 +108,28 @@ export class SectionService {
         },
       });
 
-      if (existingSection) {
+      const sections = await this.sectionRepository.find({
+        where: {
+          idPeriod: { id: +idPeriod },
+          idTeacher: { employeeNumber: `${idTeacher}` },
+        },
+        relations: [
+          'idPeriod',
+          'idPeriod.idStatePeriod',
+          'idClass',
+          'idTeacher',
+          'idClassroom',
+          'idClassroom.idBuilding.idRegionalCenter',
+        ],
+      });
+
+      const sectionAlreadyExists = await this.validateExistingSection(
+        sections,
+        hour,
+        finalHour,
+      );
+
+      if (existingSection || sectionAlreadyExists) {
         throw new NotFoundException(
           'Ya existe una seccion a esa hora con ese docente.',
         );
@@ -730,6 +751,49 @@ export class SectionService {
       message: 'Se ha eliminado la seccion exitosamente',
       statusCode: 200,
     };
+  }
+
+  async validateExistingSection(
+    sections: Section[],
+    hour: string,
+    finalHour: string,
+  ) {
+    for (const existingSection of sections) {
+      if (
+        this.horasSeccionesTraslapan(
+          existingSection.hour,
+          hour,
+          existingSection.finalHour,
+          finalHour,
+        )
+      ) {
+        return true; // Existe traslape
+      }
+    }
+
+    return false; // No existe traslape
+  }
+
+  horasSeccionesTraslapan(
+    startHour1: string,
+    startHour2: string,
+    finalHour1: string,
+    finalHour2: string,
+  ): boolean {
+    const [start1, end1] = this.parseHoras(startHour1, finalHour1);
+    const [start2, end2] = this.parseHoras(startHour2, finalHour2);
+
+    // Comprobar si hay traslape
+    return (
+      (start1 <= start2 && start2 < end1) || (start2 <= start1 && start1 < end2)
+    );
+  }
+
+  parseHoras(startHour: string, endHour: string): [number, number] {
+    const startHourNum = parseInt(startHour);
+    const endHourNum = parseInt(endHour);
+
+    return [startHourNum, endHourNum];
   }
 
   printMessageLog(message) {
