@@ -338,7 +338,7 @@ export class SectionService {
           'idPeriod',
           'idPeriod.idStatePeriod',
           'idClass',
-          'idTeacher',
+          'idTeacher.teachingCareer.centerCareer.career',
           'idClassroom',
           'idClassroom.idBuilding.idRegionalCenter',
         ],

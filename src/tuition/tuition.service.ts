@@ -12,6 +12,7 @@ import {
   StatePeriod,
 } from 'src/state-period/entities/state-period.entity';
 import { Career } from 'src/career/entities/career.entity';
+import { Teacher } from 'src/teacher/entities/teacher.entity';
 
 @Injectable()
 export class TuitionService {
@@ -188,6 +189,135 @@ export class TuitionService {
         message: 'Se han devuelto la matricula correctamente',
         statusCode: 200,
         registration: tuition,
+      };
+    } catch (error) {
+      return this.printMessageError(error);
+    }
+  }
+
+  async tuitionNotesByDepartment(id: Career) {
+    try {
+      let careerId = `${id}`;
+      careerId = careerId.toUpperCase();
+
+      const careerExist = await this.careerRepository.findOne({
+        where: { id: careerId },
+      });
+
+      if (!careerExist) {
+        throw new NotFoundException('La carrera enviada no existe');
+      }
+
+      const gradesState = await this.statePeriodRepository.findOne({
+        where: { name: Rol.GRADES },
+      });
+
+      const periodOnGrades = await this.periodRepository.findOne({
+        relations: ['idStatePeriod'],
+        where: {
+          idStatePeriod: { id: gradesState.id },
+        },
+      });
+
+      if (!periodOnGrades) {
+        throw new NotFoundException(
+          'El periodo de ingreso de calificaciones no esta activo',
+        );
+      }
+
+      const teacherTuitions = await this.tuitionRepository.find({
+        where: {
+          section: {
+            idPeriod: { id: periodOnGrades.id },
+            idClass: { departmentId: careerId },
+          },
+        },
+        relations: ['section.idTeacher'],
+      });
+
+      const distinctTeachers = teacherTuitions.reduce(
+        (uniqueRegistrations, currentRegistration) => {
+          if (
+            !uniqueRegistrations.some(
+              (reg) =>
+                reg.section.idTeacher.employeeNumber ===
+                currentRegistration.section.idTeacher.employeeNumber,
+            )
+          ) {
+            uniqueRegistrations.push(currentRegistration);
+          }
+          return uniqueRegistrations;
+        },
+        [],
+      );
+
+      const teachers = distinctTeachers.map((item) => item.section.idTeacher);
+
+      return {
+        message:
+          'Se han devuelto los docentes que subieron notas del departamento',
+        statusCode: 200,
+        teachers,
+      };
+    } catch (error) {
+      return this.printMessageError(error);
+    }
+  }
+
+  async tuitionGradesByTeacher(id: Teacher, departmentId: Career) {
+    try {
+      let careerId = `${departmentId}`;
+      careerId = careerId.toUpperCase();
+
+      const careerExist = await this.careerRepository.findOne({
+        where: { id: careerId },
+      });
+
+      if (!careerExist) {
+        throw new NotFoundException('La carrera enviada no existe');
+      }
+
+      const gradesState = await this.statePeriodRepository.findOne({
+        where: { name: Rol.GRADES },
+      });
+
+      const periodOnGrades = await this.periodRepository.findOne({
+        relations: ['idStatePeriod'],
+        where: {
+          idStatePeriod: { id: gradesState.id },
+        },
+      });
+
+      if (!periodOnGrades) {
+        throw new NotFoundException(
+          'El periodo de ingreso de calificaciones no esta activo',
+        );
+      }
+
+      const tuition = await this.tuitionRepository.find({
+        where: {
+          section: {
+            idPeriod: { id: periodOnGrades.id },
+            idClass: { departmentId: careerId },
+            idTeacher: { employeeNumber: `${id}` },
+          },
+        },
+        relations: [
+          'student',
+          'section',
+          'section.idPeriod',
+          'section.idPeriod.idStatePeriod',
+          'section.idClass',
+          'section.idTeacher',
+          'section.idClassroom',
+          'section.idClassroom.idBuilding.idRegionalCenter',
+        ],
+      });
+
+      return {
+        message: `Se han devuelto las notas ingresadas por el docente ${id}`,
+        statusCode: 200,
+        notes: tuition,
       };
     } catch (error) {
       return this.printMessageError(error);
