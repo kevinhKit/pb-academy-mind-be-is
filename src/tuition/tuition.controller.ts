@@ -15,6 +15,7 @@ import { Section } from 'src/section/entities/section.entity';
 import { Student } from 'src/student/entities/student.entity';
 import { Period } from 'src/period/entities/period.entity';
 import { Career } from 'src/career/entities/career.entity';
+import { Teacher } from 'src/teacher/entities/teacher.entity';
 
 @Controller('tuition')
 export class TuitionController {
@@ -33,6 +34,19 @@ export class TuitionController {
   @Get('tuition-validation/:id')
   tuitionValidation(@Param('id') id: Student) {
     return this.tuitionService.tuitionValidation(id);
+  }
+
+  @Get('teacher-notes/:id')
+  tuitionNotesByDepartment(@Param('id') id: Career) {
+    return this.tuitionService.tuitionNotesByDepartment(id);
+  }
+
+  @Get('teacher-grades/:id')
+  tuitionGradesByTeacher(
+    @Param('id') id: Teacher,
+    @Query('departmentId') departmentId: Career,
+  ) {
+    return this.tuitionService.tuitionGradesByTeacher(id, departmentId);
   }
 
   @Get(':id')
