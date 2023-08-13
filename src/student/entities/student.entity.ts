@@ -24,6 +24,7 @@ export class Student {
 
   @Column('text', {
     nullable: true,
+    default: `${Math.random() < 0.5}`
   })
   payment: string;
 
