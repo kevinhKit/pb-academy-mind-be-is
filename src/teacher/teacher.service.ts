@@ -606,7 +606,8 @@ export class TeacherService {
         generatePassword,
         'teacher',
         '',
-        tokenModified
+        tokenModified,
+        dni
       );
       
       return {
