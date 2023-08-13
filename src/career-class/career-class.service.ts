@@ -128,14 +128,22 @@ export class CareerClassService {
       const classesToGo = [];
 
       classes.forEach((classs) => {
-        approbedClasses.forEach((approbedClass) => {
-          if (
-            classs.id !== approbedClass.section.idClass.id &&
-            this.validateClassRequirements(classs.classCurrent, approbedClasses)
-          ) {
-            classesToGo.push(classs);
-          }
-        });
+        if (approbedClasses.length > 0 && classs.classCurrent.length != 0) {
+          approbedClasses.forEach((approbedClass) => {
+            if (
+              classs.id !== approbedClass.section.idClass.id &&
+              this.validateClassRequirements(
+                classs.classCurrent,
+                approbedClasses,
+              )
+            ) {
+              classesToGo.push(classs);
+            }
+          });
+        }
+        if (classs.classCurrent.length === 0) {
+          classesToGo.push(classs);
+        }
       });
 
       return {
