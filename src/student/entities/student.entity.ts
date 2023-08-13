@@ -43,6 +43,11 @@ export class Student {
   })
   photoThree: string;
 
+  @Column('smallint', {
+    nullable: true,
+  })
+  currentPhoto: number;
+
   @Column('text', {
     nullable: true,
   })

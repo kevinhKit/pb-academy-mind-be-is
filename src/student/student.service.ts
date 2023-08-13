@@ -273,6 +273,7 @@ export class StudentService {
       photoTwo,
       photoThree,
       description,
+      currentPhoto,
       ...others
     }: UpdateStudentDto,
   ) {
@@ -304,6 +305,7 @@ export class StudentService {
         photoThree,
         description,
         email: email,
+        currentPhoto
       });
 
       await this.userRepository.save(user);
