@@ -6,11 +6,13 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { CareerClassService } from './career-class.service';
 import { CreateCareerClassDto } from './dto/create-career-class.dto';
 import { UpdateCareerClassDto } from './dto/update-career-class.dto';
 import { Career } from 'src/career/entities/career.entity';
+import { Student } from 'src/student/entities/student.entity';
 
 @Controller('career-class')
 export class CareerClassController {
@@ -27,8 +29,11 @@ export class CareerClassController {
   }
 
   @Get('requirements/:id')
-  findClassRequirements(@Param('id') id: Career) {
-    return this.careerClassService.findClassRequirements(id);
+  findClassRequirements(
+    @Param('id') id: Career,
+    @Query('studentId') studentId: Student,
+  ) {
+    return this.careerClassService.findClassRequirements(id, studentId);
   }
 
   @Get('department/:id')

@@ -45,7 +45,7 @@ export class Class {
     () => RequirementClass,
     (requirementClass) => requirementClass.idClass,
   )
-  classCurrent: RequirementClass;
+  classCurrent: RequirementClass[];
 
   @OneToMany(() => CareerClass, (careerClass) => careerClass.idClass)
   careerClass: CareerClass;

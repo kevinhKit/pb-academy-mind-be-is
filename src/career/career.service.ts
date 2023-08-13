@@ -94,8 +94,62 @@ export class CareerService {
     return `This action returns a #${id} career`;
   }
 
-  update(id: number, updateCareerDto: UpdateCareerDto) {
-    return `This action updates a #${id} career`;
+  async update(id: string, updateCareerDto: UpdateCareerDto) {
+    try {
+      const careerId = id.toUpperCase();
+
+      const validCareer = await this.careerRepository.findOne({
+        where: { id: careerId },
+      });
+
+      if (!validCareer) {
+        throw new NotFoundException('La carrera enviada no existe.');
+      }
+
+      const centerExists = await this.validateCenters(updateCareerDto.centerId);
+
+      if (!centerExists) {
+        throw new NotFoundException('El centro regional enviado no existe.');
+      }
+
+      updateCareerDto.centerId.forEach(async (center) => {
+        let newCenter = `${center}`;
+        newCenter = newCenter.toUpperCase();
+        const alreadyExists = await this.centerCareerRepository.findOne({
+          where: {
+            career: { id: `${validCareer.id.toUpperCase()}` },
+            regionalCenter: { id: `${newCenter}` },
+          },
+        });
+        if (alreadyExists) {
+          throw new NotFoundException(
+            'Ya existe esa carrera en ese centro regional',
+          );
+        }
+      });
+
+      const careerCenters = updateCareerDto.centerId.map((center) => {
+        let newCenter = `${center}`;
+        newCenter = newCenter.toUpperCase();
+        return this.centerCareerRepository.create({
+          career: { id: `${validCareer.id.toUpperCase()}` },
+          regionalCenter: { id: `${newCenter}` },
+        });
+      });
+
+      const createdCareerCenters = await this.centerCareerRepository.insert(
+        careerCenters,
+      );
+
+      return {
+        statusCode: 200,
+        message: this.printMessageLog(
+          'Se ha actualizado la carrera exitosamente',
+        ),
+      };
+    } catch (error) {
+      return this.printMessageError(error);
+    }
   }
 
   remove(id: number) {
