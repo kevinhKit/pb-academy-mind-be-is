@@ -599,14 +599,14 @@ export class TeacherService {
       const dateExp = (currentDate) + (2*60);
       const token = jwt.sign({exp:dateExp}, secretKey);
       // console.log(fechaExpiracion - fechaActual)
-
+      const tokenModified = token.replaceAll('.','$')
       await this.teacherRepository.save(teacherChange);
       await this.sendEmailService.sendNewPassword(
         teacherChange,
         generatePassword,
         'teacher',
         '',
-        token
+        tokenModified
       );
       
       return {
@@ -626,6 +626,7 @@ export class TeacherService {
   }
 
   validateUrl(tokenURl: string){
+    tokenURl = tokenURl.replaceAll('$','.')
     const secretKey = 'miClaveSecreta';
       try {
         const decoded = jwt.verify(tokenURl, secretKey);
