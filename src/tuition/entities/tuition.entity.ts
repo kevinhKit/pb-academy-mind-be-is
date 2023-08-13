@@ -16,7 +16,7 @@ export enum classStatus {
   PROGRESS = 'En progreso',
   APPROVED = 'APR',
   FAILED = 'REPR',
-  CANCELED = 'CAN',
+  NOTPRESENT = 'NSP',
   ABANDONED = 'ABN',
 }
 
