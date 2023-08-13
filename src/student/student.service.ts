@@ -308,6 +308,12 @@ export class StudentService {
         currentPhoto
       });
 
+      const photos = [updateChangeStudent.photoOne && 1, updateChangeStudent.photoTwo && 2, updateChangeStudent.photoThree && 3].filter(Boolean);
+      
+      if (!photos.includes(currentPhoto)) {
+        updateChangeStudent.currentPhoto = photos.length > 0 ? photos.sort((a, b) => a - b)[0] : null; 
+      }
+
       await this.userRepository.save(user);
 
       await this.studentRepository.save(updateChangeStudent);
