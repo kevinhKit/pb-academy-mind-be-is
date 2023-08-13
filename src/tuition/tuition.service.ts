@@ -629,7 +629,15 @@ export class TuitionService {
         status = classStatus.FAILED;
       }
 
-      validtuition.note = `${note}`;
+      if (updateTuitionDto.statusClass) {
+        status = updateTuitionDto.statusClass;
+      }
+
+      if (updateTuitionDto.statusClass === classStatus.NOTPRESENT) {
+        validtuition.note = '0';
+      } else {
+        validtuition.note = `${note}`;
+      }
       validtuition.stateClass = status;
 
       const updatedTuition = await this.tuitionRepository.save(validtuition);
