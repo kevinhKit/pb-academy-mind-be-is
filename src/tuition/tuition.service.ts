@@ -232,7 +232,7 @@ export class TuitionService {
             idClass: { departmentId: careerId },
           },
         },
-        relations: ['section.idTeacher'],
+        relations: ['section.idTeacher.user'],
       });
 
       const distinctTeachers = teacherTuitions.reduce(
