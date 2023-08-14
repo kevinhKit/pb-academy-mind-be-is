@@ -4,7 +4,6 @@ import { Equal, Repository } from 'typeorm';
 import { User } from 'src/user/entities/user.entity';
 import { Student } from 'src/student/entities/student.entity';
 import * as bcrypt from 'bcrypt';
-import { transporter } from 'src/utils/mailer';
 import { Teacher } from 'src/teacher/entities/teacher.entity';
 
 import { CreateAuthDto } from './dto/create-auth.dto';

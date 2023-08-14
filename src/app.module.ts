@@ -6,11 +6,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from './user/user.module';
 import { StudentModule } from './student/student.module';
 import { TeacherModule } from './teacher/teacher.module';
-import { RoleModule } from './role/role.module';
 import { AuthModule } from './auth/auth.module';
 import { CareerModule } from './career/career.module';
 import { SharedModule } from './shared/shared.module';
-import { SendEmailService } from './shared/send-email/send-email.service';
 import { RegionalCenterModule } from './regional-center/regional-center.module';
 import { BuildingModule } from './building/building.module';
 import { ClassroomModule } from './classroom/classroom.module';
@@ -28,6 +26,7 @@ import { TuitionModule } from './tuition/tuition.module';
 import { ExceptionalCancellationModule } from './exceptional-cancellation/exceptional-cancellation.module';
 import { TeacherEvaluationModule } from './teacher-evaluation/teacher-evaluation.module';
 import { QuestionModule } from './question/question.module';
+import { AnalyticModule } from './analytic/analytic.module';
 
 @Module({
   imports: [
@@ -52,7 +51,6 @@ import { QuestionModule } from './question/question.module';
     UserModule,
     StudentModule,
     TeacherModule,
-    RoleModule,
     AuthModule,
     CareerModule,
     SharedModule,
@@ -73,6 +71,7 @@ import { QuestionModule } from './question/question.module';
     ExceptionalCancellationModule,
     TeacherEvaluationModule,
     QuestionModule,
+    AnalyticModule,
   ],
 
   controllers: [AppController],
