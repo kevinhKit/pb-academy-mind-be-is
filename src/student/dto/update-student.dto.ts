@@ -22,7 +22,7 @@ export class UpdateStudentDto extends PartialType(
     @IsNotEmpty({message: "No envió o dejo vacio el campo Fotografia tres"})
     photoThree: string;
 
-    // @IsOptional()
+    @IsOptional()
     @IsNumber({},{message: "La Fotografia actual debe ser de tipo número."})
     @IsNotEmpty({message: "No envió o dejo vacio el campo fotografía actual"})
     currentPhoto: number;
