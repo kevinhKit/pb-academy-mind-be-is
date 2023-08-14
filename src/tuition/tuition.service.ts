@@ -303,7 +303,7 @@ export class TuitionService {
           },
         },
         relations: [
-          'student',
+          'student.user',
           'section',
           'section.idPeriod',
           'section.idPeriod.idStatePeriod',
