@@ -278,8 +278,21 @@ export class TeacherService {
     }
   }
 
-  async changeBoss({employeeNumber}: ChangeRolTeacherDto){
+  async changeBoss({employeeNumber, employeeNumberAdmin}: ChangeRolTeacherDto){
     try {
+      const teacherAdminExits = await this.teacherRepository.findOne({
+        where: {
+          employeeNumber: employeeNumberAdmin,
+          user: {
+            isAdmin: true
+          }
+        }
+      });
+
+      if(!teacherAdminExits){
+        throw new UnauthorizedException('Usted no tiene permisos para realizar está acción.')
+      }
+
       const teacherExits = await this.teacherRepository.findOne({
         where: {
           employeeNumber: employeeNumber
@@ -320,13 +333,17 @@ export class TeacherService {
       });
 
       if(teacherIsBossExits){
-        throw new ConflictException('Para este departamento ya existe un jefe.')
+        // throw new ConflictException('Para este departamento ya existe un jefe.')
+        const oldBoss = await this.teacherRepository.preload({
+          employeeNumber: teacherIsBossExits.employeeNumber,
+          isBoss: false,
+        });
+        await this.teacherRepository.save(oldBoss);
       }
 
       const teacherCreate = await this.teacherRepository.preload({
         employeeNumber: employeeNumber,
         isBoss: true,
-        // photoOne: "jajajajaja"
       });
 
       const saveChangeTeacher = await this.teacherRepository.save(teacherCreate);
@@ -342,8 +359,21 @@ export class TeacherService {
     }
   }
 
-  async changeCoordinator({employeeNumber}: ChangeRolTeacherDto){
+  async changeCoordinator({employeeNumber, employeeNumberAdmin}: ChangeRolTeacherDto){
     try {
+      const teacherAdminExits = await this.teacherRepository.findOne({
+        where: {
+          employeeNumber: employeeNumberAdmin,
+          user: {
+            isAdmin: true
+          }
+        }
+      });
+
+      if(!teacherAdminExits){
+        throw new UnauthorizedException('Usted no tiene permisos para realizar está acción.')
+      }
+
       const teacherExits = await this.teacherRepository.findOne({
         where: {
           employeeNumber: employeeNumber
@@ -384,13 +414,17 @@ export class TeacherService {
       });
 
       if(teacherIsCoordinatorExits){
-        throw new ConflictException('Para está carrera ya existe un coordinador academico.')
+        // throw new ConflictException('Para está carrera ya existe un coordinador academico.')
+        const oldCoordinators = await this.teacherRepository.preload({
+          employeeNumber: teacherIsCoordinatorExits.employeeNumber,
+          isCoordinator: false,
+        });
+        await this.teacherRepository.save(oldCoordinators);
       }
 
       const teacherCreate = await this.teacherRepository.preload({
         employeeNumber: employeeNumber,
         isCoordinator: true,
-        // photoOne: "jajajajaja"
       });
 
       const saveChangeTeacher = await this.teacherRepository.save(teacherCreate);
