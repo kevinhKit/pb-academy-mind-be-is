@@ -5,11 +5,17 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Question } from 'src/question/entities/question.entity';
 import { Tuition } from 'src/tuition/entities/tuition.entity';
-import { TeacherEvaluation } from './entities/teacher-evaluation.entity';
+import {
+  TeacherEvaluation,
+  answerType,
+} from './entities/teacher-evaluation.entity';
 import {
   Rol,
   StatePeriod,
 } from 'src/state-period/entities/state-period.entity';
+import { Teacher } from 'src/teacher/entities/teacher.entity';
+import { Period } from 'src/period/entities/period.entity';
+import { Class } from 'src/class/entities/class.entity';
 
 @Injectable()
 export class TeacherEvaluationService {
@@ -23,6 +29,9 @@ export class TeacherEvaluationService {
     private teacherEvaluationRepository: Repository<TeacherEvaluation>,
     @InjectRepository(StatePeriod)
     private statePeriodRepository: Repository<StatePeriod>,
+    @InjectRepository(Teacher) private teacherRepository: Repository<Teacher>,
+    @InjectRepository(Class) private classRepository: Repository<Class>,
+    @InjectRepository(Period) private periodRepository: Repository<Period>,
   ) {}
   async create(createTeacherEvaluationDto: CreateTeacherEvaluationDto) {
     try {
@@ -110,7 +119,12 @@ export class TeacherEvaluationService {
   async findAll() {
     try {
       const evaluations = await this.teacherEvaluationRepository.find({
-        relations: ['tuition', 'idQuestion'],
+        relations: [
+          'idQuestion',
+          'tuition.section.idPeriod',
+          'tuition.section.idClass',
+          'tuition.section.idTeacher',
+        ],
       });
 
       return {
@@ -125,8 +139,148 @@ export class TeacherEvaluationService {
     }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} teacherEvaluation`;
+  async findOne(id: string) {
+    try {
+      const gradesState = await this.statePeriodRepository.findOne({
+        where: { name: Rol.GRADES },
+      });
+
+      const teachers = await this.tuitionRepository.find({
+        relations: [
+          'section.idTeacher.user',
+          'section.idClass',
+          'section.idPeriod',
+        ],
+        where: {
+          section: {
+            idPeriod: { idStatePeriod: { id: gradesState.id } },
+            idClass: { departmentId: id.toUpperCase() },
+          },
+        },
+      });
+
+      const uniquePairs = {};
+
+      // Filtrar y eliminar objetos repetidos
+      const filteredData = teachers.filter((obj) => {
+        const teacherId = obj.section.idTeacher.employeeNumber;
+        const classId = obj.section.idClass.id;
+
+        const key = `${teacherId}_${classId}`;
+
+        // Si el par docente-clase no ha sido visto antes, lo agregamos a uniquePairs
+        if (!uniquePairs[key]) {
+          uniquePairs[key] = true;
+          return true; // Mantener el objeto en el resultado
+        }
+
+        return false; // Descartar el objeto duplicado
+      });
+
+      return {
+        statusCode: 200,
+        message: this.printMessageLog(
+          'Los docentes a evaluar han sido devueltos exitosamente.',
+        ),
+        teachers: filteredData,
+      };
+    } catch (error) {
+      return this.printMessageError(error);
+    }
+  }
+
+  async findTeacherNotes(idTeacher: Teacher, idPeriod: Period, idClass: Class) {
+    try {
+      const validPeriod = await this.periodRepository.findOne({
+        where: { id: +idPeriod },
+      });
+
+      if (!validPeriod) {
+        throw new NotFoundException('El periodo enviado no existe.');
+      }
+
+      const validClass = await this.classRepository.findOne({
+        where: { id: +idClass },
+      });
+
+      if (!validClass) {
+        throw new NotFoundException('La clase enviada no existe.');
+      }
+
+      const validTeacher = await this.teacherRepository.findOne({
+        where: { employeeNumber: `${idTeacher}` },
+      });
+
+      if (!validTeacher) {
+        throw new NotFoundException('El docente enviado no existe.');
+      }
+
+      const evaluations = await this.teacherEvaluationRepository.find({
+        relations: [
+          'tuition.section.idPeriod',
+          'tuition.section.idClass',
+          'tuition.section.idTeacher',
+          'idQuestion',
+        ],
+        where: {
+          tuition: {
+            section: {
+              idTeacher: { employeeNumber: `${validTeacher.employeeNumber}` },
+              idPeriod: { id: validPeriod.id },
+              idClass: { id: validClass.id },
+            },
+          },
+        },
+      });
+
+      const questions = await this.questionRepository.find();
+
+      const evaluationCount = [];
+
+      questions.forEach((question) => {
+        evaluationCount.push({
+          questionId: question.id,
+          question: question.question,
+          excelentCount: 0,
+          greatCount: 0,
+          regularCount: 0,
+          insuficcientCount: 0,
+          deficcientCount: 0,
+        });
+      });
+
+      evaluationCount.forEach((question) => {
+        evaluations.forEach((evaluation) => {
+          if (question.questionId === evaluation.idQuestion.id) {
+            if (evaluation.answer == answerType.EXCELENT) {
+              question.excelentCount += 1;
+            }
+            if (evaluation.answer == answerType.GREAT) {
+              question.greatCount += 1;
+            }
+            if (evaluation.answer == answerType.REGULAR) {
+              question.regularCount += 1;
+            }
+            if (evaluation.answer == answerType.INSUFICCIENT) {
+              question.insuficcientCount += 1;
+            }
+            if (evaluation.answer == answerType.DEFICCIENT) {
+              question.deficcientCount += 1;
+            }
+          }
+        });
+      });
+
+      return {
+        statusCode: 200,
+        message: this.printMessageLog(
+          `Las evaluaciones del docente ${idTeacher} en el periodo ${idPeriod} de la clase ${idClass} se han devuelto exitosamente`,
+        ),
+        evaluationCount,
+      };
+    } catch (error) {
+      return this.printMessageError(error);
+    }
   }
 
   update(id: number, updateTeacherEvaluationDto: UpdateTeacherEvaluationDto) {

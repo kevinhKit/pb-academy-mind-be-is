@@ -6,6 +6,9 @@ import { TeacherEvaluation } from './entities/teacher-evaluation.entity';
 import { Question } from 'src/question/entities/question.entity';
 import { Tuition } from 'src/tuition/entities/tuition.entity';
 import { StatePeriod } from 'src/state-period/entities/state-period.entity';
+import { Teacher } from 'src/teacher/entities/teacher.entity';
+import { Period } from 'src/period/entities/period.entity';
+import { Class } from 'src/class/entities/class.entity';
 
 @Module({
   controllers: [TeacherEvaluationController],
@@ -16,6 +19,9 @@ import { StatePeriod } from 'src/state-period/entities/state-period.entity';
       Question,
       Tuition,
       StatePeriod,
+      Teacher,
+      Period,
+      Class,
     ]),
   ],
 })
