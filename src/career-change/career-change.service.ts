@@ -194,12 +194,21 @@ export class CareerChangeService {
     }
   }
 
-  async findOne(id: string) {
+  async findOne(center: string, id: string) {
     try {
       const allRequestStundents = await this.careerChangeRepository.find({
-        relations:['student','idPeriod', 'student.user','student.studentCareer.centerCareer','student.studentCareer.centerCareer.career'],
+        relations:['student','idPeriod', 'student.user','student.studentCareer.centerCareer','student.studentCareer.centerCareer.career','student.studentCareer.centerCareer.regionalCenter'],
         where: {
-          idCareer: id
+          idCareer: id,
+          student:{
+            studentCareer: {
+              centerCareer: {
+                regionalCenter: {
+                  id: center.toUpperCase()
+                }
+              }
+            }
+          }
         }
       });
 

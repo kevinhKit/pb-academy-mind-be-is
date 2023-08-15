@@ -24,9 +24,9 @@ export class CareerChangeController {
     return this.careerChangeService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.careerChangeService.findOne(id);
+  @Get('/:center/:id') 
+  findOne(@Param('id') id: string,@Param('center') center: string) {
+    return this.careerChangeService.findOne(center,id);
   }
 
   @Patch(':id')
