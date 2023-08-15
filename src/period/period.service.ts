@@ -9,6 +9,8 @@ import {
   StatePeriod,
 } from 'src/state-period/entities/state-period.entity';
 import { UpdatePeriodCancelationDto } from './dto/update-period-cancelation.dt';
+import { Tuition } from 'src/tuition/entities/tuition.entity';
+import { Student } from 'src/student/entities/student.entity';
 
 @Injectable()
 export class PeriodService {
@@ -19,6 +21,8 @@ export class PeriodService {
     private periodRepository: Repository<Period>,
     @InjectRepository(StatePeriod)
     private statePeriodRepository: Repository<StatePeriod>,
+    @InjectRepository(Tuition) private tuitionRepository: Repository<Tuition>,
+    @InjectRepository(Student) private studentRepository: Repository<Student>,
   ) {}
 
   async create(createPeriodDto: CreatePeriodDto) {
@@ -570,10 +574,26 @@ export class PeriodService {
 
       const updatedPeriod = await this.periodRepository.save(period);
 
-      const periodWithState = await this.periodRepository.find({
+      const periodWithState = await this.periodRepository.findOne({
         where: { id: updatedPeriod.id },
         relations: ['idStatePeriod'],
       });
+
+      console.log(periodWithState.idStatePeriod.id == finishedState.id);
+
+      if (periodWithState.idStatePeriod.id == finishedState.id) {
+        const periodTuitions = await this.tuitionRepository.find({
+          relations: ['student', 'section.idClass'],
+          where: { section: { idPeriod: { id: period.id } } },
+        });
+
+        this.calculateIndex(periodTuitions, true, false);
+
+        const globalTuitions = await this.tuitionRepository.find({
+          relations: ['student', 'section.idClass'],
+        });
+        this.calculateIndex(globalTuitions, false, true);
+      }
 
       return {
         statusCode: 200,
@@ -640,6 +660,75 @@ export class PeriodService {
 
   remove(id: number) {
     return `This action removes a #${id} period`;
+  }
+
+  async calculateIndex(
+    periodTuitions: Tuition[],
+    periodIndex: boolean,
+    globalIndex: boolean,
+  ) {
+    // Objeto para almacenar las sumas de notas ponderadas y la suma de unidades valorativas por estudiante
+    const sumasPorEstudiante = {};
+
+    // Iterar a través de los registros de clases
+    periodTuitions.forEach((registro) => {
+      const estudianteId = registro.student.accountNumber; // Puedes usar este ID para identificar a cada estudiante
+
+      // Obtener la nota del registro actual
+      const nota = registro.note;
+
+      // Obtener las unidades valorativas de la clase y convertirlas a valor numérico
+      const unidadesValorativas = parseInt(registro.section.idClass.valueUnits);
+
+      // Convertir la nota a valor numérico
+      const notaValor = parseInt(nota);
+      if (notaValor > 0 && notaValor != null) {
+        // Si el estudiante no está en el objeto, agregarlo
+        if (!sumasPorEstudiante.hasOwnProperty(estudianteId)) {
+          sumasPorEstudiante[estudianteId] = {
+            sumaNotasPonderadas: 0,
+            sumaUnidadesValorativas: 0,
+          };
+        }
+
+        // Acumular la suma de notas ponderadas y la suma de unidades valorativas para el estudiante
+        sumasPorEstudiante[estudianteId].sumaNotasPonderadas +=
+          notaValor * unidadesValorativas;
+        sumasPorEstudiante[estudianteId].sumaUnidadesValorativas +=
+          unidadesValorativas;
+      }
+    });
+
+    const promediosPorEstudiante = {};
+
+    // Calcular el promedio ponderado de notas para cada estudiante
+    for (const estudianteId in sumasPorEstudiante) {
+      const { sumaNotasPonderadas, sumaUnidadesValorativas } =
+        sumasPorEstudiante[estudianteId];
+
+      if (sumaUnidadesValorativas > 0) {
+        const promedioPonderado = Math.round(
+          sumaNotasPonderadas / sumaUnidadesValorativas,
+        );
+
+        promediosPorEstudiante[estudianteId] = promedioPonderado;
+      }
+    }
+
+    for (const estudianteId in promediosPorEstudiante) {
+      const student = await this.studentRepository.findOne({
+        where: { accountNumber: estudianteId },
+      });
+
+      if (periodIndex) {
+        student.periodIndex = promediosPorEstudiante[estudianteId];
+      }
+      if (globalIndex) {
+        student.overallIndex = promediosPorEstudiante[estudianteId];
+      }
+
+      await this.studentRepository.save(student);
+    }
   }
 
   printMessageLog(message) {
