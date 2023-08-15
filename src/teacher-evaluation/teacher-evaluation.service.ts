@@ -249,6 +249,8 @@ export class TeacherEvaluationService {
         });
       });
 
+      const observations = { observations: [] };
+
       evaluationCount.forEach((question) => {
         evaluations.forEach((evaluation) => {
           if (question.questionId === evaluation.idQuestion.id) {
@@ -267,9 +269,14 @@ export class TeacherEvaluationService {
             if (evaluation.answer == answerType.DEFICCIENT) {
               question.deficcientCount += 1;
             }
+            if (evaluation.openAnswer !== null) {
+              observations.observations.push(evaluation.openAnswer);
+            }
           }
         });
       });
+
+      evaluationCount.push(observations);
 
       return {
         statusCode: 200,
