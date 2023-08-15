@@ -28,7 +28,7 @@ export class CenterChangeService {
   }
 
   
-  async create({idCenter, justification, justificationPdf, accountNumber, idPeriod}: CreateCenterChangeDto) {
+  async create({idCenter, justification, accountNumber, idPeriod}: CreateCenterChangeDto) {
     try {
 
       const periodExist = await this.periodRepository.findOne({
@@ -121,7 +121,7 @@ export class CenterChangeService {
       const centerChange = await this.centerChangeRepository.create({
         idCenter: idCenter,
         justification: justification,
-        justificationPdf: justificationPdf,
+        // justificationPdf: justificationPdf,
         accountNumber: accountNumber,
         idPeriod: {
           id: +idPeriod
@@ -192,12 +192,21 @@ export class CenterChangeService {
     }
   }
 
-  async findOne(id: string) {
+  async findOne(id: string, career: string) {
     try {
       const allRequestStundents = await this.centerChangeRepository.find({
-        relations:['student','idPeriod','student.user','student.studentCareer.centerCareer','student.studentCareer.centerCareer.regionalCenter'],
+        relations:['student','idPeriod','student.user','student.studentCareer.centerCareer','student.studentCareer.centerCareer.regionalCenter','student.studentCareer.centerCareer.career'],
         where: {
-          idCenter : id
+          idCenter : id,
+          student: {
+            studentCareer:{
+              centerCareer:{
+                career:{
+                  id: career.toUpperCase()
+                }
+              }
+            }
+          }
         }
       });
 

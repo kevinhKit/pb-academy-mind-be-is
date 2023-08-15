@@ -27,7 +27,7 @@ export class CareerChangeService {
   }
 
 
-  async create({idCareer, justification, justificationPdf, accountNumber , idPeriod}: CreateCareerChangeDto) {
+  async create({idCareer, justification,  accountNumber , idPeriod}: CreateCareerChangeDto) {
     try {
 
       const periodExist = await this.periodRepository.findOne({
@@ -119,7 +119,7 @@ export class CareerChangeService {
       const careerChange = await this.careerChangeRepository.create({
         idCareer: idCareer,
         justification: justification,
-        justificationPdf: justificationPdf,
+        // justificationPdf: justificationPdf,
         accountNumber: accountNumber,
         idPeriod: {
           id: +idPeriod

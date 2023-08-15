@@ -51,8 +51,8 @@ export class CareerChange {
   @Column('text', { nullable: true })
   justification: string;
 
-  @Column('text', { nullable: true })
-  justificationPdf: string;
+  // @Column('text', { nullable: true })
+  // justificationPdf: string;
 
   @Column('timestamptz',{
     default: () => "current_timestamp",
