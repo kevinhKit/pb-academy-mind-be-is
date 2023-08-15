@@ -165,7 +165,7 @@ export class CenterChangeService {
   async findAll() {
     try {
       const allRequestStundents = await this.centerChangeRepository.find({
-        relations:['student','idPeriod']
+        relations:['student','idPeriod','student.user']
       });
 
       return {

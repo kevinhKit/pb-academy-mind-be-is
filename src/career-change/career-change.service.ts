@@ -167,7 +167,7 @@ export class CareerChangeService {
   async findAll() {
     try {
       const allRequestStundents = await this.careerChangeRepository.find({
-        relations:['student','idPeriod']
+        relations:['student','idPeriod', 'student.user']
       });
 
       return {
