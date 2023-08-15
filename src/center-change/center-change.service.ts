@@ -53,6 +53,20 @@ export class CenterChangeService {
       });
 
       if(centerChangeExist){
+        throw new ConflictException('Usted tiene una solicitud de cambio de centro regional vigente para el periodo actual')
+      }
+
+      const centerChangePeriodExist = await this.centerChangeRepository.findOne({
+        where:{
+          accountNumber: accountNumber,
+          idPeriod: {
+            id: +idPeriod
+          },
+        },
+        relations: ['idPeriod']
+      });
+
+      if(centerChangePeriodExist){
         throw new ConflictException('Usted ya realizo una solicitud de cambio de centro regional para el periodo actual')
       }
 
@@ -73,7 +87,7 @@ export class CenterChangeService {
       const requestExist = await this.careerChangeRepository.findOne({
         where: {
           accountNumber: accountNumber,
-          applicationStatus: applicationStatus.PROGRESS,
+          // applicationStatus: applicationStatus.PROGRESS,
           idPeriod: {
             id: +idPeriod
           }
@@ -81,7 +95,7 @@ export class CenterChangeService {
       });
 
       if(requestExist){
-        throw new ConflictException('Usted tiene un proceso de cambio de carrera actualmente')
+        throw new ConflictException('Usted ya tiene un proceso de cambio de carrera para el periodo actual')
       }
 
       if(studentExist.studentCareer[0].centerCareer.regionalCenter.id == idCenter){
