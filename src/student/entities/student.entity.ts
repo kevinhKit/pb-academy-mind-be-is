@@ -89,5 +89,5 @@ export class Student {
   user: User;
 
   @OneToMany(() => StudentCareer, (studentCareer) => studentCareer.student)
-  studentCareer: string;
+  studentCareer: StudentCareer;
 }
