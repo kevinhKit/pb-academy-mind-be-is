@@ -192,8 +192,23 @@ export class CenterChangeService {
     }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} centerChange`;
+  async findOne(id: string) {
+    try {
+      const allRequestStundents = await this.centerChangeRepository.find({
+        relations:['student','idPeriod','student.user','student.studentCareer.centerCareer','student.studentCareer.centerCareer.regionalCenter'],
+        where: {
+          idCenter : id
+        }
+      });
+
+      return {
+        statusCode: 200,
+        message: this.printMessageLog("Las solicitudes se obtuvieron exitosamente."),
+        allRequest: allRequestStundents
+      }
+    } catch (error) {
+      return this.printMessageError(error);
+    }
   }
 
   update(id: number, updateCenterChangeDto: UpdateCenterChangeDto) {

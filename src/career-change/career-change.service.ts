@@ -194,8 +194,23 @@ export class CareerChangeService {
     }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} careerChange`;
+  async findOne(id: string) {
+    try {
+      const allRequestStundents = await this.careerChangeRepository.find({
+        relations:['student','idPeriod', 'student.user','student.studentCareer.centerCareer','student.studentCareer.centerCareer.career'],
+        where: {
+          idCareer: id
+        }
+      });
+
+      return {
+        statusCode: 200,
+        message: this.printMessageLog("Las solicitudes se obtuvieron exitosamente."),
+        allRequest: allRequestStundents
+      }
+    } catch (error) {
+      return this.printMessageError(error);
+    }
   }
 
   update(id: number, updateCareerChangeDto: UpdateCareerChangeDto) {

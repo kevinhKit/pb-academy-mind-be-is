@@ -25,7 +25,7 @@ export class CenterChangeController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.centerChangeService.findOne(+id);
+    return this.centerChangeService.findOne(id);
   }
 
   @Patch(':id')
