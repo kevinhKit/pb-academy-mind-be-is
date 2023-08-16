@@ -61,7 +61,7 @@ export class RegionalCenterService {
       return {
         statusCode: 200,
         message: this.printMessageLog('Todas los centros regionales han sido obtenidas exitosamente'),
-        regioanlCenter: allRegionalCenter
+        regionalCenter: allRegionalCenter
       }
 
 
