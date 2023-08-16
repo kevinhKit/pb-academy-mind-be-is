@@ -24,6 +24,11 @@ export class CareerChangeController {
     return this.careerChangeService.findAll();
   }
 
+  @Get('student/:id')
+  findAllByStudent(@Param('id') id: string) {
+    return this.careerChangeService.findAllByStudent(id);
+  }
+
   @Get('/:center/:id') 
   findOne(@Param('id') id: string,@Param('center') center: string) {
     return this.careerChangeService.findOne(center,id);

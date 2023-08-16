@@ -191,6 +191,36 @@ export class CenterChangeService {
         }
       });
 
+      if(allRequestStundents.length == 0){
+        throw new NotFoundException('No se han encontrado solicitudes');
+      }
+
+      return {
+        statusCode: 200,
+        message: this.printMessageLog("Las solicitudes se obtuvieron exitosamente."),
+        allRequest: allRequestStundents
+      }
+    } catch (error) {
+      return this.printMessageError(error);
+    }
+  }
+
+  async findAllByStudent(idStudent: string) {
+    try {
+      const allRequestStundents = await this.centerChangeRepository.find({
+        relations:['student','idPeriod','student.user','student.studentCareer.centerCareer','student.studentCareer.centerCareer.regionalCenter','student.studentCareer.centerCareer.career'],
+        where: {
+          student: {
+            accountNumber: idStudent
+          },
+          stateRequest:true
+        }
+      });
+
+      if(allRequestStundents.length == 0){
+        throw new NotFoundException('No se han encontrado solicitudes');
+      }
+
       return {
         statusCode: 200,
         message: this.printMessageLog("Las solicitudes se obtuvieron exitosamente."),
@@ -219,6 +249,10 @@ export class CenterChangeService {
           stateRequest:true
         }
       });
+
+      if(allRequestStundents.length == 0){
+        throw new NotFoundException('No se han encontrado solicitudes');
+      }
 
       return {
         statusCode: 200,

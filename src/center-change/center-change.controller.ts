@@ -23,6 +23,11 @@ export class CenterChangeController {
     return this.centerChangeService.findAll();
   }
 
+  @Get('student/:id')
+  findAllByStudent(@Param('id') id: string) {
+    return this.centerChangeService.findAllByStudent(id);
+  }
+
   @Get(':id/:career')
   findOne(@Param('id') id: string, @Param('career') career: string) {
     return this.centerChangeService.findOne(id, career);
