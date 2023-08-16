@@ -522,6 +522,17 @@ export class TuitionService {
         relations: ['student.user', 'section.idPeriod', 'section.idClass'],
       });
 
+      registrations.sort((a, b) => {
+        const idPeriodA = a.section.idPeriod;
+        const idPeriodB = b.section.idPeriod;
+
+        if (idPeriodA.year === idPeriodB.year) {
+          return idPeriodA.numberPeriod - idPeriodB.numberPeriod;
+        } else {
+          return idPeriodA.year - idPeriodB.year;
+        }
+      });
+
       return {
         message: `El historial academico del estudiante ${id} ha sido devuelto exitosamente`,
         statusCode: 200,

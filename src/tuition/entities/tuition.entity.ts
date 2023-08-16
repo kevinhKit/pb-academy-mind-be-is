@@ -61,14 +61,11 @@ export class Tuition {
   })
   create_at: Date;
 
-  @ManyToOne(
+  @OneToMany(
     () => ExceptionalCancellation,
     (exceptionalCancellation) => exceptionalCancellation.id,
     { nullable: true },
   )
-  @JoinColumn({
-    name: 'idCancellation',
-  })
   idCancellation: ExceptionalCancellation;
 
   @Column('text', {
