@@ -64,4 +64,9 @@ export class CareerChange {
     name: 'idPeriod',
   })
   idPeriod?: Period;
+
+  @Column('boolean', {
+    default: true,
+  })
+  stateRequest: boolean;
 }

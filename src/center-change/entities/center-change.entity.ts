@@ -65,4 +65,9 @@ export class CenterChange {
     name: 'idPeriod',
   })
   idPeriod?: Period;
+
+  @Column('boolean', {
+    default: true,
+  })
+  stateRequest: boolean;
 }

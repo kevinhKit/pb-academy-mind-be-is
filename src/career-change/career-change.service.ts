@@ -46,7 +46,8 @@ export class CareerChangeService {
           applicationStatus: applicationStatus.PROGRESS,
           idPeriod: {
             id: +idPeriod
-          }
+          },
+          stateRequest: true
         },
         relations: ['idPeriod']
       });
@@ -60,7 +61,8 @@ export class CareerChangeService {
           accountNumber: accountNumber,
           idPeriod: {
             id: +idPeriod
-          }
+          },
+          stateRequest: true
         },
         relations: ['idPeriod']
       });
@@ -88,7 +90,8 @@ export class CareerChangeService {
           // applicationStatus: applicationStatus.PROGRESS,
           idPeriod: {
             id: +idPeriod
-          }
+          },
+          stateRequest: true
         },
         relations: ['idPeriod']
       });
@@ -123,7 +126,8 @@ export class CareerChangeService {
         accountNumber: accountNumber,
         idPeriod: {
           id: +idPeriod
-        }
+        },
+        stateRequest: true
       });
 
       const saveCareerChange = await this.careerChangeRepository.save(careerChange)
@@ -151,6 +155,7 @@ export class CareerChangeService {
         where: {
           idCareerChange: idCareerChange,
           // applicationStatus: In([applicationStatusOption.ACCEPTED,applicationStatusOption.REJECTED])
+          stateRequest: true
         }
       });
 
@@ -181,7 +186,10 @@ export class CareerChangeService {
   async findAll() {
     try {
       const allRequestStundents = await this.careerChangeRepository.find({
-        relations:['student','idPeriod', 'student.user']
+        relations:['student','idPeriod', 'student.user'],
+        where: {
+          stateRequest: true
+        }
       });
 
       return {
@@ -208,8 +216,9 @@ export class CareerChangeService {
                 }
               }
             }
-          }
-        }
+          },
+          stateRequest: true
+        },
       });
 
       return {

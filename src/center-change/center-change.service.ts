@@ -48,6 +48,7 @@ export class CenterChangeService {
           idPeriod: {
             id: +idPeriod
           },
+          stateRequest: true
         },
         relations: ['idPeriod']
       });
@@ -62,6 +63,7 @@ export class CenterChangeService {
           idPeriod: {
             id: +idPeriod
           },
+          stateRequest: true,
         },
         relations: ['idPeriod']
       });
@@ -90,7 +92,8 @@ export class CenterChangeService {
           // applicationStatus: applicationStatus.PROGRESS,
           idPeriod: {
             id: +idPeriod
-          }
+          },
+          stateRequest: true
         }
       });
 
@@ -125,7 +128,8 @@ export class CenterChangeService {
         accountNumber: accountNumber,
         idPeriod: {
           id: +idPeriod
-        }
+        },
+        stateRequest: true
       });
 
       const savecenterChange = await this.centerChangeRepository.save(centerChange)
@@ -149,6 +153,7 @@ export class CenterChangeService {
         where: {
           idCenterChange: idCenterChange,
           // applicationStatus: In([applicationStatusOption.ACCEPTED,applicationStatusOption.REJECTED])
+          stateRequest: true,
         }
       });
 
@@ -162,7 +167,8 @@ export class CenterChangeService {
       const createAplication = await this.centerChangeRepository.preload({
         idCenterChange,
         applicationStatus: aplicationStatus,
-        applicationDate: new Date().toISOString()
+        applicationDate: new Date().toISOString(),
+        stateRequest: true
       });
 
       const saveAplication = await this.centerChangeRepository.save(createAplication);
@@ -179,7 +185,10 @@ export class CenterChangeService {
   async findAll() {
     try {
       const allRequestStundents = await this.centerChangeRepository.find({
-        relations:['student','idPeriod','student.user']
+        relations:['student','idPeriod','student.user'],
+        where: {
+          stateRequest: true
+        }
       });
 
       return {
@@ -206,7 +215,8 @@ export class CenterChangeService {
                 }
               }
             }
-          }
+          },
+          stateRequest:true
         }
       });
 
