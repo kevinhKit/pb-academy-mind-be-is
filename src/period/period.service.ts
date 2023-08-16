@@ -579,7 +579,20 @@ export class PeriodService {
         relations: ['idStatePeriod'],
       });
 
-      console.log(periodWithState.idStatePeriod.id == finishedState.id);
+      if (periodWithState.idStatePeriod.id == ongoingState.id) {
+        const tuitionsOnWaitingList = await this.tuitionRepository.find({
+          where: {
+            section: { idPeriod: { idStatePeriod: { id: ongoingState.id } } },
+            waitingList: true,
+          },
+        });
+
+        if (tuitionsOnWaitingList.length > 0) {
+          tuitionsOnWaitingList.forEach(async (tuition) => {
+            await this.tuitionRepository.delete(tuition.id);
+          });
+        }
+      }
 
       if (periodWithState.idStatePeriod.id == finishedState.id) {
         const periodTuitions = await this.tuitionRepository.find({
