@@ -4,7 +4,7 @@ import { UpdateTuitionDto } from './dto/update-tuition.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Section } from 'src/section/entities/section.entity';
 import { Tuition, classStatus } from './entities/tuition.entity';
-import { Repository } from 'typeorm';
+import { In, Not, Repository } from 'typeorm';
 import { Student } from 'src/student/entities/student.entity';
 import { Period } from 'src/period/entities/period.entity';
 import {
@@ -493,6 +493,37 @@ export class TuitionService {
 
       return {
         message: `Mandando las matriculas del estudiante ${id}`,
+        statusCode: 200,
+        registrations,
+      };
+    } catch (error) {
+      return this.printMessageError(error);
+    }
+  }
+
+  async findStudentHistoryGrades(id: Student) {
+    try {
+      const studentExist = await this.studentRepository.findOne({
+        where: {
+          accountNumber: `${id}`,
+        },
+      });
+
+      if (!studentExist) {
+        throw new NotFoundException('No se ha encontrado al estudiante');
+      }
+
+      const registrations = await this.tuitionRepository.find({
+        where: {
+          student: { accountNumber: `${id}` },
+          waitingList: false,
+          stateClass: Not(In([classStatus.PROGRESS])),
+        },
+        relations: ['student.user', 'section.idPeriod', 'section.idClass'],
+      });
+
+      return {
+        message: `El historial academico del estudiante ${id} ha sido devuelto exitosamente`,
         statusCode: 200,
         registrations,
       };
