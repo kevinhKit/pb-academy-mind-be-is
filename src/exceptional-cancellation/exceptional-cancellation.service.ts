@@ -113,6 +113,7 @@ export class ExceptionalCancellationService {
       const cancelations = await this.exceptionalCancelationRepository.find({
         relations: [
           'idTuition.section.idPeriod.idStatePeriod',
+          'idTuition.section.idClass',
           'idTuition.student',
         ],
         where: { idTuition: { section: { idPeriod: { id: validPeriod.id } } } },
@@ -159,9 +160,14 @@ export class ExceptionalCancellationService {
       }
 
       const tuitionsCancelations = await this.tuitionRepository.find({
-        relations: ['section.idPeriod.idStatePeriod'],
+        relations: [
+          'section.idPeriod.idStatePeriod',
+          'section.idClass',
+          'student',
+        ],
         where: {
           section: { idPeriod: { idStatePeriod: { name: Rol.ONGOING } } },
+          student: { accountNumber: `${id}` },
         },
       });
 
