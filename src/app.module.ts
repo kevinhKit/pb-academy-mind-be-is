@@ -27,6 +27,7 @@ import { ExceptionalCancellationModule } from './exceptional-cancellation/except
 import { TeacherEvaluationModule } from './teacher-evaluation/teacher-evaluation.module';
 import { QuestionModule } from './question/question.module';
 import { AnalyticModule } from './analytic/analytic.module';
+import { RepositionRequestModule } from './reposition-request/reposition-request.module';
 
 @Module({
   imports: [
@@ -72,6 +73,7 @@ import { AnalyticModule } from './analytic/analytic.module';
     TeacherEvaluationModule,
     QuestionModule,
     AnalyticModule,
+    RepositionRequestModule,
   ],
 
   controllers: [AppController],
