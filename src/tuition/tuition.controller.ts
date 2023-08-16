@@ -74,6 +74,11 @@ export class TuitionController {
     return this.tuitionService.findStudentGrades(id);
   }
 
+  @Get('student-history/:id')
+  findStudentHistoryGrades(@Param('id') id: Student) {
+    return this.tuitionService.findStudentHistoryGrades(id);
+  }
+
   @Get('registration/:id')
   registration(@Param('id') id: Student) {
     return this.tuitionService.registration(id);
