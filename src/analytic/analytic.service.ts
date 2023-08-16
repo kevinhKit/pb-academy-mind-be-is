@@ -3,7 +3,7 @@ import { CreateAnalyticDto } from './dto/create-analytic.dto';
 import { UpdateAnalyticDto } from './dto/update-analytic.dto';
 import { User } from 'src/user/entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { LessThan, Repository } from 'typeorm';
 import { Teacher } from 'src/teacher/entities/teacher.entity';
 import { Student } from 'src/student/entities/student.entity';
 import { CenterCareer } from 'src/center-career/entities/center-career.entity';
@@ -60,7 +60,61 @@ export class AnalyticService {
 
   
   async findAll() {
-    return `This action returns all analytic`;
+    try {
+      const allStudent = await this.studentRepository.count();
+      const allFailed = await this.studentRepository.count({
+        where: {
+          tution: {
+            note: LessThan('65')
+          }
+        }
+      });
+      // const studentByCareer = await this.studentRepository.count({
+      //   where: {
+      //     studentCareer:{
+      //       centerCareer:{
+      //         career:{
+      //           id: 'career'
+      //         }
+      //       }
+      //     }
+      //   }
+      // });
+      const careers = await this.careerRepository.find();
+
+      const countByCareer = {};
+      
+      for (const career of careers) {
+        const count = await this.studentRepository.count({
+          where: {
+            studentCareer: {
+              centerCareer: {
+                career: {
+                  id: career.id
+                }
+              }
+            }
+          }
+        });
+      
+        countByCareer[career.name] = count;
+      }
+
+      console.log(countByCareer)
+
+      return {
+        statusCode: 200,
+        message: this.printMessageLog("Estadisticas obtenidas exitosamente."),
+        analitics:{
+          allStudent: allStudent,
+          studentFailed: allFailed,
+          
+        }
+      }
+    } catch (error) {
+      return this.printMessageError(error);
+    }
+
   }
 
   async findOne(id: number) {
@@ -78,4 +132,26 @@ export class AnalyticService {
   // async remove(id: number) {
   //   return `This action removes a #${id} analytic`;
   // }
+
+
+
+
+
+  printMessageLog(message){
+    this.logger.log(message);
+    return message;
+  }
+
+  printMessageError(message){
+    if(message.response){
+      if(message.response.message){
+        this.logger.error(message.response.message);
+        return message.response;
+      }
+      this.logger.error(message.response);
+      return message.response;
+    }
+    this.logger.error(message);
+    return message;
+  }
 }

@@ -1,4 +1,5 @@
 import { StudentCareer } from 'src/student-career/entities/student-career.entity';
+import { Tuition } from 'src/tuition/entities/tuition.entity';
 import { User } from 'src/user/entities/user.entity';
 import { Column, Entity, JoinColumn, OneToMany, OneToOne, PrimaryColumn } from 'typeorm';
 
@@ -90,4 +91,10 @@ export class Student {
 
   @OneToMany(() => StudentCareer, (studentCareer) => studentCareer.student)
   studentCareer: StudentCareer;
+
+  @OneToMany(
+    () => Tuition,
+    (tuition) => tuition.student,
+  )
+  tution: Tuition[];
 }
