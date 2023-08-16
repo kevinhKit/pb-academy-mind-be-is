@@ -235,8 +235,48 @@ export class CareerChangeService {
     return `This action updates a #${id} careerChange`;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} careerChange`;
+  async remove(id: string) {
+    try {
+
+      const careerChangeDelete = await this.careerChangeRepository.findOne({
+        where: {
+          idCareerChange: id,
+          stateRequest: false
+        }
+      });
+
+      if(careerChangeDelete){
+        throw new NotFoundException('La Solicitud ya ha sido borrada');
+      }
+      
+      const careerChangeExist = await this.careerChangeRepository.findOne({
+        where: {
+          idCareerChange: id,
+          stateRequest: true
+        }
+      });
+
+      if(!careerChangeExist){
+        throw new NotFoundException('Solicitud no encontrada');
+      }
+
+      const careerChange = await this.careerChangeRepository.preload({
+        idCareerChange:id,
+        stateRequest: false
+      });
+
+      await this.careerChangeRepository.save(careerChange);
+
+
+      return {
+        statusCode: 200,
+        message: this.printMessageLog("La solicitud se ha borrado exitosamente"),
+      }
+
+
+    } catch (error) {
+      return this.printMessageError(error);
+    }
   }
 
   printMessageLog(message){

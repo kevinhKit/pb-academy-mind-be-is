@@ -35,6 +35,6 @@ export class CenterChangeController {
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.centerChangeService.remove(+id);
+    return this.centerChangeService.remove(id);
   }
 }

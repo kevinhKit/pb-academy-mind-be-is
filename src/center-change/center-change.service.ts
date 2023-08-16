@@ -234,8 +234,48 @@ export class CenterChangeService {
     return `This action updates a #${id} centerChange`;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} centerChange`;
+  async remove(id: string) {
+    try {
+      
+      const centerChangeDelete = await this.centerChangeRepository.findOne({
+        where: {
+          idCenterChange: id,
+          stateRequest: false
+        }
+      });
+
+      if(centerChangeDelete){
+        throw new NotFoundException('La Solicitud ya ha sido borrada');
+      }
+      
+      const centerChangeExist = await this.centerChangeRepository.findOne({
+        where: {
+          idCenterChange: id,
+          stateRequest: true
+        }
+      });
+
+      if(!centerChangeExist){
+        throw new NotFoundException('Solicitud no encontrada');
+      }
+
+      const centerChange = await this.centerChangeRepository.preload({
+        idCenterChange:id,
+        stateRequest: false
+      });
+
+      await this.centerChangeRepository.save(centerChange);
+
+
+      return {
+        statusCode: 200,
+        message: this.printMessageLog("La solicitud se ha borrado exitosamente"),
+      }
+
+
+    } catch (error) {
+      return this.printMessageError(error);
+    }
   }
 
   printMessageLog(message){

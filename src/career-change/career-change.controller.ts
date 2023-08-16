@@ -36,6 +36,6 @@ export class CareerChangeController {
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.careerChangeService.remove(+id);
+    return this.careerChangeService.remove(id);
   }
 }
