@@ -19,7 +19,7 @@ export class RegionalCenterController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.regionalCenterService.findOne(+id);
+    return this.regionalCenterService.findOne(id);
   }
 
   @Patch(':id')

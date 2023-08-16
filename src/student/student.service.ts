@@ -252,17 +252,75 @@ export class StudentService {
     }
   }
 
-  async findAll() {
-    const allStudents = await this.studentRepository.find({ relations: ['user','studentCareer','studentCareer.centerCareer','studentCareer.centerCareer.career','studentCareer.centerCareer.regionalCenter'] });
-    return {
-      statusCode: 200,
-      message: 'Los estudiantes han sido devueltos exitosamente.',
-      students: allStudents,
-    };
+  async findAllStudentByRegionalCenter(center: string) {
+    try {
+      const allStudents = await this.studentRepository.find({
+        relations: ['user','studentCareer','studentCareer.centerCareer','studentCareer.centerCareer.career','studentCareer.centerCareer.regionalCenter'],
+        where: {
+          studentCareer: {
+            centerCareer:{
+              regionalCenter: {
+                id: center.toUpperCase()
+              }
+            }
+          }
+        }
+      });
+
+      if(allStudents.length == 0){
+        throw new NotFoundException('No se han encontrado estudiantes');
+      }
+
+      return {
+        statusCode: 200,
+        message: this.printMessageLog('Los estudiantes han sido devueltos exitosamente.'),
+        students: allStudents,
+      };
+    } catch (error) {
+      return this.printMessageError(error);
+    }
   }
 
-  async findOne(id: number) {
-    return `Está acción devuelve al estudiante con el id  #${id}`;
+  async findAll() {
+    try {
+      const allStudents = await this.studentRepository.find({ relations: ['user','studentCareer','studentCareer.centerCareer','studentCareer.centerCareer.career','studentCareer.centerCareer.regionalCenter'] });
+      
+      if(allStudents.length == 0){
+        throw new NotFoundException('No se han encontrado estudiantes');
+      }
+
+      return {
+        statusCode: 200,
+        message: this.printMessageLog('Los estudiantes han sido devueltos exitosamente.'),
+        students: allStudents,
+      };
+
+    } catch (error) {
+      return this.printMessageError(error);
+    }
+  }
+
+  async findOne(id: string) {
+    try {
+      const findStudent = await this.studentRepository.findOne({
+        relations: ['user','studentCareer','studentCareer.centerCareer','studentCareer.centerCareer.career','studentCareer.centerCareer.regionalCenter'],
+        where: {
+          accountNumber: id
+        }
+      });
+
+      if(!findStudent){
+        throw new NotFoundException('No se ha encontrado el estudiante');
+      }
+
+      return {
+        statusCode: 200,
+        message: this.printMessageLog('Se ha encontrado el estudiante.'),
+        student: findStudent,
+      };
+    } catch (error) {
+      return this.printMessageError(error);
+    }
   }
 
   async update(

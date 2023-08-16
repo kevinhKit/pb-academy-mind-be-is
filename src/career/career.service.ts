@@ -78,6 +78,11 @@ export class CareerService {
   async findAll() {
     try {
       const allCareer = await this.careerRepository.find();
+
+      if(allCareer.length == 0){
+        throw new NotFoundException('No se ha encontrado ninguna carrera');
+      }
+
       return {
         statusCode: 200,
         message: this.printMessageLog(
@@ -85,13 +90,35 @@ export class CareerService {
         ),
         careers: allCareer,
       };
+
     } catch (error) {
       return this.printMessageError(error);
     }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} career`;
+  async findOne(id: string) {
+    try {
+      const allCareer = await this.careerRepository.findOne({
+        where: {
+          id: id.toUpperCase()
+        }
+      });
+
+      if(!allCareer){
+        throw new NotFoundException('No se ha encontrado la carrera');
+      }
+
+      return {
+        statusCode: 200,
+        message: this.printMessageLog(
+          'La carrera ha sido obtenida exitosamente',
+        ),
+        career: allCareer,
+      };
+
+    } catch (error) {
+      return this.printMessageError(error);
+    }
   }
 
   async update(id: string, updateCareerDto: UpdateCareerDto) {

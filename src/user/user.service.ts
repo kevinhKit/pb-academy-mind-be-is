@@ -180,17 +180,49 @@ export class UserService {
 
   
   async findAll() {
-    const alladmins = await this.userRepository.find({ relations: ['user'] });
-    return {
-      statusCode: 200,
-      message: 'Los administradores han sido devueltos exitosamente.',
-      students: alladmins,
-    };
+    try {
+      
+      const alladmins = await this.userRepository.find({ relations: ['user'] });
+
+      if(alladmins.length == 0){
+        throw new NotFoundException('No se ha encontrado ninguno administrador');
+      }
+
+      return {
+        statusCode: 200,
+        message: 'Los administradores han sido devueltos exitosamente.',
+        admins: alladmins,
+      };
+
+    } catch (error) {
+      return this.printMessageError(error);
+    }
   }
 
 
-  findOne(id: number) {
-    return `Está acción retorna al usuario con el id #${id}.`;
+  async findOne(id: string) {
+    try {
+      
+      const admin = await this.userRepository.findOne({
+        relations: ['user'],
+        where: {
+          dni: id.toUpperCase()
+        }
+     });
+
+      if(!admin){
+        throw new NotFoundException('No se ha encontrado el administrador');
+      }
+
+      return {
+        statusCode: 200,
+        message: 'El administrado se ah encontrado.',
+        admin: admin,
+      };
+
+    } catch (error) {
+      return this.printMessageError(error);
+    }
   }
 
   

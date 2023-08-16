@@ -51,7 +51,12 @@ export class StudentController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.studentService.findOne(+id);
+    return this.studentService.findOne(id);
+  }
+
+  @Get('center/:id')
+  findAllStudentByRegionalCenter(@Param('id') id: string) {
+    return this.studentService.findAllStudentByRegionalCenter(id);
   }
 
   @Patch(':id')

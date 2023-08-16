@@ -40,7 +40,7 @@ export class UserController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.userService.findOne(+id);
+    return this.userService.findOne(id);
   }
   @Patch('change-password/:id')
   changePassword(@Param('id') id: string, @Body() changePasswordUserDto: ChangePasswordUserDto) {

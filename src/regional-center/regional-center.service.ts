@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, Logger } from '@nestjs/common';
+import { ConflictException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { CreateRegionalCenterDto } from './dto/create-regional-center.dto';
 import { UpdateRegionalCenterDto } from './dto/update-regional-center.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -51,19 +51,48 @@ export class RegionalCenterService {
 
   async findAll() {
     try {
-      const allCareer = await this.regionalCenterRepository.find();
+      const allRegionalCenter = await this.regionalCenterRepository.find();
+
+      
+      if(allRegionalCenter.length == 0){
+        throw new NotFoundException('No se han encontrado centro regionales')
+      }
+
       return {
         statusCode: 200,
         message: this.printMessageLog('Todas los centros regionales han sido obtenidas exitosamente'),
-        careers: allCareer
+        regioanlCenter: allRegionalCenter
       }
+
+
     } catch (error) {
       return this.printMessageError(error);
     }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} regionalCenter`;
+  async findOne(id: string) {
+    try {
+      const AllRegionalCenter = await this.regionalCenterRepository.findOne({
+        where: {
+          id: id.toUpperCase()
+        }
+      });
+
+      
+      if(!AllRegionalCenter){
+        throw new NotFoundException('No se ha encontrado el centro regional')
+      }
+
+      return {
+        statusCode: 200,
+        message: this.printMessageLog('Se ha obtenido el centro regional exitosamete'),
+        regionalCenter: AllRegionalCenter
+      }
+
+
+    } catch (error) {
+      return this.printMessageError(error);
+    }
   }
 
   update(id: number, updateRegionalCenterDto: UpdateRegionalCenterDto) {

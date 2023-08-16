@@ -543,16 +543,47 @@ export class TeacherService {
   }
 
   async findAll() {
-    const allTeachers = await this.teacherRepository.find({ relations: ['user','teachingCareer','teachingCareer.centerCareer','teachingCareer.centerCareer.career','teachingCareer.centerCareer.regionalCenter'] });
-    return {
-      statusCode: 200,
-      message: 'Los docentes han sido devueltos exitosamente.',
-      teachers: allTeachers,
-    };
+    try {
+      
+      const allTeachers = await this.teacherRepository.find({ relations: ['user','teachingCareer','teachingCareer.centerCareer','teachingCareer.centerCareer.career','teachingCareer.centerCareer.regionalCenter'] });
+
+      if(allTeachers.length == 0){
+        throw new NotFoundException('No se han encontrado docentes')
+      }
+
+      return {
+        statusCode: 200,
+        message: 'Los docentes han sido devueltos exitosamente.',
+        teachers: allTeachers,
+      };
+
+    } catch (error) {
+      return this.printMessageError(error);
+    }
   }
 
-  async findOne(id: number) {
-    return `This action returns a #${id} teacher`;
+  async findOne(id: string) {
+    try {
+      
+      const findTeacher = await this.teacherRepository.findOne({ relations: ['user','teachingCareer','teachingCareer.centerCareer','teachingCareer.centerCareer.career','teachingCareer.centerCareer.regionalCenter'],
+      where: {
+        employeeNumber: id
+      }
+    });
+
+      if(!findTeacher){
+        throw new NotFoundException('No se ha encontrado el docente')
+      }
+
+      return {
+        statusCode: 200,
+        message: 'El docente se ha obtenido exitosamente.',
+        teacher: findTeacher,
+      };
+
+    } catch (error) {
+      return this.printMessageError(error);
+    }
   }
 
   async findCareer(career: string, center: string) {
