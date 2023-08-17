@@ -19,6 +19,7 @@ import {
   StatePeriod,
 } from 'src/state-period/entities/state-period.entity';
 import { Career } from 'src/career/entities/career.entity';
+import { RegionalCenter } from 'src/regional-center/entities/regional-center.entity';
 
 @Injectable()
 export class SectionService {
@@ -35,6 +36,8 @@ export class SectionService {
     @InjectRepository(StatePeriod)
     private statePeriodRepository: Repository<StatePeriod>,
     @InjectRepository(Career) private careerRepository: Repository<Career>,
+    @InjectRepository(RegionalCenter)
+    private regionalCenterRepository: Repository<RegionalCenter>,
   ) {}
 
   async create({
@@ -237,16 +240,26 @@ export class SectionService {
     }
   }
 
-  async findSectionsByDepartment(id: Career) {
+  async findSectionsByDepartment(id: Career, centerId: RegionalCenter) {
     try {
       const newId = `${id}`;
       const idCareer = newId.toUpperCase();
+      let idCenter = `${centerId}`;
+      idCenter = idCenter.toUpperCase();
       const existingCareer = await this.careerRepository.findOne({
         where: { id: idCareer },
       });
 
       if (!existingCareer) {
         throw new NotFoundException('La carrera no existe.');
+      }
+
+      const existingCenter = await this.regionalCenterRepository.findOne({
+        where: { id: idCenter },
+      });
+
+      if (!existingCenter) {
+        throw new NotFoundException('El centro regional no existe.');
       }
 
       const planificationState = await this.statePeriodRepository.findOne({
@@ -273,6 +286,7 @@ export class SectionService {
         where: {
           idClass: { departmentId: idCareer },
           idPeriod: { id: periodExist.id },
+          idClassroom: { idBuilding: { idRegionalCenter: { id: idCenter } } },
         },
         relations: [
           'idPeriod',
@@ -321,7 +335,7 @@ export class SectionService {
       }
 
       return {
-        message: 'Se han devuelto las secciones exitosamente',
+        message: `Se han devuelto las secciones del departamento ${id} y el centro ${centerId} exitosamente`,
         statusCode: 200,
         sections,
       };
@@ -475,8 +489,15 @@ export class SectionService {
     }
   }
 
-  async findClasses(classId: Class, periodId: Period) {
+  async findClasses(
+    classId: Class,
+    periodId: Period,
+    centerId: RegionalCenter,
+  ) {
     try {
+      let idCenter = `${centerId}`;
+      idCenter = idCenter.toUpperCase();
+
       const classExist = await this.classRepository.findOne({
         where: {
           id: +classId,
@@ -497,10 +518,19 @@ export class SectionService {
         throw new NotFoundException('EL periodo enviado no existe');
       }
 
+      const existingCenter = await this.regionalCenterRepository.findOne({
+        where: { id: idCenter },
+      });
+
+      if (!existingCenter) {
+        throw new NotFoundException('El centro regional no existe.');
+      }
+
       const classesSections = await this.sectionRepository.find({
         where: {
           idPeriod: { id: +periodId },
           idClass: { id: +classId },
+          idClassroom: { idBuilding: { idRegionalCenter: { id: idCenter } } },
         },
         relations: [
           'idPeriod',
@@ -548,7 +578,7 @@ export class SectionService {
       }
 
       return {
-        message: `Se han devuelto las secciones de la clase ${classId} en el periodo ${periodId}`,
+        message: `Se han devuelto las secciones de la clase ${classId} en el periodo ${periodId} del centro ${idCenter}`,
         statusCode: 200,
         sections: classesSections,
       };
@@ -557,7 +587,7 @@ export class SectionService {
     }
   }
 
-  async findWaitingListSections(id: Career) {
+  async findWaitingListSections(id: Career, centerId: RegionalCenter) {
     try {
       const newId = `${id}`;
       const idCareer = newId.toUpperCase();
@@ -567,6 +597,17 @@ export class SectionService {
 
       if (!existingCareer) {
         throw new NotFoundException('La carrera no existe.');
+      }
+
+      let idCenter = `${centerId}`;
+      idCenter = idCenter.toUpperCase();
+
+      const existingCenter = await this.regionalCenterRepository.findOne({
+        where: { id: idCenter },
+      });
+
+      if (!existingCenter) {
+        throw new NotFoundException('El centro regional no existe.');
       }
 
       const registrationState = await this.statePeriodRepository.findOne({
@@ -589,6 +630,7 @@ export class SectionService {
           idPeriod: { id: period.id },
           waitingList: true,
           idClass: { departmentId: idCareer },
+          idClassroom: { idBuilding: { idRegionalCenter: { id: idCenter } } },
         },
         relations: [
           'idPeriod',

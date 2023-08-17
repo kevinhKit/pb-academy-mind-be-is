@@ -16,6 +16,7 @@ import {
 import { Teacher } from 'src/teacher/entities/teacher.entity';
 import { Period } from 'src/period/entities/period.entity';
 import { Class } from 'src/class/entities/class.entity';
+import { RegionalCenter } from 'src/regional-center/entities/regional-center.entity';
 
 @Injectable()
 export class TeacherEvaluationService {
@@ -32,6 +33,8 @@ export class TeacherEvaluationService {
     @InjectRepository(Teacher) private teacherRepository: Repository<Teacher>,
     @InjectRepository(Class) private classRepository: Repository<Class>,
     @InjectRepository(Period) private periodRepository: Repository<Period>,
+    @InjectRepository(RegionalCenter)
+    private regionalCenterRepository: Repository<RegionalCenter>,
   ) {}
   async create(createTeacherEvaluationDto: CreateTeacherEvaluationDto) {
     try {
@@ -139,15 +142,27 @@ export class TeacherEvaluationService {
     }
   }
 
-  async findOne(id: string) {
+  async findOne(id: string, centerId: RegionalCenter) {
     try {
+      let idCenter = `${centerId}`;
+      idCenter = idCenter.toUpperCase();
+
       const gradesState = await this.statePeriodRepository.findOne({
         where: { name: Rol.GRADES },
       });
 
+      const existingCenter = await this.regionalCenterRepository.findOne({
+        where: { id: idCenter },
+      });
+
+      if (!existingCenter) {
+        throw new NotFoundException('El centro regional no existe.');
+      }
+
       const teachers = await this.tuitionRepository.find({
         relations: [
           'section.idTeacher.user',
+          'section.idTeacher.teachingCareer.centerCareer.regionalCenter',
           'section.idClass',
           'section.idPeriod',
         ],
@@ -155,6 +170,11 @@ export class TeacherEvaluationService {
           section: {
             idPeriod: { idStatePeriod: { id: gradesState.id } },
             idClass: { departmentId: id.toUpperCase() },
+            idTeacher: {
+              teachingCareer: {
+                centerCareer: { regionalCenter: { id: idCenter } },
+              },
+            },
           },
         },
       });

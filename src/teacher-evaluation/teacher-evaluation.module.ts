@@ -9,6 +9,7 @@ import { StatePeriod } from 'src/state-period/entities/state-period.entity';
 import { Teacher } from 'src/teacher/entities/teacher.entity';
 import { Period } from 'src/period/entities/period.entity';
 import { Class } from 'src/class/entities/class.entity';
+import { RegionalCenter } from 'src/regional-center/entities/regional-center.entity';
 
 @Module({
   controllers: [TeacherEvaluationController],
@@ -22,6 +23,7 @@ import { Class } from 'src/class/entities/class.entity';
       Teacher,
       Period,
       Class,
+      RegionalCenter,
     ]),
   ],
 })
