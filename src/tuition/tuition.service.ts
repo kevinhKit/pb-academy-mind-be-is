@@ -13,6 +13,7 @@ import {
 } from 'src/state-period/entities/state-period.entity';
 import { Career } from 'src/career/entities/career.entity';
 import { Teacher } from 'src/teacher/entities/teacher.entity';
+import { RegionalCenter } from 'src/regional-center/entities/regional-center.entity';
 
 @Injectable()
 export class TuitionService {
@@ -26,6 +27,8 @@ export class TuitionService {
     @InjectRepository(StatePeriod)
     private statePeriodRepository: Repository<StatePeriod>,
     @InjectRepository(Career) private careerRepository: Repository<Career>,
+    @InjectRepository(RegionalCenter)
+    private regionalCenterRepository: Repository<RegionalCenter>,
   ) {}
 
   async create(createTuitionDto: CreateTuitionDto) {
@@ -195,10 +198,21 @@ export class TuitionService {
     }
   }
 
-  async tuitionNotesByDepartment(id: Career) {
+  async tuitionNotesByDepartment(id: Career, centerId: RegionalCenter) {
     try {
       let careerId = `${id}`;
       careerId = careerId.toUpperCase();
+
+      let idCenter = `${centerId}`;
+      idCenter = idCenter.toUpperCase();
+
+      const existingCenter = await this.regionalCenterRepository.findOne({
+        where: { id: idCenter },
+      });
+
+      if (!existingCenter) {
+        throw new NotFoundException('El centro regional no existe.');
+      }
 
       const careerExist = await this.careerRepository.findOne({
         where: { id: careerId },
@@ -230,9 +244,13 @@ export class TuitionService {
           section: {
             idPeriod: { id: periodOnGrades.id },
             idClass: { departmentId: careerId },
+            idClassroom: { idBuilding: { idRegionalCenter: { id: idCenter } } },
           },
         },
-        relations: ['section.idTeacher.user'],
+        relations: [
+          'section.idTeacher.user',
+          'section.idClassroom.idBuilding.idRegionalCenter',
+        ],
       });
 
       const distinctTeachers = teacherTuitions.reduce(
@@ -254,8 +272,7 @@ export class TuitionService {
       const teachers = distinctTeachers.map((item) => item.section.idTeacher);
 
       return {
-        message:
-          'Se han devuelto los docentes que subieron notas del departamento',
+        message: `Se han devuelto los docentes que subieron notas del departamento del centro ${idCenter}`,
         statusCode: 200,
         teachers,
       };

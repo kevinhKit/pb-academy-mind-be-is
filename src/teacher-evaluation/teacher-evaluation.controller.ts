@@ -1,6 +1,7 @@
 import {
   Controller,
   Get,
+  Query,
   Post,
   Body,
   Patch,
@@ -13,6 +14,7 @@ import { UpdateTeacherEvaluationDto } from './dto/update-teacher-evaluation.dto'
 import { Teacher } from 'src/teacher/entities/teacher.entity';
 import { Period } from 'src/period/entities/period.entity';
 import { Class } from 'src/class/entities/class.entity';
+import { RegionalCenter } from 'src/regional-center/entities/regional-center.entity';
 
 @Controller('teacher-evaluation')
 export class TeacherEvaluationController {
@@ -26,8 +28,8 @@ export class TeacherEvaluationController {
   }
 
   @Get('teachers/:id')
-  findOne(@Param('id') id: string) {
-    return this.teacherEvaluationService.findOne(id);
+  findOne(@Param('id') id: string, @Query('center') centerId: RegionalCenter) {
+    return this.teacherEvaluationService.findOne(id, centerId);
   }
 
   @Get('teachers-notes/:idTeacher/:idPeriod/:idClass')

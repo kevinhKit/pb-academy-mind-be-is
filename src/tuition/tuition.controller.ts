@@ -16,6 +16,7 @@ import { Student } from 'src/student/entities/student.entity';
 import { Period } from 'src/period/entities/period.entity';
 import { Career } from 'src/career/entities/career.entity';
 import { Teacher } from 'src/teacher/entities/teacher.entity';
+import { RegionalCenter } from 'src/regional-center/entities/regional-center.entity';
 
 @Controller('tuition')
 export class TuitionController {
@@ -37,8 +38,11 @@ export class TuitionController {
   }
 
   @Get('teacher-notes/:id')
-  tuitionNotesByDepartment(@Param('id') id: Career) {
-    return this.tuitionService.tuitionNotesByDepartment(id);
+  tuitionNotesByDepartment(
+    @Param('id') id: Career,
+    @Query('center') centerId: RegionalCenter,
+  ) {
+    return this.tuitionService.tuitionNotesByDepartment(id, centerId);
   }
 
   @Get('teacher-grades/:id')

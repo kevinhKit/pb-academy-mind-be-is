@@ -15,6 +15,7 @@ import { Teacher } from 'src/teacher/entities/teacher.entity';
 import { Period } from 'src/period/entities/period.entity';
 import { Class } from 'src/class/entities/class.entity';
 import { Career } from 'src/career/entities/career.entity';
+import { RegionalCenter } from 'src/regional-center/entities/regional-center.entity';
 
 @Controller('section')
 export class SectionController {
@@ -46,18 +47,28 @@ export class SectionController {
   }
 
   @Get('class-period/:id')
-  findClasses(@Param('id') id: Class, @Query('period') periodId?: Period) {
-    return this.sectionService.findClasses(id, periodId);
-  }
-
-  @Get('waiting-list-sections/:id')
-  findWaitingListSections(@Param('id') id: Career) {
-    return this.sectionService.findWaitingListSections(id);
+  findClasses(
+    @Param('id') id: Class,
+    @Query('center') centerId: RegionalCenter,
+    @Query('period') periodId?: Period,
+  ) {
+    return this.sectionService.findClasses(id, periodId, centerId);
   }
 
   @Get('department/:id')
-  findSectionsByDepartment(@Param('id') id: Career) {
-    return this.sectionService.findSectionsByDepartment(id);
+  findSectionsByDepartment(
+    @Param('id') id: Career,
+    @Query('center') centerId: RegionalCenter,
+  ) {
+    return this.sectionService.findSectionsByDepartment(id, centerId);
+  }
+
+  @Get('waiting-list-sections/:id')
+  findWaitingListSections(
+    @Param('id') id: Career,
+    @Query('center') centerId: RegionalCenter,
+  ) {
+    return this.sectionService.findWaitingListSections(id, centerId);
   }
 
   @Patch(':id')
