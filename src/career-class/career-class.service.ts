@@ -23,7 +23,7 @@ export class CareerClassService {
     private requirementClassRepository: Repository<RequirementClass>,
     @InjectRepository(Student) private studentRepository: Repository<Student>,
     @InjectRepository(Tuition) private tuitionRepository: Repository<Tuition>,
-  ) { }
+  ) {}
 
   create(createCareerClassDto: CreateCareerClassDto) {
     return 'This action adds a new careerClass';
@@ -131,15 +131,12 @@ export class CareerClassService {
         // No tengo clases aprobadas y las clases no tienen requisito
         if (approbedClasses.length === 0 && classs.classCurrent.length === 0) {
           classesToGo.push(classs);
-
         }
-
 
         // Tengo clases aprobadas
         if (approbedClasses.length > 0) {
           //La clase tiene requisito
           if (classs.classCurrent.length != 0) {
-
             if (
               !this.validateHaventPassedClass(classs, approbedClasses) &&
               this.validateClassRequirements(
@@ -148,15 +145,12 @@ export class CareerClassService {
               )
             ) {
               classesToGo.push(classs);
-
             }
-
           }
           //La clase no tiene requisito
           else {
             if (!this.validateHaventPassedClass(classs, approbedClasses)) {
               classesToGo.push(classs);
-
             }
           }
         }
@@ -226,13 +220,10 @@ export class CareerClassService {
     return true;
   }
   validateHaventPassedClass(classs: Class, approbedClasses: Tuition[]) {
-
     const idsApprobed = approbedClasses.map((obj) => obj.section.idClass.id);
 
     if (idsApprobed.includes(classs.id)) {
-
       return true;
-
     }
     return false;
   }
