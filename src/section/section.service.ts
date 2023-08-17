@@ -701,6 +701,24 @@ export class SectionService {
         },
       });
 
+      for (const section of academicCharge) {
+        const sectionRegistrations = await this.tuitionRepository.find({
+          where: {
+            section: { id: section.id },
+            waitingList: false,
+          },
+        });
+
+        let spaces;
+        if (sectionRegistrations.length == 0) {
+          spaces = 0;
+        } else {
+          spaces = sectionRegistrations.length;
+        }
+
+        section['studentsRegistered'] = spaces;
+      }
+
       return {
         message: `Se ha devuelto la carga academica del periodo`,
         statusCode: 200,
