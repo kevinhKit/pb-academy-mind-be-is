@@ -29,4 +29,9 @@ export class RepositionRequest {
     name: 'idPeriod',
   })
   idPeriod: Period;
+
+  @Column('text', {
+    nullable: false
+  })
+  justification: string;
 }

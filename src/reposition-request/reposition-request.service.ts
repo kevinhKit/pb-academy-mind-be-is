@@ -65,6 +65,7 @@ export class RepositionRequestService {
         await this.repositionRequestRepository.create({
           idPeriod: createRepositionRequestDto.idPeriod,
           idStudent: createRepositionRequestDto.idStudent,
+          justification: createRepositionRequestDto.justification
         });
 
       const savedRepositionRequest =

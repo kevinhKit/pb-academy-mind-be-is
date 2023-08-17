@@ -10,4 +10,8 @@ export class CreateRepositionRequestDto {
   @IsString({ message: 'El id del estudiante debe ser de tipo texto.' })
   @IsNotEmpty({ message: 'No envió o dejo vacio el id del estudiante' })
   idStudent: Student;
+
+  @IsString({ message: 'Lajustificacióndebe ser de tipo texto.' })
+  @IsNotEmpty({ message: 'No envió o dejo vacia la justifiación ' })
+  justification: string;
 }
