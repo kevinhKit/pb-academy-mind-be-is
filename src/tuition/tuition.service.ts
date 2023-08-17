@@ -14,12 +14,15 @@ import {
 import { Career } from 'src/career/entities/career.entity';
 import { Teacher } from 'src/teacher/entities/teacher.entity';
 import { RegionalCenter } from 'src/regional-center/entities/regional-center.entity';
+import { SendEmailService } from 'src/shared/send-email/send-email.service';
 
 @Injectable()
 export class TuitionService {
   private readonly logger = new Logger('tutionLogger');
 
   constructor(
+    private readonly sendEmailService: SendEmailService,
+
     @InjectRepository(Section) private sectionRepository: Repository<Section>,
     @InjectRepository(Tuition) private tuitionRepository: Repository<Tuition>,
     @InjectRepository(Student) private studentRepository: Repository<Student>,
@@ -361,6 +364,48 @@ export class TuitionService {
 
       return {
         message: `Mandando las matriculas de la seccion ${id}`,
+        statusCode: 200,
+        registration,
+      };
+    } catch (error) {
+      return this.printMessageError(error);
+    }
+  }
+
+  async sendEmailGrades(id: Section) {
+    try {
+      const validSection = await this.sectionRepository.findOne({
+        where: { id: `${id}` },
+      });
+
+      if (!validSection) {
+        throw new NotFoundException('La seccion enviada no existe');
+      }
+
+      const registration = await this.tuitionRepository.find({
+        where: {
+          section: { id: `${id}` },
+          waitingList: false,
+        },
+        relations: [
+          'student.user',
+          'section.idTeacher.user',
+          'section.idClass',
+        ],
+      });
+
+      registration.forEach((registration) => {
+        if (registration.note === null) {
+          throw new NotFoundException(
+            'Todavia no ha calificado a todos los estudiantes',
+          );
+        }
+      });
+
+      await this.sendEmailService.sendNotification(registration);
+
+      return {
+        message: `Mandando correos de ingreso de notas de la seccion ${id}`,
         statusCode: 200,
         registration,
       };
