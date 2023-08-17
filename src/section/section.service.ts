@@ -652,6 +652,65 @@ export class SectionService {
     }
   }
 
+  async findPeriodCharge(
+    id: Career,
+    centerId: RegionalCenter,
+    periodId: Period,
+  ) {
+    try {
+      const newId = `${id}`;
+      const idCareer = newId.toUpperCase();
+      const existingCareer = await this.careerRepository.findOne({
+        where: { id: idCareer },
+      });
+
+      if (!existingCareer) {
+        throw new NotFoundException('La carrera no existe.');
+      }
+
+      let idCenter = `${centerId}`;
+      idCenter = idCenter.toUpperCase();
+
+      const existingCenter = await this.regionalCenterRepository.findOne({
+        where: { id: idCenter },
+      });
+
+      if (!existingCenter) {
+        throw new NotFoundException('El centro regional no existe.');
+      }
+
+      const periodExist = await this.periodRepository.findOne({
+        where: { id: +periodId },
+      });
+
+      if (!periodExist) {
+        throw new NotFoundException('El periodo enviado no existe.');
+      }
+
+      const academicCharge = await this.sectionRepository.find({
+        relations: [
+          'idPeriod',
+          'idClass',
+          'idTeacher.user',
+          'idClassroom.idBuilding.idRegionalCenter',
+        ],
+        where: {
+          idClassroom: { idBuilding: { idRegionalCenter: { id: idCenter } } },
+          idClass: { departmentId: idCareer },
+          idPeriod: { id: periodExist.id },
+        },
+      });
+
+      return {
+        message: `Se ha devuelto la carga academica del periodo`,
+        statusCode: 200,
+        academicCharge,
+      };
+    } catch (error) {
+      return this.printMessageError(error);
+    }
+  }
+
   async update(id: string, updateSectionDto: UpdateSectionDto) {
     try {
       let teacher;

@@ -71,6 +71,15 @@ export class SectionController {
     return this.sectionService.findWaitingListSections(id, centerId);
   }
 
+  @Get('period-charge/:id')
+  findPeriodCharge(
+    @Param('id') id: Career,
+    @Query('center') centerId: RegionalCenter,
+    @Query('period') periodId: Period,
+  ) {
+    return this.sectionService.findPeriodCharge(id, centerId, periodId);
+  }
+
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateSectionDto: UpdateSectionDto) {
     return this.sectionService.update(id, updateSectionDto);

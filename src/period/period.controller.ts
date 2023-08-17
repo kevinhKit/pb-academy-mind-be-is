@@ -26,6 +26,11 @@ export class PeriodController {
     return this.periodService.findAll();
   }
 
+  @Get('academic-charge')
+  findAcademicCharge() {
+    return this.periodService.findAcademicCharge();
+  }
+
   @Get('registration-planification')
   findPlanificationRegistrationByYear() {
     return this.periodService.findPlanificationRegistrationByYear();

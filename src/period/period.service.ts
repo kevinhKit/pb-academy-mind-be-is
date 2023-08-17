@@ -321,6 +321,33 @@ export class PeriodService {
     }
   }
 
+  async findAcademicCharge() {
+    try {
+      const periods = await this.periodRepository.find({
+        relations: ['idStatePeriod'],
+        where: { idStatePeriod: { name: Not(Rol.DEFINNING) } },
+      });
+
+      periods.sort((a, b) => {
+        // Primero ordenar por año en orden descendente
+        if (a.year !== b.year) {
+          return b.year - a.year;
+        }
+
+        // Luego ordenar por número de período en orden descendente
+        return b.numberPeriod - a.numberPeriod;
+      });
+
+      return {
+        statusCode: 200,
+        message: `Periodos con carga academica devueltos exitosamente.`,
+        periods,
+      };
+    } catch (error) {
+      return this.printMessageError(error);
+    }
+  }
+
   async update(id: number, updatePeriodDto: UpdatePeriodDto) {
     try {
       const period = await this.periodRepository.findOne({
