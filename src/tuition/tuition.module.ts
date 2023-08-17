@@ -9,6 +9,7 @@ import { Period } from 'src/period/entities/period.entity';
 import { StatePeriod } from 'src/state-period/entities/state-period.entity';
 import { Career } from 'src/career/entities/career.entity';
 import { RegionalCenter } from 'src/regional-center/entities/regional-center.entity';
+import { SharedModule } from 'src/shared/shared.module';
 
 @Module({
   controllers: [TuitionController],
@@ -23,6 +24,7 @@ import { RegionalCenter } from 'src/regional-center/entities/regional-center.ent
       Career,
       RegionalCenter,
     ]),
+    SharedModule,
   ],
 })
 export class TuitionModule {}
