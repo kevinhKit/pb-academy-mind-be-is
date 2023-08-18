@@ -751,6 +751,14 @@ export class PeriodService {
           sumaNotasPonderadas / sumaUnidadesValorativas,
         );
 
+        if (globalIndex) {
+          const student = await this.studentRepository.findOne({
+            where: { accountNumber: estudianteId },
+          });
+          student.unitValuesSum = sumaUnidadesValorativas;
+          student.gradesSum = sumaNotasPonderadas;
+        }
+
         promediosPorEstudiante[estudianteId] = promedioPonderado;
       }
     }
