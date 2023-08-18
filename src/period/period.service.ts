@@ -757,6 +757,7 @@ export class PeriodService {
           });
           student.unitValuesSum = sumaUnidadesValorativas;
           student.gradesSum = sumaNotasPonderadas;
+          await this.studentRepository.save(student);
         }
 
         promediosPorEstudiante[estudianteId] = promedioPonderado;
