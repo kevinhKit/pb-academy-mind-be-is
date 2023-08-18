@@ -155,13 +155,16 @@ export class CareerChangeService {
         where: {
           idCareerChange: idCareerChange,
           // applicationStatus: In([applicationStatusOption.ACCEPTED,applicationStatusOption.REJECTED])
-          stateRequest: true
-        }
+          stateRequest: true,
+        },
+        relations: ['student','student.studentCareer','student.studentCareer.centerCareer','student.studentCareer.centerCareer.career','student.studentCareer.centerCareer.regionalCenter']
       });
+      
 
       if(!statusAplication){
         throw new NotFoundException('Solicitud de cambio de carrera no encontrada');
       }
+
       if(statusAplication.applicationStatus == applicationStatusOption.ACCEPTED || statusAplication.applicationStatus == applicationStatusOption.REJECTED ){
         throw new ConflictException('La solicitud del estudiante ya fue revisada');
       }
@@ -172,6 +175,58 @@ export class CareerChangeService {
         applicationDate: new Date().toISOString()
       });
 
+      if(aplicationStatus == applicationStatusOption.ACCEPTED){
+
+        const studentChange = await JSON.parse(JSON.stringify(statusAplication));
+
+        const oldCenterCareer = await this.centerCareerRepository.findOne({
+          where: {
+            career: {
+              id: studentChange.student.studentCareer[0].centerCareer.career.id
+            },
+            regionalCenter: {
+              id: studentChange.student.studentCareer[0].centerCareer.regionalCenter.id
+            }
+          }
+        });
+
+        
+
+        const centerCareer = await this.centerCareerRepository.findOne({
+          where: {
+            career: {
+              id: studentChange.idCareer
+            },
+            regionalCenter: {
+              id: studentChange.student.studentCareer[0].centerCareer.regionalCenter.id
+            }
+          }
+        });
+
+        const studentCarrer = await this.studentCareerRepository.findOne({
+          where: {
+            student: {
+              accountNumber: studentChange.student.accountNumber
+            }
+          }
+        });
+
+        
+        const newStudentCareer = await this.studentCareerRepository.preload({
+          idStudentCareer: studentCarrer.idStudentCareer,
+          // student: 
+          //   studentChange.student.accountNumber
+          // ,
+          centerCareer: {
+            idCenterCareer: centerCareer.idCenterCareer
+          }
+        });
+
+        console.log(newStudentCareer)
+  
+        await this.studentCareerRepository.save(newStudentCareer);
+      }
+
       const saveAplication = await this.careerChangeRepository.save(createAplication);
       return {
         statusCode: 200,
@@ -179,6 +234,7 @@ export class CareerChangeService {
         aplicationRequest: saveAplication
       }
     } catch (error) {
+      console.log(error)
       return this.printMessageError(error);
     }
   }
