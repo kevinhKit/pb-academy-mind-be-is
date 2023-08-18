@@ -1,22 +1,29 @@
 import { StudentCareer } from 'src/student-career/entities/student-career.entity';
 import { Tuition } from 'src/tuition/entities/tuition.entity';
 import { User } from 'src/user/entities/user.entity';
-import { Column, Entity, JoinColumn, OneToMany, OneToOne, PrimaryColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  OneToMany,
+  OneToOne,
+  PrimaryColumn,
+} from 'typeorm';
 
 @Entity('Students')
 export class Student {
-  @PrimaryColumn('text',{
-    unique: true
+  @PrimaryColumn('text', {
+    unique: true,
   })
   accountNumber: string;
 
-  @Column('text',{
-    unique: true
+  @Column('text', {
+    unique: true,
   })
   institutionalEmail: string;
 
-  @Column('text',{
-    unique: true
+  @Column('text', {
+    unique: true,
   })
   email: string;
 
@@ -25,7 +32,7 @@ export class Student {
 
   @Column('text', {
     nullable: true,
-    default: `${Math.random() < 0.5}`
+    default: `${Math.random() < 0.5}`,
   })
   payment: string;
 
@@ -54,14 +61,14 @@ export class Student {
   })
   description: string;
 
-  @Column('timestamptz',{
-    default: () => "current_timestamp"
+  @Column('timestamptz', {
+    default: () => 'current_timestamp',
   })
   create_at: Date;
 
   @Column({
     type: 'boolean',
-    default: true
+    default: true,
   })
   status: boolean;
 
@@ -73,15 +80,27 @@ export class Student {
 
   @Column({
     type: 'smallint',
-    default: 0
+    default: 0,
   })
   overallIndex: number;
 
   @Column({
     type: 'smallint',
-    default: 0
+    default: 0,
   })
   periodIndex: number;
+
+  @Column({
+    type: 'smallint',
+    default: 0,
+  })
+  gradesSum: number;
+
+  @Column({
+    type: 'smallint',
+    default: 0,
+  })
+  unitValuesSum: number;
 
   @OneToOne(() => User, (user) => user.student)
   @JoinColumn({
@@ -92,9 +111,6 @@ export class Student {
   @OneToMany(() => StudentCareer, (studentCareer) => studentCareer.student)
   studentCareer: StudentCareer;
 
-  @OneToMany(
-    () => Tuition,
-    (tuition) => tuition.student,
-  )
+  @OneToMany(() => Tuition, (tuition) => tuition.student)
   tution: Tuition[];
 }
