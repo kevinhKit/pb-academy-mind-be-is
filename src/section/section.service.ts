@@ -766,7 +766,7 @@ export class SectionService {
             idPeriod: { id: section.idPeriod.id },
             hour: section.hour,
             idTeacher: {
-              employeeNumber: section.idTeacher.employeeNumber,
+              employeeNumber: `${updateSectionDto.idTeacher}`,
             },
           },
         });
@@ -775,7 +775,7 @@ export class SectionService {
           where: {
             idPeriod: { id: section.idPeriod.id },
             idTeacher: {
-              employeeNumber: section.idTeacher.employeeNumber,
+              employeeNumber: `${updateSectionDto.idTeacher}`,
             },
           },
           relations: [
