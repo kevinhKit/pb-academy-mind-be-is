@@ -63,6 +63,11 @@ export class TuitionController {
     return this.tuitionService.findSection(id);
   }
 
+  @Get('grades-ready/:id')
+  sendEmailGrades(@Param('id') id: Section) {
+    return this.tuitionService.sendEmailGrades(id);
+  }
+
   @Get('waiting-section/:id')
   findWaitingSection(@Param('id') id: Section) {
     return this.tuitionService.findWaitingSection(id);
