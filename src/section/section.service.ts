@@ -736,6 +736,14 @@ export class SectionService {
 
       const section = await this.sectionRepository.findOne({
         where: { id: id },
+        relations: [
+          'idPeriod',
+          'idPeriod.idStatePeriod',
+          'idClass',
+          'idTeacher',
+          'idClassroom',
+          'idClassroom.idBuilding.idRegionalCenter',
+        ],
       });
 
       if (!section) {
@@ -751,6 +759,45 @@ export class SectionService {
 
         if (!teacher) {
           throw new NotFoundException('El docente no existe.');
+        }
+
+        const existingSection = await this.sectionRepository.findOne({
+          where: {
+            idPeriod: { id: section.idPeriod.id },
+            hour: section.hour,
+            idTeacher: {
+              employeeNumber: `${updateSectionDto.idTeacher}`,
+            },
+          },
+        });
+
+        const sections = await this.sectionRepository.find({
+          where: {
+            idPeriod: { id: section.idPeriod.id },
+            idTeacher: {
+              employeeNumber: `${updateSectionDto.idTeacher}`,
+            },
+          },
+          relations: [
+            'idPeriod',
+            'idPeriod.idStatePeriod',
+            'idClass',
+            'idTeacher',
+            'idClassroom',
+            'idClassroom.idBuilding.idRegionalCenter',
+          ],
+        });
+
+        const sectionAlreadyExists = await this.validateExistingSection(
+          sections,
+          section.hour,
+          section.finalHour,
+        );
+
+        if (existingSection || sectionAlreadyExists) {
+          throw new NotFoundException(
+            'Ya existe una seccion a esa hora con ese docente.',
+          );
         }
       }
 
