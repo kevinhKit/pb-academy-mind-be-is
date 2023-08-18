@@ -24,10 +24,11 @@ import { TeachingCareer } from 'src/teaching-career/entities/teaching-career.ent
 import { Tuition } from 'src/tuition/entities/tuition.entity';
 import { TeacherEvaluation } from 'src/teacher-evaluation/entities/teacher-evaluation.entity';
 import { CenterChange } from 'src/center-change/entities/center-change.entity';
+import { SharedModule } from 'src/shared/shared.module';
 
 @Module({
   controllers: [AnalyticController],
   providers: [AnalyticService],
-  imports: [TypeOrmModule.forFeature([User, Teacher, Student, Career, RegionalCenter, CareerChange, CenterCareer, Building, CareerClass, Class, Classroom, ExceptionalCancellation, Period, Question, RequirementClass, Section, StatePeriod, StudentCareer, TeachingCareer, Tuition, TeacherEvaluation, CenterChange])]
+  imports: [TypeOrmModule.forFeature([User, Teacher, Student, Career, RegionalCenter, CareerChange, CenterCareer, Building, CareerClass, Class, Classroom, ExceptionalCancellation, Period, Question, RequirementClass, Section, StatePeriod, StudentCareer, TeachingCareer, Tuition, TeacherEvaluation, CenterChange]),SharedModule]
 })
 export class AnalyticModule {}

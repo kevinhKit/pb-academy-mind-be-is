@@ -1,9 +1,9 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { CreateAnalyticDto } from './dto/create-analytic.dto';
 import { UpdateAnalyticDto } from './dto/update-analytic.dto';
 import { User } from 'src/user/entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { LessThan, Repository } from 'typeorm';
+import { LessThan, MoreThanOrEqual, Repository } from 'typeorm';
 import { Teacher } from 'src/teacher/entities/teacher.entity';
 import { Student } from 'src/student/entities/student.entity';
 import { CenterCareer } from 'src/center-career/entities/center-career.entity';
@@ -26,6 +26,10 @@ import { CareerClass } from 'src/career-class/entities/career-class.entity';
 import { RequirementClass } from 'src/requirement-class/entities/requirement-class.entity';
 import { TeacherEvaluation } from 'src/teacher-evaluation/entities/teacher-evaluation.entity';
 import { CenterChange } from 'src/center-change/entities/center-change.entity';
+import { CriteriaAnalyticDto } from './dto/criteria-analytic.dto';
+import { SendEmailService } from 'src/shared/send-email/send-email.service';
+import { throws } from 'assert';
+import { distinct } from 'rxjs';
 
 @Injectable()
 export class AnalyticService {
@@ -55,12 +59,210 @@ export class AnalyticService {
     @InjectRepository(Tuition) private tuitionRepository: Repository<Tuition>,
     @InjectRepository(TeacherEvaluation) private teacherEvaluationRepository: Repository<TeacherEvaluation>,
     @InjectRepository(CenterChange) private centerChangeRepository: Repository<CenterChange>,
-
+    private readonly sendEmailService: SendEmailService,
   ) {}
+
+  async findFilter({idPeriod, idCareer, idRegionalCenter, idClass, failedStudent, approvedStudent}: CriteriaAnalyticDto) {
+    try {
+      // verificaciones
+      const periodExist = await this.periodRepository.findOne({where: { id : idPeriod }});
+
+      if(!periodExist) throw new  NotFoundException('El periodo academico no se ha encontrado');
+
+      const careerExits = await this.careerRepository.findOne({where: { id : idCareer}});
+
+      if(!careerExits) throw new NotFoundException('La carrera no se ha encontrado');
+
+      const regionalCenterExits = await this.regionalCenterRepository.findOne({where: { id : idRegionalCenter}});
+
+      if(!regionalCenterExits) throw new NotFoundException('El centro regional no se ha encontrado')
+
+      // opcionales
+      const classExits = await this.classRepository.findOne({where: { id : +idClass}}) ;
+
+      if(!classExits) throw new NotFoundException('La clase no se ha encontrado');
+
+      // filtros
+      const analitycs = []
+
+      const allStudent = await this.studentRepository.count({
+        where:{
+          studentCareer: {
+            centerCareer:{
+              career: {
+                id: idCareer
+              },
+              regionalCenter:{
+                id: idRegionalCenter
+              }
+            }
+          }
+        }
+      });
+
+      const allStudentEnrolled = await this.studentRepository.count({
+        where:{
+          studentCareer: {
+            centerCareer:{
+              career: {
+                id: idCareer
+              },
+              regionalCenter:{
+                id: idRegionalCenter
+              }
+            }
+          },
+          tution: {
+            section:{
+              idPeriod:{
+                id: idPeriod
+              },
+              // idClass: {
+              //   id: +idClass
+              // }
+            }
+          }
+        }
+      });
+
+
+      const allFailed = await this.studentRepository.count({
+        where: {
+          tution: {
+            note: LessThan('65'),
+            section: {
+              idPeriod: {
+                id: idPeriod
+              },
+              // idClass: {
+              //   id: +idClass
+              // }
+            }
+          },
+          studentCareer: {
+            centerCareer: {
+              career: {
+                id : idCareer
+              },
+              regionalCenter: {
+                id: idRegionalCenter
+              }
+            }
+          },
+        },
+      });
+
+      // const careers = await this.careerRepository.find();
+      // const countByCareer = {};
+      // for (const career of careers) {
+      //   const count = await this.studentRepository.count({
+      //     where: {
+      //       studentCareer: {
+      //         centerCareer: {
+      //           career: {
+      //             id: career.id
+      //           }
+      //         }
+      //       }
+      //     }
+      //   });
+      
+      //   countByCareer[career.name] = count;
+      // }
+
+      const allClass = await this.classRepository.count({
+        where: {
+          careerClass:{
+            idCareer: {
+              id: idCareer
+            }
+          },
+          section:{
+            idClassroom:{
+              idBuilding:{
+                idRegionalCenter:{
+                  id: idRegionalCenter
+                }
+              }
+            },
+            idPeriod: {
+              id: idPeriod
+            }
+          }
+        }
+      });
+
+      const allSection = await this.sectionRepository.count({
+        where:{
+          idClass: {
+            // id: +idClass,
+            career:{
+              id: idCareer
+            }
+          },
+          idPeriod:{
+            id: idPeriod
+          },
+          idClassroom:{
+            idBuilding:{
+              idRegionalCenter:{
+                id: idRegionalCenter
+              }
+            }
+          }
+        }
+      });
+
+
+      const employeeNumbers = await this.teacherRepository.createQueryBuilder('teacher')
+        .innerJoin('teacher.section', 'section')
+        .innerJoin('section.idClass', 'class')
+        .where('section.idPeriod = :idPeriod', { idPeriod })
+        // .andWhere('class.id = :idClass', { idClass: +idClass })
+        .andWhere('class.career.id = :idCareer', { idCareer })
+        .select('teacher.employeeNumber', 'employeeNumber')
+        .getRawMany();
+
+      const uniqueEmployeeNumbers = new Set(employeeNumbers.map(item => item.employeeNumber));
+      const employeeCount = uniqueEmployeeNumbers.size;
+      console.log(employeeCount)
+
+
+
+    analitycs.push({name: "Estudiantes de la Carrera",count: allStudent});
+
+    analitycs.push({name: "Estudiantes Matriculados",count: allStudentEnrolled});
+
+    analitycs.push({name: "Estudiantes Reprobados",count: allFailed});
+
+    analitycs.push({name: "Estudiantes Aprobados",count: (allStudentEnrolled - allFailed)});
+
+    analitycs.push({name: "Clases",count: allClass});
+
+    analitycs.push({name: "Secciones",count: allSection});
+
+    analitycs.push({name: "Docentes",count: employeeCount})
+
+      return {
+        statusCode: 200,
+        message: this.printMessageLog("Estadisticas obtenidas exitosamente."),
+        analitics:analitycs
+      }
+    } catch (error) {
+      return this.printMessageError(error);
+    }
+  }
+
+
+
+
+
+
 
   
   async findAll() {
     try {
+      const analitycs = []
       const allStudent = await this.studentRepository.count();
       const allFailed = await this.studentRepository.count({
         where: {
@@ -69,47 +271,51 @@ export class AnalyticService {
           }
         }
       });
-      // const studentByCareer = await this.studentRepository.count({
-      //   where: {
-      //     studentCareer:{
-      //       centerCareer:{
-      //         career:{
-      //           id: 'career'
+
+      // const careers = await this.careerRepository.find();
+
+      // const countByCareer = {};
+      
+      // for (const career of careers) {
+      //   const count = await this.studentRepository.count({
+      //     where: {
+      //       studentCareer: {
+      //         centerCareer: {
+      //           career: {
+      //             id: career.id
+      //           }
       //         }
       //       }
       //     }
-      //   }
-      // });
-      const careers = await this.careerRepository.find();
-
-      const countByCareer = {};
+      //   });
       
-      for (const career of careers) {
-        const count = await this.studentRepository.count({
-          where: {
-            studentCareer: {
-              centerCareer: {
-                career: {
-                  id: career.id
-                }
-              }
-            }
-          }
-        });
-      
-        countByCareer[career.name] = count;
-      }
+      //   countByCareer[career.name] = count;
+      // }
 
-      console.log(countByCareer)
+      analitycs.push({
+        name: "Total de estudiantes Matriculados",
+        count: allStudent
+      })
+
+      analitycs.push({
+        name: "Total de estudiante Reprobados",
+        count: allFailed
+      })
+
+      analitycs.push({
+        name: "Total de estudiante Reprobados",
+        count: allFailed
+      })
+
+      // analitycs.push({
+      //   name: "Carreras",
+      //   count: countByCareer
+      // })
 
       return {
         statusCode: 200,
         message: this.printMessageLog("Estadisticas obtenidas exitosamente."),
-        analitics:{
-          allStudent: allStudent,
-          studentFailed: allFailed,
-          
-        }
+        analitics:analitycs
       }
     } catch (error) {
       return this.printMessageError(error);
@@ -117,9 +323,30 @@ export class AnalyticService {
 
   }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   async findOne(id: number) {
     return `This action returns a #${id} analytic`;
   }
+
+
+
+
+
+
 
   // async create(createAnalyticDto: CreateAnalyticDto) {
   //   return 'This action adds a new analytic';
@@ -132,6 +359,9 @@ export class AnalyticService {
   // async remove(id: number) {
   //   return `This action removes a #${id} analytic`;
   // }
+
+
+
 
 
 
@@ -154,4 +384,326 @@ export class AnalyticService {
     this.logger.error(message);
     return message;
   }
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  async criteria({ idPeriod, idCareer, idRegionalCenter, idClass, failedStudent, approvedStudent }: CriteriaAnalyticDto) {
+    try {
+      // Verificaciones
+      const periodExist = await this.periodRepository.findOne({ where: { id: idPeriod } });
+      if (!periodExist) throw new NotFoundException('El periodo académico no se ha encontrado');
+  
+      const careerExists = await this.careerRepository.findOne({ where: { id: idCareer } });
+      if (!careerExists) throw new NotFoundException('La carrera no se ha encontrado');
+  
+      const regionalCenterExists = await this.regionalCenterRepository.findOne({ where: { id: idRegionalCenter } });
+      if (!regionalCenterExists) throw new NotFoundException('El centro regional no se ha encontrado');
+  
+      // Opcionales
+      let classExists;
+      if (idClass) {
+        classExists = await this.classRepository.findOne({ where: { id: +idClass } });
+        if (!classExists) throw new NotFoundException('La clase no se ha encontrado');
+      }
+  
+      // Filtros
+      // const includeClasses = !idClass;
+      const analytics = [];
+  
+      // Estudiantes de la Carrera
+      const allStudents = await this.studentRepository.count({
+        where: {
+          studentCareer: {
+            centerCareer: {
+              career: {
+                id: idCareer
+              },
+              regionalCenter: {
+                id: idRegionalCenter
+              }
+            }
+          }
+        }
+      });
+      analytics.push({ name: "Estudiantes de la Carrera", count: allStudents });
+  
+      // Estudiantes Matriculados
+      let allStudentsEnrolled;
+      if (classExists) {
+        allStudentsEnrolled = await this.studentRepository.count({
+          where: {
+            studentCareer: {
+              centerCareer: {
+                career: {
+                  id: idCareer
+                },
+                regionalCenter: {
+                  id: idRegionalCenter
+                }
+              }
+            },
+            tution: {
+              section: {
+                idPeriod: {
+                  id: idPeriod
+                },
+                idClass: {
+                  id: +idClass
+                }
+              }
+            }
+          }
+        });
+      } else {
+        allStudentsEnrolled = await this.studentRepository.count({
+          where: {
+            studentCareer: {
+              centerCareer: {
+                career: {
+                  id: idCareer
+                },
+                regionalCenter: {
+                  id: idRegionalCenter
+                }
+              }
+            },
+            tution: {
+              section: {
+                idPeriod: {
+                  id: idPeriod
+                }
+              }
+            }
+          }
+        });
+      }
+      analytics.push({ name: "Estudiantes Matriculados", count: allStudentsEnrolled, "percentage": (allStudentsEnrolled / allStudents) * 100   });
+  
+      // Estudiantes Reprobados
+      let allFailed;
+      if (classExists) {
+        allFailed = await this.studentRepository.count({
+          where: {
+            tution: {
+              note: LessThan('65'),
+              section: {
+                idPeriod: {
+                  id: idPeriod
+                },
+                idClass: {
+                  id: +idClass
+                }
+              }
+            },
+            studentCareer: {
+              centerCareer: {
+                career: {
+                  id: idCareer
+                },
+                regionalCenter: {
+                  id: idRegionalCenter
+                }
+              }
+            }
+          }
+        });
+      } else {
+        allFailed = await this.studentRepository.count({
+          where: {
+            tution: {
+              note: LessThan('65'),
+              section: {
+                idPeriod: {
+                  id: idPeriod
+                }
+              }
+            },
+            studentCareer: {
+              centerCareer: {
+                career: {
+                  id: idCareer
+                },
+                regionalCenter: {
+                  id: idRegionalCenter
+                }
+              }
+            }
+          }
+        });
+      }
+      analytics.push({ name: "Estudiantes Reprobados", count: allFailed, "percentage": (allFailed / allStudentsEnrolled) * 100  });
+  
+      // Estudiantes Aprobados
+      const allApproved = allStudentsEnrolled - allFailed;
+      analytics.push({ name: "Estudiantes Aprobados", count: allApproved, "percentage": (allApproved / allStudentsEnrolled) * 100 });
+  
+      // Clases
+      let allClasses;
+      if (classExists) {
+        allClasses = 1;
+      } else {
+        allClasses = await this.classRepository.count({
+          where: {
+            careerClass: {
+              idCareer: {
+                id: idCareer
+              }
+            },
+            section: {
+              idClassroom: {
+                idBuilding: {
+                  idRegionalCenter: {
+                    id: idRegionalCenter
+                  }
+                }
+              },
+              idPeriod: {
+                id: idPeriod
+              }
+            }
+          }
+        });
+        analytics.push({ name: "Clases", count: allClasses });
+      }
+      
+  
+      // Secciones
+      let allSections;
+      if (classExists) {
+        allSections = await this.sectionRepository.count({
+          where: {
+            idClass: {
+              id: +idClass,
+              career: {
+                id: idCareer
+              }
+            },
+            idPeriod: {
+              id: idPeriod
+            },
+            idClassroom: {
+              idBuilding: {
+                idRegionalCenter: {
+                  id: idRegionalCenter
+                }
+              }
+            }
+          }
+        });
+      } else {
+        allSections = await this.sectionRepository.count({
+          where: {
+            idPeriod: {
+              id: idPeriod
+            },
+            idClassroom: {
+              idBuilding: {
+                idRegionalCenter: {
+                  id: idRegionalCenter
+                }
+              }
+            }
+          }
+        });
+      }
+      analytics.push({ name: "Secciones", count: allSections });
+  
+      // Docentes
+      let employeeCount;
+      if (classExists) {
+        const employeeNumbers = await this.teacherRepository.createQueryBuilder('teacher')
+          .innerJoin('teacher.section', 'section')
+          .innerJoin('section.idClass', 'class')
+          .where('section.idPeriod = :idPeriod', { idPeriod })
+          .andWhere('class.id = :idClass', { idClass: +idClass })
+          .andWhere('class.career.id = :idCareer', { idCareer })
+          .select('teacher.employeeNumber', 'employeeNumber')
+          .getRawMany();
+  
+        const uniqueEmployeeNumbers = new Set(employeeNumbers.map(item => item.employeeNumber));
+        employeeCount = uniqueEmployeeNumbers.size;
+      } else {
+        const employeeNumbers = await this.teacherRepository.createQueryBuilder('teacher')
+          .innerJoin('teacher.section', 'section')
+          .innerJoin('section.idClass', 'class')
+          .innerJoin('section.idClassroom', 'classroom')
+          .innerJoin('classroom.idBuilding', 'building')
+          .innerJoin('building.idRegionalCenter', 'regionalCenter')
+          .where('section.idPeriod = :idPeriod', { idPeriod })
+          .andWhere('class.career.id = :idCareer', { idCareer })
+          .andWhere('regionalCenter.id = :idRegionalCenter', { idRegionalCenter })
+          .select('teacher.employeeNumber', 'employeeNumber')
+          .getRawMany();
+  
+        const uniqueEmployeeNumbers = new Set(employeeNumbers.map(item => item.employeeNumber));
+        employeeCount = uniqueEmployeeNumbers.size;
+      }
+      analytics.push({ name: "Docentes", count: employeeCount });
+  
+      return {
+        statusCode: 200,
+        message: this.printMessageLog("Estadísticas obtenidas exitosamente."),
+        analytics: analytics
+      };
+    } catch (error) {
+      // console.log(error)
+      return this.printMessageError(error);
+    }
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
 }
