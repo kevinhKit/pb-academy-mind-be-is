@@ -154,12 +154,14 @@ export class CenterChangeService {
           idCenterChange: idCenterChange,
           // applicationStatus: In([applicationStatusOption.ACCEPTED,applicationStatusOption.REJECTED])
           stateRequest: true,
-        }
+        },
+        relations: ['student','student.studentCareer','student.studentCareer.centerCareer','student.studentCareer.centerCareer.career','student.studentCareer.centerCareer.regionalCenter']
       });
 
       if(!statusAplication){
         throw new NotFoundException('Solicitud de cambio de centro regional no encontrada');
       }
+
       if(statusAplication.applicationStatus == applicationStatusOption.ACCEPTED || statusAplication.applicationStatus == applicationStatusOption.REJECTED ){
         throw new ConflictException('La solicitud del estudiante ya fue revisada');
       }
@@ -170,6 +172,38 @@ export class CenterChangeService {
         applicationDate: new Date().toISOString(),
         stateRequest: true
       });
+
+      if(aplicationStatus == applicationStatusOption.ACCEPTED){
+        const studentChange = await JSON.parse(JSON.stringify(statusAplication));
+
+        const centerCareer = await this.centerCareerRepository.findOne({
+          where: {
+            career: {
+              id: studentChange.student.studentCareer[0].centerCareer.career.id
+            },
+            regionalCenter: {
+              id: statusAplication.idCenter
+            }
+          }
+        });
+
+        const studentCarrer = await this.studentCareerRepository.findOne({
+          where: {
+            student: {
+              accountNumber: studentChange.student.accountNumber
+            }
+          }
+        });
+
+        const newStudentCareer = await this.studentCareerRepository.preload({
+          idStudentCareer: studentCarrer.idStudentCareer,
+          centerCareer: {
+            idCenterCareer: centerCareer.idCenterCareer
+          }
+        });
+  
+        await this.studentCareerRepository.save(newStudentCareer);
+      }
 
       const saveAplication = await this.centerChangeRepository.save(createAplication);
       return {

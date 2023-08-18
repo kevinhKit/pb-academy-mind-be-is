@@ -177,20 +177,7 @@ export class CareerChangeService {
 
       if(aplicationStatus == applicationStatusOption.ACCEPTED){
 
-        const studentChange = await JSON.parse(JSON.stringify(statusAplication));
-
-        const oldCenterCareer = await this.centerCareerRepository.findOne({
-          where: {
-            career: {
-              id: studentChange.student.studentCareer[0].centerCareer.career.id
-            },
-            regionalCenter: {
-              id: studentChange.student.studentCareer[0].centerCareer.regionalCenter.id
-            }
-          }
-        });
-
-        
+        const studentChange = await JSON.parse(JSON.stringify(statusAplication));        
 
         const centerCareer = await this.centerCareerRepository.findOne({
           where: {
@@ -214,15 +201,10 @@ export class CareerChangeService {
         
         const newStudentCareer = await this.studentCareerRepository.preload({
           idStudentCareer: studentCarrer.idStudentCareer,
-          // student: 
-          //   studentChange.student.accountNumber
-          // ,
           centerCareer: {
             idCenterCareer: centerCareer.idCenterCareer
           }
         });
-
-        console.log(newStudentCareer)
   
         await this.studentCareerRepository.save(newStudentCareer);
       }
