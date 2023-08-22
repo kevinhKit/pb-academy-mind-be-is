@@ -162,6 +162,10 @@ export class CenterChangeService {
         throw new NotFoundException('Solicitud de cambio de centro regional no encontrada');
       }
 
+      if(Boolean(statusAplication.accountStatement) == Boolean(false)){
+        throw new ConflictException('EL estudiante no ha realizado el pago para la solicitud de cambio de centro regional');
+      }
+
       if(statusAplication.applicationStatus == applicationStatusOption.ACCEPTED || statusAplication.applicationStatus == applicationStatusOption.REJECTED ){
         throw new ConflictException('La solicitud del estudiante ya fue revisada');
       }
