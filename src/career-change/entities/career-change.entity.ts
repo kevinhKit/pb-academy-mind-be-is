@@ -69,4 +69,9 @@ export class CareerChange {
     default: true,
   })
   stateRequest: boolean;
+
+  @Column('boolean', {
+    default: true,
+  })
+  AccountStatement: boolean;
 }
