@@ -241,14 +241,16 @@ export class StudentService {
       const careerChange = await this.careerChangeRepository.findOne({
         where: {
           accountNumber: accountNumber,
-          idPeriod: currentPeriod.id
+          idPeriod: currentPeriod.id,
+          stateRequest: true
         }
       });
 
       const centerChange = await this.centerChangeRepository.findOne({
         where: {
           accountNumber: accountNumber,
-          idPeriod: currentPeriod.id
+          idPeriod: currentPeriod.id,
+          stateRequest: true
         }
       });
 
