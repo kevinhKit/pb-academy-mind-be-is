@@ -73,5 +73,5 @@ export class CareerChange {
   @Column('boolean', {
     default: true,
   })
-  AccountStatement: boolean;
+  accountStatement: boolean;
 }

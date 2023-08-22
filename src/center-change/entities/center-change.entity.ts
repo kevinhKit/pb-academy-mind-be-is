@@ -74,5 +74,5 @@ export class CenterChange {
   @Column('boolean', {
     default: true,
   })
-  AccountStatement: boolean;
+  accountStatement: boolean;
 }
