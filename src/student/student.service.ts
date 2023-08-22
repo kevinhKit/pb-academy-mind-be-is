@@ -21,6 +21,10 @@ import { ResetPasswordStudentDto } from './dto/reset-password-student.dto';
 import { ChangePasswordStudentDto } from './dto/change-password-student.dto';
 import { CenterCareer } from 'src/center-career/entities/center-career.entity';
 import { StudentCareer } from 'src/student-career/entities/student-career.entity';
+import { CareerChange } from 'src/career-change/entities/career-change.entity';
+import { CenterChange } from 'src/center-change/entities/center-change.entity';
+import { Period } from 'src/period/entities/period.entity';
+import { Rol } from 'src/state-period/entities/state-period.entity';
 
 @Injectable()
 export class StudentService {
@@ -35,6 +39,9 @@ export class StudentService {
 
     @InjectRepository(User) private userRepository: Repository<User>,
     @InjectRepository(Student) private studentRepository: Repository<Student>,
+    @InjectRepository(CareerChange) private careerChangeRepository: Repository<CareerChange>,
+    @InjectRepository(CenterChange) private centerChangeRepository: Repository<CenterChange>,
+    @InjectRepository(Period) private periodRepository: Repository<Period>,
     @InjectRepository(CenterCareer)
     private centerCareerRepository: Repository<CenterCareer>,
     @InjectRepository(StudentCareer)
@@ -220,6 +227,40 @@ export class StudentService {
       delete returnUser.student.user;
       delete returnUser.student.password;
       delete returnUser.password;
+
+      const period = await this.periodRepository.findOne({
+        where: {
+          idStatePeriod: {
+            name: Rol.ONGOING
+          }
+        }
+      });
+
+      const currentPeriod = JSON.parse(JSON.stringify(period));
+
+      const careerChange = await this.careerChangeRepository.findOne({
+        where: {
+          accountNumber: accountNumber,
+          idPeriod: currentPeriod.id
+        }
+      });
+
+      const centerChange = await this.centerChangeRepository.findOne({
+        where: {
+          accountNumber: accountNumber,
+          idPeriod: currentPeriod.id
+        }
+      });
+
+      if(careerChange){
+        returnUser.careerChange = careerChange.accountStatement
+      }
+
+      console.log(centerChange)
+
+      if(centerChange){
+        returnUser.centerChange = centerChange.accountStatement
+      }
 
       return {
         authenticated: true,
