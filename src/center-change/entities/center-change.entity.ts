@@ -70,4 +70,9 @@ export class CenterChange {
     default: true,
   })
   stateRequest: boolean;
+
+  @Column('boolean', {
+    default: true,
+  })
+  AccountStatement: boolean;
 }
