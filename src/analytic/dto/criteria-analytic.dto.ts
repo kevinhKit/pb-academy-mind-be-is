@@ -19,6 +19,11 @@ export class CriteriaAnalyticDto {
     @IsOptional()
     idClass: string;
 
+    @IsNumberString({},{message: "El id de la sección debe ser de tipo número"})
+    @IsNotEmpty({message: "No envío o dejo vacio el campo id de la sección"})
+    @IsOptional()
+    idSection: string;
+
     @IsString({message: "El campo estudiantes reprobados debe ser de tipo texto"})
     @IsNotEmpty({message: "No envío o dejo vacio el campo Estudiante reprobados"})
     @IsOptional()

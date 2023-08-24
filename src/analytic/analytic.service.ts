@@ -253,13 +253,6 @@ export class AnalyticService {
     }
   }
 
-
-
-
-
-
-
-  
   async findAll() {
     try {
       const analitycs = []
@@ -324,29 +317,9 @@ export class AnalyticService {
   }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   async findOne(id: number) {
     return `This action returns a #${id} analytic`;
   }
-
-
-
-
-
-
 
   // async create(createAnalyticDto: CreateAnalyticDto) {
   //   return 'This action adds a new analytic';
@@ -359,13 +332,6 @@ export class AnalyticService {
   // async remove(id: number) {
   //   return `This action removes a #${id} analytic`;
   // }
-
-
-
-
-
-
-
 
   printMessageLog(message){
     this.logger.log(message);
@@ -410,7 +376,7 @@ export class AnalyticService {
 
 
 
-  async criteria({ idPeriod, idCareer, idRegionalCenter, idClass, failedStudent, approvedStudent }: CriteriaAnalyticDto) {
+  async criteria({ idPeriod, idCareer, idRegionalCenter, idClass, idSection,  failedStudent, approvedStudent }: CriteriaAnalyticDto) {
     try {
       // Verificaciones
       const periodExist = await this.periodRepository.findOne({ where: { id: idPeriod } });
@@ -427,6 +393,12 @@ export class AnalyticService {
       if (idClass) {
         classExists = await this.classRepository.findOne({ where: { id: +idClass } });
         if (!classExists) throw new NotFoundException('La clase no se ha encontrado');
+      }
+
+      let sectionExists;
+      if (idClass) {
+        sectionExists = await this.sectionRepository.findOne({ where: { id: idSection } });
+        if (!sectionExists) throw new NotFoundException('La sección no se ha encontrado');
       }
   
       // Filtros
@@ -673,37 +645,5 @@ export class AnalyticService {
       return this.printMessageError(error);
     }
   }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   
 }
