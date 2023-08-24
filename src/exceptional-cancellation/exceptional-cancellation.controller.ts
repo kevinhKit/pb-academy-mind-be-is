@@ -11,6 +11,7 @@ import { ExceptionalCancellationService } from './exceptional-cancellation.servi
 import { CreateExceptionalCancellationDto } from './dto/create-exceptional-cancellation.dto';
 import { UpdateExceptionalCancellationDto } from './dto/update-exceptional-cancellation.dto';
 import { Student } from 'src/student/entities/student.entity';
+import { Career } from 'src/career/entities/career.entity';
 
 @Controller('exceptional-cancellation')
 export class ExceptionalCancellationController {
@@ -25,6 +26,11 @@ export class ExceptionalCancellationController {
     return this.exceptionalCancellationService.create(
       createExceptionalCancellationDto,
     );
+  }
+
+  @Get('by-carrer/:id')
+  findByCareer(@Param('id') id: Career) {
+    return this.exceptionalCancellationService.findByCareer(id);
   }
 
   @Get('cancelation-tuitions/:id')

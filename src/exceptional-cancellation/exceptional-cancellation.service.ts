@@ -11,10 +11,11 @@ import {
 import { Period } from 'src/period/entities/period.entity';
 import { Rol } from 'src/state-period/entities/state-period.entity';
 import { Student } from 'src/student/entities/student.entity';
+import { Career } from 'src/career/entities/career.entity';
 
 @Injectable()
 export class ExceptionalCancellationService {
-  private readonly logger = new Logger('tutionLogger');
+  private readonly logger = new Logger('ExceptionalCancelationLogger');
 
   constructor(
     @InjectRepository(Tuition) private tuitionRepository: Repository<Tuition>,
@@ -22,6 +23,7 @@ export class ExceptionalCancellationService {
     private exceptionalCancelationRepository: Repository<ExceptionalCancellation>,
     @InjectRepository(Period) private periodRepository: Repository<Period>,
     @InjectRepository(Student) private studentRepository: Repository<Student>,
+    @InjectRepository(Career) private careerRepository: Repository<Career>,
   ) {}
 
   async create({
@@ -114,9 +116,72 @@ export class ExceptionalCancellationService {
         relations: [
           'idTuition.section.idPeriod.idStatePeriod',
           'idTuition.section.idClass',
-          'idTuition.student',
+          'idTuition.student.user',
         ],
         where: { idTuition: { section: { idPeriod: { id: validPeriod.id } } } },
+      });
+
+      cancelations.sort((a, b) => {
+        if (
+          a.status === cancelationStatus.PROGRESS &&
+          b.status !== cancelationStatus.PROGRESS
+        ) {
+          return -1; // a debe ir antes que b
+        } else if (
+          a.status !== cancelationStatus.PROGRESS &&
+          b.status === cancelationStatus.PROGRESS
+        ) {
+          return 1; // b debe ir antes que a
+        } else {
+          return 0; // no se cambia el orden
+        }
+      });
+
+      return {
+        message: 'Se ha creado la cancelacion excepcional correctamente',
+        statusCode: 200,
+        cancelations,
+      };
+    } catch (error) {
+      return this.printMessageError(error);
+    }
+  }
+
+  async findByCareer(id: Career) {
+    try {
+      let careerId = `${id}`;
+      careerId = careerId.toUpperCase();
+      const validPeriod = await this.periodRepository.findOne({
+        relations: ['idStatePeriod'],
+        where: { idStatePeriod: { name: Rol.ONGOING } },
+      });
+
+      if (!validPeriod) {
+        throw new NotFoundException('El periodo no esta en curso.');
+      }
+
+      const validCareer = await this.careerRepository.findOne({
+        where: { id: careerId },
+      });
+
+      if (!validCareer) {
+        throw new NotFoundException('La carrera no existe.');
+      }
+
+      const cancelations = await this.exceptionalCancelationRepository.find({
+        relations: [
+          'idTuition.section.idPeriod.idStatePeriod',
+          'idTuition.section.idClass.careerClass.idCareer',
+          'idTuition.student.user',
+        ],
+        where: {
+          idTuition: {
+            section: {
+              idPeriod: { id: validPeriod.id },
+              idClass: { careerClass: { idCareer: { id: careerId } } },
+            },
+          },
+        },
       });
 
       cancelations.sort((a, b) => {
