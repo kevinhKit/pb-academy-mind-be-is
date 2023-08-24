@@ -685,13 +685,18 @@ export class TuitionService {
       }
 
       const registrations = await this.tuitionRepository.find({
+        relations: [
+          'section.idPeriod',
+          'section.idClass',
+          'student',
+          'student.user',
+        ],
         where: {
           section: {
             idPeriod: { id: +id },
-            idClass: { departmentId: careerId },
+            idClass: { careerClass: { idCareer: { id: careerId } } },
           },
         },
-        relations: ['student', 'student.user'],
       });
       const distinctRegistrations = registrations.reduce(
         (uniqueRegistrations, currentRegistration) => {
