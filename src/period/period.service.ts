@@ -513,23 +513,33 @@ export class PeriodService {
           );
         }
 
-        const date = new Date();
-        const days = 5;
-        const restDays = [];
-        for (let i = 0; i < days; i++) {
-          const day = date.getDate() + i;
-          const month = date.getMonth() + 1;
-          const year = date.getFullYear();
-          const dayFormated = day < 10 ? `0${day}` : day;
-          const monthFormated = month < 10 ? `0${month}` : month;
+        // const date = new Date();
+        // const days = 5;
+        // const restDays = [];
+        // for (let i = 0; i < days; i++) {
+        //   const day = date.getDate() + i;
+        //   const month = date.getMonth() + 1;
+        //   const year = date.getFullYear();
+        //   const dayFormated = day < 10 ? `0${day}` : day;
+        //   const monthFormated = month < 10 ? `0${month}` : month;
 
-          restDays.push(`${year}-${monthFormated}-${dayFormated}`);
-        }
-        period.dayOne = restDays[0];
-        period.dayTwo = restDays[1];
-        period.dayThree = restDays[2];
-        period.dayFour = restDays[3];
-        period.dayFive = restDays[4];
+        //   restDays.push(`${year}-${monthFormated}-${dayFormated}`);
+        // }
+        // period.dayOne = restDays[0];
+        // period.dayTwo = restDays[1];
+        // period.dayThree = restDays[2];
+        // period.dayFour = restDays[3];
+        // period.dayFive = restDays[4];
+
+        const date = updatePeriodDto.registrationDate;
+
+        const days = this.calculateDays(`${date}`);
+
+        period.dayOne = days[0];
+        period.dayTwo = days[1];
+        period.dayThree = days[2];
+        period.dayFour = days[3];
+        period.dayFive = days[4];
       }
 
       if (+updatePeriodDto.idStatePeriod == ongoingState.id) {
@@ -778,6 +788,22 @@ export class PeriodService {
 
       await this.studentRepository.save(student);
     }
+  }
+
+  calculateDays(fechaStr: string) {
+    // Parsea la cadena de fecha en un objeto Date
+    const fecha = new Date(fechaStr);
+
+    const fechasSiguientes = [];
+
+    // Añade 1 día a la fecha y luego calcula los siguientes 3 días
+    for (let i = 0; i <= 4; i++) {
+      fecha.setDate(fecha.getDate() + (i > 0 ? 1 : 0)); // Agrega 1 día después del primer ciclo
+      const siguienteFecha = fecha.toISOString().substring(0, 10);
+      fechasSiguientes.push(siguienteFecha);
+    }
+
+    return fechasSiguientes;
   }
 
   printMessageLog(message) {
