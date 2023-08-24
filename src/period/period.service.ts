@@ -232,12 +232,32 @@ export class PeriodService {
         relations: ['idStatePeriod'],
       });
 
+      const lasPeriodOfTheYearFinished = await this.periodRepository.findOne({
+        where: {
+          year: id,
+          idStatePeriod: { id: finishedState.id },
+          numberPeriod: 3,
+        },
+        relations: ['idStatePeriod'],
+      });
+
+      const firstNextYearPeriod = await this.periodRepository.findOne({
+        where: { year: id + 1 },
+        relations: ['idStatePeriod'],
+      });
+
       const periods = [];
 
       if (periodOnGoing) periods.push(periodOnGoing);
       if (periodOnGrades) periods.push(periodOnGrades);
       if (periodOnRegistration) periods.push(periodOnRegistration);
       if (periodOnPlanification) periods.push(periodOnPlanification);
+      if (
+        periodOnGoing?.numberPeriod == 3 ||
+        periodOnGrades?.numberPeriod == 3 ||
+        lasPeriodOfTheYearFinished
+      )
+        periods.push(firstNextYearPeriod);
       if (periodOnDefinning.length > 0) periods.push(...periodOnDefinning);
       if (periodOnFinished.length > 0) periods.push(...periodOnFinished);
 
