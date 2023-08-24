@@ -344,6 +344,70 @@ export class SectionService {
     }
   }
 
+  async findSectionsOnGrades(id: Career, centerId: RegionalCenter) {
+    try {
+      const newId = `${id}`;
+      const idCareer = newId.toUpperCase();
+      let idCenter = `${centerId}`;
+      idCenter = idCenter.toUpperCase();
+      const existingCareer = await this.careerRepository.findOne({
+        where: { id: idCareer },
+      });
+
+      if (!existingCareer) {
+        throw new NotFoundException('La carrera no existe.');
+      }
+
+      const existingCenter = await this.regionalCenterRepository.findOne({
+        where: { id: idCenter },
+      });
+
+      if (!existingCenter) {
+        throw new NotFoundException('El centro regional no existe.');
+      }
+
+      const gradesState = await this.statePeriodRepository.findOne({
+        where: { name: Rol.GRADES },
+      });
+
+      const periodExist = await this.periodRepository.findOne({
+        where: {
+          idStatePeriod: In([gradesState.id]),
+        },
+      });
+
+      if (!periodExist) {
+        throw new NotFoundException(
+          'El periodo de ingreso de notas no esta activo',
+        );
+      }
+
+      const sections = await this.sectionRepository.find({
+        where: {
+          idClass: { departmentId: idCareer },
+          idPeriod: { id: periodExist.id },
+          idClassroom: { idBuilding: { idRegionalCenter: { id: idCenter } } },
+        },
+        relations: [
+          'idPeriod',
+          'idPeriod.idStatePeriod',
+          'idClass',
+          'idTeacher',
+          'idClassroom',
+          'idClassroom.idBuilding.idRegionalCenter',
+        ],
+      });
+
+      return {
+        message: `Se han devuelto las secciones del departamento ${id} y el centro ${centerId} exitosamente`,
+        statusCode: 200,
+        sections,
+      };
+    } catch (error) {
+      return this.printMessageError(error);
+    }
+  }
+
   async findOne(id: string) {
     try {
       const section = await this.sectionRepository.findOne({
