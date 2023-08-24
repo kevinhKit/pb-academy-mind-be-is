@@ -236,7 +236,8 @@ export class StudentService {
         }
       });
 
-      const currentPeriod = JSON.parse(JSON.stringify(period));
+      if(period){
+        const currentPeriod = JSON.parse(JSON.stringify(period));
 
       const careerChange = await this.careerChangeRepository.findOne({
         where: {
@@ -263,6 +264,7 @@ export class StudentService {
       if(centerChange){
         returnUser.centerChange = centerChange.accountStatement
       }
+      }
 
       return {
         authenticated: true,
@@ -270,6 +272,7 @@ export class StudentService {
         statusCode: 200,
       };
     } catch (error) {
+      console.log(error)
       return this.printMessageError(error);
     }
   }
