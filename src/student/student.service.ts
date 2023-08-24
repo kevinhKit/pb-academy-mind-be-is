@@ -196,7 +196,6 @@ export class StudentService {
         user: returnUser,
       };
     } catch (error) {
-      console.log(error)
       return this.printMessageError(error);
     }
   }
@@ -259,7 +258,6 @@ export class StudentService {
         returnUser.careerChange = careerChange.accountStatement
       }
 
-      console.log(centerChange)
 
       if(centerChange){
         returnUser.centerChange = centerChange.accountStatement
@@ -272,7 +270,6 @@ export class StudentService {
         statusCode: 200,
       };
     } catch (error) {
-      console.log(error)
       return this.printMessageError(error);
     }
   }
@@ -293,7 +290,6 @@ export class StudentService {
   
       return response;
     } catch(error){
-      console.log(error)
       return this.printMessageError(error);
     }
   }
