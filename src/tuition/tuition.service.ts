@@ -359,7 +359,7 @@ export class TuitionService {
           section: { id: `${id}` },
           waitingList: false,
         },
-        relations: ['student', 'student.user'],
+        relations: ['student', 'student.user', 'section.idClass'],
       });
 
       return {

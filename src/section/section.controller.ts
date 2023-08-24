@@ -63,6 +63,14 @@ export class SectionController {
     return this.sectionService.findSectionsByDepartment(id, centerId);
   }
 
+  @Get('on-grades/:id')
+  findSectionsOnGrades(
+    @Param('id') id: Career,
+    @Query('center') centerId: RegionalCenter,
+  ) {
+    return this.sectionService.findSectionsOnGrades(id, centerId);
+  }
+
   @Get('waiting-list-sections/:id')
   findWaitingListSections(
     @Param('id') id: Career,
