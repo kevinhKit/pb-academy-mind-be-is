@@ -38,6 +38,11 @@ export class ExceptionalCancellationController {
     return this.exceptionalCancellationService.findByCareer(id, centerId);
   }
 
+  @Get('by-student/:id')
+  findByStudent(@Param('id') id: Student) {
+    return this.exceptionalCancellationService.findByStudent(id);
+  }
+
   @Get('cancelation-tuitions/:id')
   findCancelationTuitions(@Param('id') id: Student) {
     return this.exceptionalCancellationService.findCancelationTuitions(id);

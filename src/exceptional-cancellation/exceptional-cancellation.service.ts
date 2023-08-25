@@ -104,6 +104,47 @@ export class ExceptionalCancellationService {
     }
   }
 
+  async findByStudent(id: Student) {
+    try {
+      const validStudent = await this.studentRepository.findOne({
+        where: { accountNumber: `${id}` },
+      });
+
+      if (!validStudent) {
+        throw new NotFoundException('El estudiante no ha sido encontrado.');
+      }
+
+      const cancelations = await this.exceptionalCancelationRepository.find({
+        relations: ['idTuition.student', 'idTuition.section'],
+        where: {
+          idTuition: { student: { accountNumber: validStudent.accountNumber } },
+        },
+      });
+
+      cancelations.sort((a, b) => {
+        const statusA = a.status;
+        const statusB = b.status;
+
+        // Asigna un valor numérico basado en el orden definido por cancelationStatus
+        const statusOrder = {
+          [cancelationStatus.PROGRESS]: 1,
+          [cancelationStatus.APPROVED]: 2,
+          [cancelationStatus.DENIED]: 3,
+        };
+
+        return statusOrder[statusA] - statusOrder[statusB];
+      });
+
+      return {
+        message: 'Se han devuelto las canciones excepcionales del estudiante',
+        statusCode: 200,
+        cancelations,
+      };
+    } catch (error) {
+      return this.printMessageError(error);
+    }
+  }
+
   async findAll() {
     try {
       const validPeriod = await this.periodRepository.findOne({
