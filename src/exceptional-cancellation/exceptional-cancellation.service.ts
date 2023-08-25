@@ -180,6 +180,9 @@ export class ExceptionalCancellationService {
               idPeriod: { id: validPeriod.id },
               idClass: { careerClass: { idCareer: { id: careerId } } },
             },
+            student: {
+              studentCareer: { centerCareer: { career: { id: careerId } } },
+            },
           },
         },
       });
