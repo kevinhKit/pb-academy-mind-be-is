@@ -696,6 +696,9 @@ export class TuitionService {
             idPeriod: { id: +id },
             idClass: { careerClass: { idCareer: { id: careerId } } },
           },
+          student: {
+            studentCareer: { centerCareer: { career: { id: careerId } } },
+          },
         },
       });
       const distinctRegistrations = registrations.reduce(
