@@ -12,6 +12,7 @@ import { Period } from 'src/period/entities/period.entity';
 import { Rol } from 'src/state-period/entities/state-period.entity';
 import { Student } from 'src/student/entities/student.entity';
 import { Career } from 'src/career/entities/career.entity';
+import { RegionalCenter } from 'src/regional-center/entities/regional-center.entity';
 
 @Injectable()
 export class ExceptionalCancellationService {
@@ -24,6 +25,8 @@ export class ExceptionalCancellationService {
     @InjectRepository(Period) private periodRepository: Repository<Period>,
     @InjectRepository(Student) private studentRepository: Repository<Student>,
     @InjectRepository(Career) private careerRepository: Repository<Career>,
+    @InjectRepository(RegionalCenter)
+    private regionalCenterRepository: Repository<RegionalCenter>,
   ) {}
 
   async create({
@@ -147,10 +150,12 @@ export class ExceptionalCancellationService {
     }
   }
 
-  async findByCareer(id: Career) {
+  async findByCareer(id: Career, centerId: RegionalCenter) {
     try {
       let careerId = `${id}`;
       careerId = careerId.toUpperCase();
+      let idCenter = `${centerId}`;
+      idCenter = idCenter.toUpperCase();
       const validPeriod = await this.periodRepository.findOne({
         relations: ['idStatePeriod'],
         where: { idStatePeriod: { name: Rol.ONGOING } },
@@ -168,10 +173,19 @@ export class ExceptionalCancellationService {
         throw new NotFoundException('La carrera no existe.');
       }
 
+      const validRegionalCenter = await this.regionalCenterRepository.findOne({
+        where: { id: idCenter },
+      });
+
+      if (!validRegionalCenter) {
+        throw new NotFoundException('El centro regional no existe.');
+      }
+
       const cancelations = await this.exceptionalCancelationRepository.find({
         relations: [
           'idTuition.section.idPeriod.idStatePeriod',
           'idTuition.section.idClass.careerClass.idCareer',
+          'idTuition.section.idClassroom.idBuilding.idRegionalCenter',
           'idTuition.student.user',
         ],
         where: {
@@ -181,7 +195,12 @@ export class ExceptionalCancellationService {
               idClass: { careerClass: { idCareer: { id: careerId } } },
             },
             student: {
-              studentCareer: { centerCareer: { career: { id: careerId } } },
+              studentCareer: {
+                centerCareer: {
+                  career: { id: careerId },
+                  regionalCenter: { id: validRegionalCenter.id },
+                },
+              },
             },
           },
         },
@@ -204,7 +223,8 @@ export class ExceptionalCancellationService {
       });
 
       return {
-        message: 'Se ha creado la cancelacion excepcional correctamente',
+        message:
+          'Se han devuelvo las cancelaciones excepcionales correctamente',
         statusCode: 200,
         cancelations,
       };

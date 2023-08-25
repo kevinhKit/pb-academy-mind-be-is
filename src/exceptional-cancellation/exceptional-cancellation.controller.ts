@@ -5,6 +5,7 @@ import {
   Body,
   Patch,
   Param,
+  Query,
   Delete,
 } from '@nestjs/common';
 import { ExceptionalCancellationService } from './exceptional-cancellation.service';
@@ -12,6 +13,7 @@ import { CreateExceptionalCancellationDto } from './dto/create-exceptional-cance
 import { UpdateExceptionalCancellationDto } from './dto/update-exceptional-cancellation.dto';
 import { Student } from 'src/student/entities/student.entity';
 import { Career } from 'src/career/entities/career.entity';
+import { RegionalCenter } from 'src/regional-center/entities/regional-center.entity';
 
 @Controller('exceptional-cancellation')
 export class ExceptionalCancellationController {
@@ -29,8 +31,11 @@ export class ExceptionalCancellationController {
   }
 
   @Get('by-carrer/:id')
-  findByCareer(@Param('id') id: Career) {
-    return this.exceptionalCancellationService.findByCareer(id);
+  findByCareer(
+    @Param('id') id: Career,
+    @Query('center') centerId: RegionalCenter,
+  ) {
+    return this.exceptionalCancellationService.findByCareer(id, centerId);
   }
 
   @Get('cancelation-tuitions/:id')

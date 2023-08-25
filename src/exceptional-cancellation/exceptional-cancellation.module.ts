@@ -8,6 +8,7 @@ import { StatePeriod } from 'src/state-period/entities/state-period.entity';
 import { Period } from 'src/period/entities/period.entity';
 import { Student } from 'src/student/entities/student.entity';
 import { Career } from 'src/career/entities/career.entity';
+import { RegionalCenter } from 'src/regional-center/entities/regional-center.entity';
 
 @Module({
   controllers: [ExceptionalCancellationController],
@@ -20,6 +21,7 @@ import { Career } from 'src/career/entities/career.entity';
       Period,
       Student,
       Career,
+      RegionalCenter,
     ]),
   ],
 })
