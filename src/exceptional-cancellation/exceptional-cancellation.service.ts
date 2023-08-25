@@ -115,7 +115,11 @@ export class ExceptionalCancellationService {
       }
 
       const cancelations = await this.exceptionalCancelationRepository.find({
-        relations: ['idTuition.student', 'idTuition.section'],
+        relations: [
+          'idTuition.student',
+          'idTuition.section.idClass',
+          'idTuition.section.idPeriod',
+        ],
         where: {
           idTuition: { student: { accountNumber: validStudent.accountNumber } },
         },
