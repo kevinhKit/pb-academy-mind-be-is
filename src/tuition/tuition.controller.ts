@@ -97,8 +97,9 @@ export class TuitionController {
   findStudents(
     @Param('id') id: Period,
     @Query('department') deparmentId: Career,
+    @Query('center') centerId: RegionalCenter,
   ) {
-    return this.tuitionService.findStudentsPeriod(id, deparmentId);
+    return this.tuitionService.findStudentsPeriod(id, deparmentId, centerId);
   }
 
   @Patch(':id')

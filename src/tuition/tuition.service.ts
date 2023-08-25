@@ -661,10 +661,16 @@ export class TuitionService {
     }
   }
 
-  async findStudentsPeriod(id: Period, deparmentId: Career) {
+  async findStudentsPeriod(
+    id: Period,
+    deparmentId: Career,
+    centerId: RegionalCenter,
+  ) {
     try {
       let careerId = `${deparmentId}`;
       careerId = careerId.toUpperCase();
+      let idCenter = `${centerId}`;
+      idCenter = idCenter.toUpperCase();
 
       const periodExist = await this.periodRepository.findOne({
         where: {
@@ -684,6 +690,14 @@ export class TuitionService {
         throw new NotFoundException('La carrera enviada no existe');
       }
 
+      const validRegionalCenter = await this.regionalCenterRepository.findOne({
+        where: { id: idCenter },
+      });
+
+      if (!validRegionalCenter) {
+        throw new NotFoundException('El centro regional no existe');
+      }
+
       const registrations = await this.tuitionRepository.find({
         relations: [
           'section.idPeriod',
@@ -697,7 +711,12 @@ export class TuitionService {
             idClass: { careerClass: { idCareer: { id: careerId } } },
           },
           student: {
-            studentCareer: { centerCareer: { career: { id: careerId } } },
+            studentCareer: {
+              centerCareer: {
+                career: { id: careerId },
+                regionalCenter: { id: validRegionalCenter.id },
+              },
+            },
           },
         },
       });
