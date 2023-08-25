@@ -11,6 +11,8 @@ import { Tuition } from 'src/tuition/entities/tuition.entity';
 import { StatePeriod } from 'src/state-period/entities/state-period.entity';
 import { Career } from 'src/career/entities/career.entity';
 import { RegionalCenter } from 'src/regional-center/entities/regional-center.entity';
+import { Student } from 'src/student/entities/student.entity';
+import { SharedModule } from 'src/shared/shared.module';
 
 @Module({
   controllers: [SectionController],
@@ -26,7 +28,9 @@ import { RegionalCenter } from 'src/regional-center/entities/regional-center.ent
       StatePeriod,
       Career,
       RegionalCenter,
+      Student,
     ]),
+    SharedModule,
   ],
 })
 export class SectionModule {}

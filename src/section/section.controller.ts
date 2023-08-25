@@ -16,6 +16,7 @@ import { Period } from 'src/period/entities/period.entity';
 import { Class } from 'src/class/entities/class.entity';
 import { Career } from 'src/career/entities/career.entity';
 import { RegionalCenter } from 'src/regional-center/entities/regional-center.entity';
+import { Student } from 'src/student/entities/student.entity';
 
 @Controller('section')
 export class SectionController {
@@ -34,6 +35,14 @@ export class SectionController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.sectionService.findOne(id);
+  }
+
+  @Get('friend-request/:id')
+  sendFriendRequest(
+    @Param('id') id: Student,
+    @Query('receptor') student: Student,
+  ) {
+    return this.sectionService.sendFriendRequest(id, student);
   }
 
   @Get('teacher/:id')

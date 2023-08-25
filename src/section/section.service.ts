@@ -20,12 +20,16 @@ import {
 } from 'src/state-period/entities/state-period.entity';
 import { Career } from 'src/career/entities/career.entity';
 import { RegionalCenter } from 'src/regional-center/entities/regional-center.entity';
+import { Student } from 'src/student/entities/student.entity';
+import { SendEmailService } from 'src/shared/send-email/send-email.service';
 
 @Injectable()
 export class SectionService {
   private readonly logger = new Logger('sectionLogger');
 
   constructor(
+    private readonly sendEmailService: SendEmailService,
+
     @InjectRepository(Teacher) private teacherRepository: Repository<Teacher>,
     @InjectRepository(Section) private sectionRepository: Repository<Section>,
     @InjectRepository(Classroom)
@@ -38,6 +42,7 @@ export class SectionService {
     @InjectRepository(Career) private careerRepository: Repository<Career>,
     @InjectRepository(RegionalCenter)
     private regionalCenterRepository: Repository<RegionalCenter>,
+    @InjectRepository(Student) private studentRepository: Repository<Student>,
   ) {}
 
   async create({
@@ -995,6 +1000,18 @@ export class SectionService {
       message: 'Se ha eliminado la seccion exitosamente',
       statusCode: 200,
     };
+  }
+
+  async sendFriendRequest(emisorId: Student, receptorId: Student) {
+    const sender = await this.studentRepository.findOne({
+      where: { accountNumber: `${emisorId}` },
+    });
+
+    const recipient = await this.studentRepository.findOne({
+      where: { accountNumber: `${receptorId}` },
+    });
+
+    await this.sendEmailService.sendRequestContact(sender, recipient);
   }
 
   async validateExistingSection(
