@@ -169,7 +169,8 @@ export class SectionService {
       let sectionIterator = 0;
       let finalSectionCode = '';
       do {
-        const sectionCode = hour.slice(0, -1) + sectionIterator;
+        const sectionCode =
+          hour.replace(':', '').slice(0, -1) + sectionIterator;
         sectionExist = await this.sectionRepository.findOne({
           where: {
             idPeriod: idPeriod,
