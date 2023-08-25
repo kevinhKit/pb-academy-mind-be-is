@@ -1023,20 +1023,31 @@ export class SectionService {
     finalHour1: string,
     finalHour2: string,
   ): boolean {
-    const [start1, end1] = this.parseHoras(startHour1, finalHour1);
-    const [start2, end2] = this.parseHoras(startHour2, finalHour2);
+    const [startHour1Num, startMinute1Num] = startHour1.split(':').map(Number);
+    const [endHour1Num, endMinute1Num] = finalHour1.split(':').map(Number);
+    const [startHour2Num, startMinute2Num] = startHour2.split(':').map(Number);
+    const [endHour2Num, endMinute2Num] = finalHour2.split(':').map(Number);
+
+    const startTotalMinutes1 = startHour1Num * 60 + startMinute1Num;
+    const endTotalMinutes1 = endHour1Num * 60 + endMinute1Num;
+    const startTotalMinutes2 = startHour2Num * 60 + startMinute2Num;
+    const endTotalMinutes2 = endHour2Num * 60 + endMinute2Num;
 
     // Comprobar si hay traslape
     return (
-      (start1 <= start2 && start2 < end1) || (start2 <= start1 && start1 < end2)
+      startTotalMinutes1 <= endTotalMinutes2 &&
+      startTotalMinutes2 <= endTotalMinutes1
     );
   }
 
   parseHoras(startHour: string, endHour: string): [number, number] {
-    const startHourNum = parseInt(startHour);
-    const endHourNum = parseInt(endHour);
+    const [startHourNum, startMinuteNum] = startHour.split(':').map(Number);
+    const [endHourNum, endMinuteNum] = endHour.split(':').map(Number);
 
-    return [startHourNum, endHourNum];
+    const startTotalMinutes = startHourNum * 60 + startMinuteNum;
+    const endTotalMinutes = endHourNum * 60 + endMinuteNum;
+
+    return [startTotalMinutes, endTotalMinutes];
   }
 
   printMessageLog(message) {
