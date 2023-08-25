@@ -1003,15 +1003,33 @@ export class SectionService {
   }
 
   async sendFriendRequest(emisorId: Student, receptorId: Student) {
-    const sender = await this.studentRepository.findOne({
-      where: { accountNumber: `${emisorId}` },
-    });
+    
+    try {
+      const sender = await this.studentRepository.findOne({
+        where: { accountNumber: `${emisorId}` },
+        relations:['user']
+      });
+  
+      const recipient = await this.studentRepository.findOne({
+        where: { accountNumber: `${receptorId}` },
+        relations:['user']
+      });
 
-    const recipient = await this.studentRepository.findOne({
-      where: { accountNumber: `${receptorId}` },
-    });
-
-    await this.sendEmailService.sendRequestContact(sender, recipient);
+      if(!sender){
+        throw new NotFoundException('El usuario no existe.');
+      }
+      if(!recipient){
+        throw new NotFoundException('El usuario no existe.');
+      }
+  
+      await this.sendEmailService.sendRequestContact(sender, recipient);
+      return {
+        message: 'Se ha enviado el correo exitosamente',
+        statusCode: 200,
+      };
+    } catch (error) {
+      return this.printMessageError(error);
+    }
   }
 
   async validateExistingSection(

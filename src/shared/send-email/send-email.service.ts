@@ -89,7 +89,7 @@ export class SendEmailService {
     async sendRequestContact(sender: Student, recipient: Student){
       const info = await this.transporter.sendMail({
         from: await process.env.EMAIL_FROM,
-        to: `${recipient.user.email}`,
+        to: `${recipient.email}`,
         subject: await `Solicitud de contacto - Sistema de Registro Universitario`,
         text: `El estudiante ${sender.user.firstName.toUpperCase()} ${sender.user.firstLastName.toUpperCase()} quiere agregarte a sus contactos.\n\nNOTA:\n"Si le ha llegado por error este correo no difunda el contenido del mismo."`,
         html: `
